@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KuyumHesapFiyatEkran.UI.MainPage"
+             BackgroundColor="#F4F5F7">
+
+    <Grid RowDefinitions="*,Auto">
+        <RefreshView Command="{Binding RefreshCommand}"
+                     IsRefreshing="{Binding IsBusy}">
+            <Grid Padding="10,22,10,18"
+                  RowDefinitions="Auto,Auto,*"
+                  RowSpacing="18">
+                <Border BackgroundColor="White"
+                        Stroke="#ECEEF2"
+                        StrokeThickness="1"
+                        Padding="18,16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8" />
+                    </Border.StrokeShape>
+
+                    <Grid RowDefinitions="Auto,Auto"
+                          RowSpacing="22">
+                        <Grid ColumnDefinitions="*,Auto"
+                              ColumnSpacing="12">
+                            <Label Text="G&#252;ncel Kurlar"
+                                   FontAttributes="Bold"
+                                   FontSize="22"
+                                   TextColor="#202328"
+                                   VerticalOptions="Center" />
+
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Spacing="0"
+                                                 HorizontalOptions="End">
+                                <Label Text="Son G&#252;ncelleme"
+                                       FontSize="13"
+                                       TextColor="#777B85"
+                                       HorizontalTextAlignment="End" />
+                                <Label Text="{Binding LastUpdate}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="#273044"
+                                       HorizontalTextAlignment="End" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Grid Grid.Row="1"
+                              ColumnDefinitions="*,*,*"
+                              HeightRequest="50">
+                            <Grid RowDefinitions="*,4">
+                                <Label Text="SARRAF&#304;YE"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="#747985"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectCategoryCommand}"
+                                                              CommandParameter="Sarrafiye" />
+                                    </Label.GestureRecognizers>
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label"
+                                                     Binding="{Binding IsSarrafiyeSelected}"
+                                                     Value="True">
+                                            <Setter Property="TextColor"
+                                                    Value="#149456" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <BoxView Grid.Row="1"
+                                         BackgroundColor="#18A45E"
+                                         IsVisible="{Binding IsSarrafiyeSelected}" />
+                            </Grid>
+
+                            <Grid Grid.Column="1"
+                                  RowDefinitions="*,4">
+                                <Label Text="MADEN"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="#747985"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectCategoryCommand}"
+                                                              CommandParameter="Maden" />
+                                    </Label.GestureRecognizers>
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label"
+                                                     Binding="{Binding IsMadenSelected}"
+                                                     Value="True">
+                                            <Setter Property="TextColor"
+                                                    Value="#149456" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <BoxView Grid.Row="1"
+                                         BackgroundColor="#18A45E"
+                                         IsVisible="{Binding IsMadenSelected}" />
+                            </Grid>
+
+                            <Grid Grid.Column="2"
+                                  RowDefinitions="*,4">
+                                <Label Text="D&#214;V&#304;Z"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="#747985"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectCategoryCommand}"
+                                                              CommandParameter="Doviz" />
+                                    </Label.GestureRecognizers>
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label"
+                                                     Binding="{Binding IsDovizSelected}"
+                                                     Value="True">
+                                            <Setter Property="TextColor"
+                                                    Value="#149456" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <BoxView Grid.Row="1"
+                                         BackgroundColor="#18A45E"
+                                         IsVisible="{Binding IsDovizSelected}" />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Label Grid.Row="1"
+                       Text="{Binding ErrorMessage}"
+                       FontSize="13"
+                       TextColor="#D84555" />
+
+                <Border Grid.Row="2"
+                        Stroke="#A2DDB8"
+                        StrokeThickness="1"
+                        BackgroundColor="White">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="10" />
+                    </Border.StrokeShape>
+
+                    <Grid RowDefinitions="Auto,*">
+                        <Grid ColumnDefinitions="120,*,*"
+                              ColumnSpacing="4"
+                              Padding="10,16"
+                              BackgroundColor="#A6DDBB">
+                            <Label Text="{Binding SelectedCategoryTitle}"
+                                   FontAttributes="Bold"
+                                   FontSize="17"
+                                   CharacterSpacing="1"
+                                   TextColor="#122321"
+                                   FontAutoScalingEnabled="False"
+                                   LineBreakMode="NoWrap"
+                                   MaxLines="1"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="1"
+                                   Text="ALI&#350;"
+                                   FontAttributes="Bold"
+                                   FontSize="17"
+                                   TextColor="#122321"
+                                   FontAutoScalingEnabled="False"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Grid.Column="2"
+                                   Text="SATI&#350;"
+                                   FontAttributes="Bold"
+                                   FontSize="17"
+                                   TextColor="#122321"
+                                   FontAutoScalingEnabled="False"
+                                   HorizontalTextAlignment="Center" />
+                        </Grid>
+
+                        <CollectionView Grid.Row="1"
+                                        ItemsSource="{Binding DisplayRates}"
+                                        ItemSizingStrategy="MeasureFirstItem"
+                                        SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="120,*,*"
+                                          ColumnSpacing="4"
+                                          Padding="10,18"
+                                          HeightRequest="106"
+                                          BackgroundColor="White">
+                                        <Grid.Triggers>
+                                            <DataTrigger TargetType="Grid"
+                                                         Binding="{Binding IsAlternateRow}"
+                                                         Value="True">
+                                                <Setter Property="BackgroundColor"
+                                                        Value="#F0F1F3" />
+                                            </DataTrigger>
+                                        </Grid.Triggers>
+
+                                        <VerticalStackLayout Spacing="1"
+                                                             VerticalOptions="Center">
+                                            <Label Text="{Binding Name}"
+                                                   FontSize="17"
+                                                   FontAutoScalingEnabled="False"
+                                                   TextColor="#24272D" />
+                                            <Label Text="{Binding Code}"
+                                                   FontSize="12"
+                                                   FontAutoScalingEnabled="False"
+                                                   TextColor="#676C75"
+                                                   IsVisible="{Binding HasCode}" />
+                                        </VerticalStackLayout>
+
+                                        <VerticalStackLayout Grid.Column="1"
+                                                             Spacing="0"
+                                                             WidthRequest="102"
+                                                             HorizontalOptions="Center"
+                                                             VerticalOptions="Center">
+                                            <Label Text="{Binding Buy, StringFormat='{0:N2}'}"
+                                                   WidthRequest="102"
+                                                   FontSize="15"
+                                                   FontAutoScalingEnabled="False"
+                                                   TextColor="#24272D"
+                                                   HorizontalTextAlignment="Center"
+                                                   LineBreakMode="NoWrap"
+                                                   MaxLines="1" />
+                                            <Label Text="{Binding TrendText}"
+                                                   WidthRequest="102"
+                                                   FontSize="12"
+                                                   FontAutoScalingEnabled="False"
+                                                   TextColor="#26BF72"
+                                                   HorizontalTextAlignment="Center"
+                                                   LineBreakMode="NoWrap"
+                                                   MaxLines="1">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                                 Binding="{Binding IsUp}"
+                                                                 Value="False">
+                                                        <Setter Property="TextColor"
+                                                                Value="#E34F61" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </VerticalStackLayout>
+
+                                        <VerticalStackLayout Grid.Column="2"
+                                                             Spacing="0"
+                                                             WidthRequest="102"
+                                                             HorizontalOptions="Center"
+                                                             VerticalOptions="Center">
+                                            <Label Text="{Binding Sell, StringFormat='{0:N2}'}"
+                                                   WidthRequest="102"
+                                                   FontSize="15"
+                                                   FontAutoScalingEnabled="False"
+                                                   TextColor="#24272D"
+                                                   HorizontalTextAlignment="Center"
+                                                   LineBreakMode="NoWrap"
+                                                   MaxLines="1" />
+                                            <Label Text="{Binding TrendText}"
+                                                   WidthRequest="102"
+                                                   FontSize="12"
+                                                   FontAutoScalingEnabled="False"
+                                                   TextColor="#26BF72"
+                                                   HorizontalTextAlignment="Center"
+                                                   LineBreakMode="NoWrap"
+                                                   MaxLines="1">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                                 Binding="{Binding IsUp}"
+                                                                 Value="False">
+                                                        <Setter Property="TextColor"
+                                                                Value="#E34F61" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Grid>
+                </Border>
+            </Grid>
+        </RefreshView>
+
+        <Grid Grid.Row="0"
+              BackgroundColor="#F4F5F7"
+              IsVisible="{Binding IsInitialLoading}">
+            <VerticalStackLayout HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 Spacing="18">
+                <Image Source="kuyumhesap_logo.svg"
+                       WidthRequest="150"
+                       HeightRequest="150"
+                       Aspect="AspectFit" />
+                <ActivityIndicator IsRunning="{Binding IsInitialLoading}"
+                                   Color="#149456"
+                                   WidthRequest="42"
+                                   HeightRequest="42" />
+                <Label Text="Kurlar y&#252;kleniyor"
+                       FontSize="15"
+                       FontAttributes="Bold"
+                       TextColor="#273044"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <Grid x:Name="TickerViewport"
+              Grid.Row="1"
+              HeightRequest="54"
+              Padding="0"
+              BackgroundColor="#333A42"
+              IsClippedToBounds="True"
+              IsVisible="{Binding IsTickerVisible}">
+            <Grid.GestureRecognizers>
+                <PanGestureRecognizer PanUpdated="OnTickerPanUpdated" />
+            </Grid.GestureRecognizers>
+
+            <HorizontalStackLayout x:Name="TickerContent"
+                                   Spacing="28"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center">
+                <Border x:Name="TickerSegment"
+                        Padding="18,7"
+                        Stroke="#0C8E54"
+                        StrokeThickness="1"
+                        BackgroundColor="#333A42">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="6" />
+                    </Border.StrokeShape>
+                    <HorizontalStackLayout x:Name="TickerSegmentContent"
+                                           Spacing="14" />
+                </Border>
+
+                <Border Padding="18,7"
+                        Stroke="#0C8E54"
+                        StrokeThickness="1"
+                        BackgroundColor="#333A42">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="6" />
+                    </Border.StrokeShape>
+                    <HorizontalStackLayout x:Name="TickerSegmentCloneContent"
+                                           Spacing="14" />
+                </Border>
+            </HorizontalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>

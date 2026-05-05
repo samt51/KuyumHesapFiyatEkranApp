@@ -1,0 +1,21 @@
+<svg width="456" height="456" viewBox="0 0 456 456" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="456" height="456" fill="#ffffff"/>
+  <circle cx="228" cy="228" r="182" fill="#0b7d65"/>
+  <circle cx="228" cy="228" r="165" fill="#109563"/>
+  <circle cx="228" cy="228" r="151" fill="url(#paint0_radial)"/>
+  <circle cx="228" cy="228" r="171" stroke="#ffffff" stroke-width="6"/>
+  <circle cx="228" cy="228" r="182" stroke="#108759" stroke-width="12"/>
+  <path d="M176 142H206V230C206 246 214 253 230 253C240 253 249 250 257 242L308 142H345L287 252L350 316H310L264 270C252 280 237 285 220 285C191 285 176 271 176 241V142Z" fill="#ffffff"/>
+  <path d="M135 247C153 204 181 183 219 185C192 195 173 212 163 237C156 255 164 266 189 268C222 272 263 257 312 226" stroke="#ffffff" stroke-width="19" stroke-linecap="round"/>
+  <path d="M145 241C159 214 178 198 204 193C187 205 176 220 171 238C167 255 177 263 201 264C233 264 271 250 315 222" stroke="#0b7d65" stroke-width="8" stroke-linecap="round"/>
+  <path d="M233 135C289 115 328 123 349 159C355 170 356 183 352 198" stroke="#ffffff" stroke-width="17" stroke-linecap="round"/>
+  <path d="M319 198L335 176L354 196L337 217L319 198Z" fill="#ffffff"/>
+  <path d="M326 194H349M319 198H354M330 177L337 217M345 178L337 217M319 198L330 177M354 196L345 178" stroke="#0b7d65" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="228" y="355" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="800" letter-spacing="1">KUYUMHESAP</text>
+  <defs>
+    <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(244 148) rotate(90) scale(214)">
+      <stop stop-color="#4fbd75"/>
+      <stop offset="1" stop-color="#006155"/>
+    </radialGradient>
+  </defs>
+</svg>
