@@ -1,5 +1,7 @@
 using System.Net.Http.Json;
+using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using KuyumHesapFiyatEkran.Core.Abstractions.Http;
 using KuyumHesapFiyatEkran.Core.Common.Models;
 
@@ -9,7 +11,8 @@ internal sealed class BackendApiClient(HttpClient httpClient) : IBackendApiClien
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        Converters = { new TurkishDecimalJsonConverter() }
     };
 
     public async Task<ResponseDto<TResponse>> GetAsync<TResponse>(string requestUri, CancellationToken cancellationToken = default)
@@ -65,5 +68,39 @@ internal sealed class BackendApiClient(HttpClient httpClient) : IBackendApiClien
             : $"Backend istegi basarisiz oldu. StatusCode: {(int)response.StatusCode}";
 
         return new ResponseDto<TResponse>().Fail(message, (int)response.StatusCode);
+    }
+
+    private sealed class TurkishDecimalJsonConverter : JsonConverter<decimal>
+    {
+        private static readonly CultureInfo TurkishCulture = CultureInfo.GetCultureInfo("tr-TR");
+
+        public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Number && reader.TryGetDecimal(out var number))
+            {
+                return number;
+            }
+
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var value = reader.GetString();
+                if (decimal.TryParse(value, NumberStyles.Number, TurkishCulture, out var turkishNumber))
+                {
+                    return turkishNumber;
+                }
+
+                if (decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var invariantNumber))
+                {
+                    return invariantNumber;
+                }
+            }
+
+            throw new JsonException("Decimal degeri beklenen formatta degil.");
+        }
+
+        public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(value);
+        }
     }
 }

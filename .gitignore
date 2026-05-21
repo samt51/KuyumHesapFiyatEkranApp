@@ -350,6 +350,9 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
+# Local Google Play release signing files
+.play-release/
+
 # BeatPulse healthcheck temp database
 healthchecksdb
 

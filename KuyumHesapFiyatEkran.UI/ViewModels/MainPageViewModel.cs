@@ -108,11 +108,18 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
 
     public bool IsDovizSelected => SelectedCategory == "Doviz";
 
+    public bool IsSarrafiyeEnabled => Sarrafiye.Count > 0;
+
+    public bool IsMadenEnabled => Maden.Count > 0;
+
+    public bool IsDovizEnabled => Doviz.Count > 0;
+
     public string SelectedCategoryTitle => SelectedCategory switch
     {
         "Maden" => "MADEN",
         "Doviz" => "D\u00d6V\u0130Z",
-        _ => "SARRAF\u0130YE"
+        "Sarrafiye" => "SARRAF\u0130YE",
+        _ => "KURLAR"
     };
 
     public async Task LoadAsync(CancellationToken cancellationToken, bool updateTicker, bool showBusy)
@@ -135,16 +142,18 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
 
             if (!response.IsSuccess || response.Data is null)
             {
-                ErrorMessage = response.Errors.Count > 0
+                ErrorMessage = response.Errors?.Count > 0
                     ? string.Join(Environment.NewLine, response.Errors)
                     : "Canli kur bilgileri alinamadi.";
                 return;
             }
 
             LastUpdate = response.Data.LastUpdate;
-            SyncItems(Sarrafiye, response.Data.Sarrafiye);
-            SyncItems(Maden, response.Data.Maden);
-            SyncItems(Doviz, response.Data.Doviz);
+            SyncItems(Sarrafiye, response.Data.Sarrafiye ?? Enumerable.Empty<LiveRateItem>());
+            SyncItems(Maden, response.Data.Maden ?? Enumerable.Empty<LiveRateItem>());
+            SyncItems(Doviz, response.Data.Doviz ?? Enumerable.Empty<LiveRateItem>());
+            RefreshCategoryAvailability();
+            EnsureSelectedCategoryAvailable();
             RefreshDisplayRates();
             if (updateTicker || string.IsNullOrWhiteSpace(TickerText))
             {
@@ -202,6 +211,11 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
             return;
         }
 
+        if (!IsCategoryAvailable(category))
+        {
+            return;
+        }
+
         SelectedCategory = category;
         tickerSwitchCancellationTokenSource?.Cancel();
         tickerSwitchCancellationTokenSource?.Dispose();
@@ -226,7 +240,7 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
     {
         SyncItems(TickerRates, GetSelectedRates());
         TickerText = string.Join("    |    ", GetSelectedRates()
-            .Select(item => $"{item.Name}  ALI\u015e: {item.Buy:N2} {item.ChangePercent}  SATI\u015e: {item.Sell:N2}"));
+            .Select(item => $"{item.Name}  ALI\u015e: {item.Buy} {item.ChangePercent}  SATI\u015e: {item.Sell}"));
     }
 
     private IEnumerable<LiveRateItem> GetSelectedRates()
@@ -235,8 +249,52 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
         {
             "Maden" => Maden,
             "Doviz" => Doviz,
-            _ => Sarrafiye
+            "Sarrafiye" => Sarrafiye,
+            _ => Enumerable.Empty<LiveRateItem>()
         };
+    }
+
+    private void EnsureSelectedCategoryAvailable()
+    {
+        if (IsCategoryAvailable(SelectedCategory))
+        {
+            return;
+        }
+
+        SelectedCategory = GetFirstAvailableCategory();
+    }
+
+    private string GetFirstAvailableCategory()
+    {
+        if (IsSarrafiyeEnabled)
+        {
+            return "Sarrafiye";
+        }
+
+        if (IsMadenEnabled)
+        {
+            return "Maden";
+        }
+
+        return IsDovizEnabled ? "Doviz" : string.Empty;
+    }
+
+    private bool IsCategoryAvailable(string category)
+    {
+        return category switch
+        {
+            "Sarrafiye" => IsSarrafiyeEnabled,
+            "Maden" => IsMadenEnabled,
+            "Doviz" => IsDovizEnabled,
+            _ => false
+        };
+    }
+
+    private void RefreshCategoryAvailability()
+    {
+        OnPropertyChanged(nameof(IsSarrafiyeEnabled));
+        OnPropertyChanged(nameof(IsMadenEnabled));
+        OnPropertyChanged(nameof(IsDovizEnabled));
     }
 
     private static bool AreSame(LiveRateItem left, LiveRateItem right)

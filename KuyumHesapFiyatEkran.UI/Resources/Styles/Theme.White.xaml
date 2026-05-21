@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    <Color x:Key="AppBackground">#FFFFFF</Color>
+    <Color x:Key="AppCardBackground">#FFFFFF</Color>
+    <Color x:Key="AppPanelBackground">#FFFFFF</Color>
+    <Color x:Key="AppAlternateRowBackground">#FAF6EA</Color>
+    <Color x:Key="AppBorder">#D4AF37</Color>
+    <Color x:Key="AppAccent">#D4AF37</Color>
+    <Color x:Key="AppTextPrimary">#2F2A1D</Color>
+    <Color x:Key="AppTextMuted">#9A7417</Color>
+    <Color x:Key="AppTextInactive">#A8872B</Color>
+    <Color x:Key="AppBrandText">#231F20</Color>
+    <Color x:Key="AppHeaderText">#111111</Color>
+    <Color x:Key="AppPositive">#1FA463</Color>
+    <Color x:Key="AppNegative">#D84555</Color>
+    <Color x:Key="AppTickerBackground">#FFFFFF</Color>
+    <Color x:Key="AppTickerCardBackground">#FFF9E8</Color>
+    <Color x:Key="AppTickerText">#2F2A1D</Color>
+    <Color x:Key="AppLoadingBackground">#FFFFFF</Color>
+</ResourceDictionary>

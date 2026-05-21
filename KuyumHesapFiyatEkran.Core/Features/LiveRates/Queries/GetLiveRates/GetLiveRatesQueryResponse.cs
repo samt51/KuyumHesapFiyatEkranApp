@@ -17,9 +17,9 @@ public sealed class LiveRateItem
 
     public string? Code { get; set; }
 
-    public decimal Buy { get; set; }
+    public string Buy { get; set; } = string.Empty;
 
-    public decimal Sell { get; set; }
+    public string Sell { get; set; } = string.Empty;
 
     public string? Description { get; set; }
 

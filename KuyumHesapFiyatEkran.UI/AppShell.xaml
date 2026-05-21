@@ -5,11 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Shell.FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False"
-    Title="KuyumHesapFiyatEkran.UI">
+    Title="Aslan Kuyumculuk">
 
     <ShellContent
         x:Name="HomeContent"
-        Title="Home"
+        Title="Aslan Kuyumculuk"
         Route="MainPage" />
 
 </Shell>

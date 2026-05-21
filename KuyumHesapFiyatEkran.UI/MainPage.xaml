@@ -1,56 +1,151 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KuyumHesapFiyatEkran.UI.MainPage"
-             BackgroundColor="#F4F5F7">
+             BackgroundColor="{DynamicResource AppBackground}">
 
-    <Grid RowDefinitions="*,Auto">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Active page theme: white/gold. The old black/gold values are kept in Theme.GoldBlack.xaml. -->
+            <Color x:Key="AppBackground">#FFFFFF</Color>
+            <Color x:Key="AppCardBackground">#FFFFFF</Color>
+            <Color x:Key="AppPanelBackground">#FFFFFF</Color>
+            <Color x:Key="AppAlternateRowBackground">#FAF6EA</Color>
+            <Color x:Key="AppBorder">#D4AF37</Color>
+            <Color x:Key="AppAccent">#D4AF37</Color>
+            <Color x:Key="AppTextPrimary">#2F2A1D</Color>
+            <Color x:Key="AppTextMuted">#9A7417</Color>
+            <Color x:Key="AppTextInactive">#A8872B</Color>
+            <Color x:Key="AppBrandText">#231F20</Color>
+            <Color x:Key="AppHeaderText">#111111</Color>
+            <Color x:Key="AppPositive">#1FA463</Color>
+            <Color x:Key="AppNegative">#D84555</Color>
+            <Color x:Key="AppTickerBackground">#FFFFFF</Color>
+            <Color x:Key="AppTickerCardBackground">#FFF9E8</Color>
+            <Color x:Key="AppTickerText">#2F2A1D</Color>
+            <Color x:Key="AppLoadingBackground">#FFFFFF</Color>
+            <x:Double x:Key="RateRowHeight">58</x:Double>
+            <Thickness x:Key="RateRowPadding">10,5</Thickness>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid x:Name="RootLayout"
+          RowDefinitions="*,Auto">
         <RefreshView Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsBusy}">
-            <Grid Padding="10,22,10,18"
-                  RowDefinitions="Auto,Auto,*"
-                  RowSpacing="18">
-                <Border BackgroundColor="White"
-                        Stroke="#ECEEF2"
+            <Grid x:Name="ContentGrid"
+                  Padding="10,22,10,18"
+                  RowDefinitions="Auto,*"
+                  RowSpacing="4">
+                <Border x:Name="HeaderCard"
+                        BackgroundColor="{DynamicResource AppCardBackground}"
+                        Stroke="{DynamicResource AppBorder}"
                         StrokeThickness="1"
                         Padding="18,16">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="8" />
                     </Border.StrokeShape>
 
-                    <Grid RowDefinitions="Auto,Auto"
+                    <Grid x:Name="HeaderContent"
+                          RowDefinitions="Auto,Auto"
                           RowSpacing="22">
                         <Grid ColumnDefinitions="*,Auto"
                               ColumnSpacing="12">
-                            <Label Text="G&#252;ncel Kurlar"
-                                   FontAttributes="Bold"
-                                   FontSize="22"
-                                   TextColor="#202328"
-                                   VerticalOptions="Center" />
+                            <HorizontalStackLayout Spacing="10"
+                                                   VerticalOptions="Center">
+                                <Border x:Name="BrandLogoFrame"
+                                        WidthRequest="42"
+                                        HeightRequest="42"
+                                        Padding="0"
+                                        StrokeThickness="0"
+                                        BackgroundColor="#050505"
+                                        VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8" />
+                                    </Border.StrokeShape>
+                                    <Image x:Name="BrandLogoImage"
+                                           Source="aslan_logo.png"
+                                           WidthRequest="42"
+                                           HeightRequest="42"
+                                           Aspect="AspectFit" />
+                                </Border>
+                                <VerticalStackLayout x:Name="BrandTextStack"
+                                                     WidthRequest="150"
+                                                     Spacing="-4"
+                                                     VerticalOptions="Center">
+                                    <Label x:Name="BrandAslanLabel"
+                                           Text="ASLAN"
+                                           FontAttributes="Bold"
+                                           FontSize="32"
+                                           TextColor="{DynamicResource AppBrandText}"
+                                           CharacterSpacing="0"
+                                           FontAutoScalingEnabled="False"
+                                           HorizontalOptions="Start"
+                                           LineBreakMode="NoWrap"
+                                           MaxLines="1" />
+                                    <Label x:Name="BrandKuyumculukLabel"
+                                           Text="KUYUMCULUK"
+                                           FontAttributes="Bold"
+                                           FontSize="17"
+                                           TextColor="{DynamicResource AppBrandText}"
+                                           CharacterSpacing="0"
+                                           FontAutoScalingEnabled="False"
+                                           HorizontalOptions="Start"
+                                           AnchorX="0"
+                                           ScaleX="0.94"
+                                           LineBreakMode="NoWrap"
+                                           MaxLines="1" />
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
 
                             <VerticalStackLayout Grid.Column="1"
                                                  Spacing="0"
                                                  HorizontalOptions="End">
                                 <Label Text="Son G&#252;ncelleme"
                                        FontSize="13"
-                                       TextColor="#777B85"
+                                       TextColor="{DynamicResource AppTextMuted}"
                                        HorizontalTextAlignment="End" />
                                 <Label Text="{Binding LastUpdate}"
                                        FontSize="16"
                                        FontAttributes="Bold"
-                                       TextColor="#273044"
+                                       TextColor="{DynamicResource AppTextPrimary}"
                                        HorizontalTextAlignment="End" />
+                                <Border x:Name="ThemeToggle"
+                                        Margin="0,6,0,0"
+                                        WidthRequest="46"
+                                        HeightRequest="46"
+                                        Padding="0"
+                                        StrokeThickness="0"
+                                        HorizontalOptions="End">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12" />
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnThemeToggleTapped" />
+                                    </Border.GestureRecognizers>
+                                    <Label x:Name="ThemeToggleIcon"
+                                           FontSize="25"
+                                           FontAttributes="Bold"
+                                           FontAutoScalingEnabled="False"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalTextAlignment="Center" />
+                                </Border>
                             </VerticalStackLayout>
                         </Grid>
 
-                        <Grid Grid.Row="1"
-                              ColumnDefinitions="*,*,*"
-                              HeightRequest="50">
-                            <Grid RowDefinitions="*,4">
+                        <FlexLayout x:Name="CategoryTabs"
+                                    Grid.Row="1"
+                                    Direction="Row"
+                                    AlignItems="Stretch"
+                                    JustifyContent="SpaceAround"
+                                    HeightRequest="50">
+                            <Grid RowDefinitions="*,4"
+                                  FlexLayout.Grow="1"
+                                  IsVisible="{Binding IsSarrafiyeEnabled}">
                                 <Label Text="SARRAF&#304;YE"
                                        FontSize="18"
                                        FontAttributes="Bold"
-                                       TextColor="#747985"
+                                       TextColor="{DynamicResource AppTextInactive}"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center">
                                     <Label.GestureRecognizers>
@@ -62,21 +157,22 @@
                                                      Binding="{Binding IsSarrafiyeSelected}"
                                                      Value="True">
                                             <Setter Property="TextColor"
-                                                    Value="#149456" />
+                                                    Value="{DynamicResource AppTextPrimary}" />
                                         </DataTrigger>
                                     </Label.Triggers>
                                 </Label>
                                 <BoxView Grid.Row="1"
-                                         BackgroundColor="#18A45E"
+                                         BackgroundColor="{DynamicResource AppAccent}"
                                          IsVisible="{Binding IsSarrafiyeSelected}" />
                             </Grid>
 
-                            <Grid Grid.Column="1"
-                                  RowDefinitions="*,4">
+                            <Grid RowDefinitions="*,4"
+                                  FlexLayout.Grow="1"
+                                  IsVisible="{Binding IsMadenEnabled}">
                                 <Label Text="MADEN"
                                        FontSize="18"
                                        FontAttributes="Bold"
-                                       TextColor="#747985"
+                                       TextColor="{DynamicResource AppTextInactive}"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center">
                                     <Label.GestureRecognizers>
@@ -88,21 +184,22 @@
                                                      Binding="{Binding IsMadenSelected}"
                                                      Value="True">
                                             <Setter Property="TextColor"
-                                                    Value="#149456" />
+                                                    Value="{DynamicResource AppTextPrimary}" />
                                         </DataTrigger>
                                     </Label.Triggers>
                                 </Label>
                                 <BoxView Grid.Row="1"
-                                         BackgroundColor="#18A45E"
+                                         BackgroundColor="{DynamicResource AppAccent}"
                                          IsVisible="{Binding IsMadenSelected}" />
                             </Grid>
 
-                            <Grid Grid.Column="2"
-                                  RowDefinitions="*,4">
+                            <Grid RowDefinitions="*,4"
+                                  FlexLayout.Grow="1"
+                                  IsVisible="{Binding IsDovizEnabled}">
                                 <Label Text="D&#214;V&#304;Z"
                                        FontSize="18"
                                        FontAttributes="Bold"
-                                       TextColor="#747985"
+                                       TextColor="{DynamicResource AppTextInactive}"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center">
                                     <Label.GestureRecognizers>
@@ -114,41 +211,37 @@
                                                      Binding="{Binding IsDovizSelected}"
                                                      Value="True">
                                             <Setter Property="TextColor"
-                                                    Value="#149456" />
+                                                    Value="{DynamicResource AppTextPrimary}" />
                                         </DataTrigger>
                                     </Label.Triggers>
                                 </Label>
                                 <BoxView Grid.Row="1"
-                                         BackgroundColor="#18A45E"
+                                         BackgroundColor="{DynamicResource AppAccent}"
                                          IsVisible="{Binding IsDovizSelected}" />
                             </Grid>
-                        </Grid>
+                        </FlexLayout>
                     </Grid>
                 </Border>
 
-                <Label Grid.Row="1"
-                       Text="{Binding ErrorMessage}"
-                       FontSize="13"
-                       TextColor="#D84555" />
-
-                <Border Grid.Row="2"
-                        Stroke="#A2DDB8"
+                <Border Grid.Row="1"
+                        Stroke="{DynamicResource AppBorder}"
                         StrokeThickness="1"
-                        BackgroundColor="White">
+                        BackgroundColor="{DynamicResource AppPanelBackground}">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="10" />
                     </Border.StrokeShape>
 
                     <Grid RowDefinitions="Auto,*">
-                        <Grid ColumnDefinitions="120,*,*"
+                        <Grid x:Name="TableHeader"
+                              ColumnDefinitions="120,*,*"
                               ColumnSpacing="4"
-                              Padding="10,16"
-                              BackgroundColor="#A6DDBB">
+                              Padding="10,10"
+                              BackgroundColor="{DynamicResource AppAccent}">
                             <Label Text="{Binding SelectedCategoryTitle}"
                                    FontAttributes="Bold"
                                    FontSize="17"
                                    CharacterSpacing="1"
-                                   TextColor="#122321"
+                                   TextColor="{DynamicResource AppHeaderText}"
                                    FontAutoScalingEnabled="False"
                                    LineBreakMode="NoWrap"
                                    MaxLines="1"
@@ -157,19 +250,20 @@
                                    Text="ALI&#350;"
                                    FontAttributes="Bold"
                                    FontSize="17"
-                                   TextColor="#122321"
+                                   TextColor="{DynamicResource AppHeaderText}"
                                    FontAutoScalingEnabled="False"
                                    HorizontalTextAlignment="Center" />
                             <Label Grid.Column="2"
                                    Text="SATI&#350;"
                                    FontAttributes="Bold"
                                    FontSize="17"
-                                   TextColor="#122321"
+                                   TextColor="{DynamicResource AppHeaderText}"
                                    FontAutoScalingEnabled="False"
                                    HorizontalTextAlignment="Center" />
                         </Grid>
 
-                        <CollectionView Grid.Row="1"
+                        <CollectionView x:Name="RatesCollectionView"
+                                        Grid.Row="1"
                                         ItemsSource="{Binding DisplayRates}"
                                         ItemSizingStrategy="MeasureFirstItem"
                                         SelectionMode="None">
@@ -177,15 +271,21 @@
                                 <DataTemplate>
                                     <Grid ColumnDefinitions="120,*,*"
                                           ColumnSpacing="4"
-                                          Padding="10,18"
-                                          HeightRequest="106"
-                                          BackgroundColor="White">
+                                          Padding="{DynamicResource RateRowPadding}"
+                                          HeightRequest="{DynamicResource RateRowHeight}"
+                                          BackgroundColor="{DynamicResource AppPanelBackground}">
                                         <Grid.Triggers>
                                             <DataTrigger TargetType="Grid"
                                                          Binding="{Binding IsAlternateRow}"
                                                          Value="True">
                                                 <Setter Property="BackgroundColor"
-                                                        Value="#F0F1F3" />
+                                                        Value="{DynamicResource AppAlternateRowBackground}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Grid"
+                                                         Binding="{Binding IsAlternateRow}"
+                                                         Value="False">
+                                                <Setter Property="BackgroundColor"
+                                                        Value="{DynamicResource AppPanelBackground}" />
                                             </DataTrigger>
                                         </Grid.Triggers>
 
@@ -194,11 +294,11 @@
                                             <Label Text="{Binding Name}"
                                                    FontSize="17"
                                                    FontAutoScalingEnabled="False"
-                                                   TextColor="#24272D" />
+                                                   TextColor="{DynamicResource AppTextPrimary}" />
                                             <Label Text="{Binding Code}"
                                                    FontSize="12"
                                                    FontAutoScalingEnabled="False"
-                                                   TextColor="#676C75"
+                                                   TextColor="{DynamicResource AppTextMuted}"
                                                    IsVisible="{Binding HasCode}" />
                                         </VerticalStackLayout>
 
@@ -207,31 +307,14 @@
                                                              WidthRequest="102"
                                                              HorizontalOptions="Center"
                                                              VerticalOptions="Center">
-                                            <Label Text="{Binding Buy, StringFormat='{0:N2}'}"
+                                            <Label Text="{Binding Buy}"
                                                    WidthRequest="102"
                                                    FontSize="15"
                                                    FontAutoScalingEnabled="False"
-                                                   TextColor="#24272D"
+                                                   TextColor="{DynamicResource AppTextPrimary}"
                                                    HorizontalTextAlignment="Center"
                                                    LineBreakMode="NoWrap"
                                                    MaxLines="1" />
-                                            <Label Text="{Binding TrendText}"
-                                                   WidthRequest="102"
-                                                   FontSize="12"
-                                                   FontAutoScalingEnabled="False"
-                                                   TextColor="#26BF72"
-                                                   HorizontalTextAlignment="Center"
-                                                   LineBreakMode="NoWrap"
-                                                   MaxLines="1">
-                                                <Label.Triggers>
-                                                    <DataTrigger TargetType="Label"
-                                                                 Binding="{Binding IsUp}"
-                                                                 Value="False">
-                                                        <Setter Property="TextColor"
-                                                                Value="#E34F61" />
-                                                    </DataTrigger>
-                                                </Label.Triggers>
-                                            </Label>
                                         </VerticalStackLayout>
 
                                         <VerticalStackLayout Grid.Column="2"
@@ -239,28 +322,30 @@
                                                              WidthRequest="102"
                                                              HorizontalOptions="Center"
                                                              VerticalOptions="Center">
-                                            <Label Text="{Binding Sell, StringFormat='{0:N2}'}"
+                                            <Label Text="{Binding Sell}"
                                                    WidthRequest="102"
                                                    FontSize="15"
                                                    FontAutoScalingEnabled="False"
-                                                   TextColor="#24272D"
+                                                   TextColor="{DynamicResource AppTextPrimary}"
                                                    HorizontalTextAlignment="Center"
                                                    LineBreakMode="NoWrap"
                                                    MaxLines="1" />
                                             <Label Text="{Binding TrendText}"
                                                    WidthRequest="102"
-                                                   FontSize="12"
+                                                   FontSize="11"
                                                    FontAutoScalingEnabled="False"
-                                                   TextColor="#26BF72"
+                                                   TextColor="{DynamicResource AppPositive}"
                                                    HorizontalTextAlignment="Center"
                                                    LineBreakMode="NoWrap"
-                                                   MaxLines="1">
+                                                   MaxLines="1"
+                                                   Loaded="OnTrendLabelLoaded"
+                                                   Unloaded="OnTrendLabelUnloaded">
                                                 <Label.Triggers>
                                                     <DataTrigger TargetType="Label"
                                                                  Binding="{Binding IsUp}"
                                                                  Value="False">
                                                         <Setter Property="TextColor"
-                                                                Value="#E34F61" />
+                                                                Value="{DynamicResource AppNegative}" />
                                                     </DataTrigger>
                                                 </Label.Triggers>
                                             </Label>
@@ -275,24 +360,28 @@
         </RefreshView>
 
         <Grid Grid.Row="0"
-              BackgroundColor="#F4F5F7"
+              BackgroundColor="{DynamicResource AppLoadingBackground}"
               IsVisible="{Binding IsInitialLoading}">
             <VerticalStackLayout HorizontalOptions="Center"
                                  VerticalOptions="Center"
-                                 Spacing="18">
-                <Image Source="kuyumhesap_logo.svg"
-                       WidthRequest="150"
-                       HeightRequest="150"
-                       Aspect="AspectFit" />
+                                 Spacing="16">
+                <Border WidthRequest="240"
+                        HeightRequest="240"
+                        Padding="0"
+                        StrokeThickness="0"
+                        BackgroundColor="#050505">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="28" />
+                    </Border.StrokeShape>
+                    <Image Source="aslan_logo.png"
+                           WidthRequest="240"
+                           HeightRequest="240"
+                           Aspect="AspectFit" />
+                </Border>
                 <ActivityIndicator IsRunning="{Binding IsInitialLoading}"
-                                   Color="#149456"
-                                   WidthRequest="42"
-                                   HeightRequest="42" />
-                <Label Text="Kurlar y&#252;kleniyor"
-                       FontSize="15"
-                       FontAttributes="Bold"
-                       TextColor="#273044"
-                       HorizontalTextAlignment="Center" />
+                                   Color="{DynamicResource AppAccent}"
+                                   WidthRequest="38"
+                                   HeightRequest="38" />
             </VerticalStackLayout>
         </Grid>
 
@@ -300,7 +389,7 @@
               Grid.Row="1"
               HeightRequest="54"
               Padding="0"
-              BackgroundColor="#333A42"
+              BackgroundColor="{DynamicResource AppTickerBackground}"
               IsClippedToBounds="True"
               IsVisible="{Binding IsTickerVisible}">
             <Grid.GestureRecognizers>
@@ -313,9 +402,9 @@
                                    VerticalOptions="Center">
                 <Border x:Name="TickerSegment"
                         Padding="18,7"
-                        Stroke="#0C8E54"
+                        Stroke="{DynamicResource AppBorder}"
                         StrokeThickness="1"
-                        BackgroundColor="#333A42">
+                        BackgroundColor="{DynamicResource AppTickerCardBackground}">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="6" />
                     </Border.StrokeShape>
@@ -324,9 +413,9 @@
                 </Border>
 
                 <Border Padding="18,7"
-                        Stroke="#0C8E54"
+                        Stroke="{DynamicResource AppBorder}"
                         StrokeThickness="1"
-                        BackgroundColor="#333A42">
+                        BackgroundColor="{DynamicResource AppTickerCardBackground}">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="6" />
                     </Border.StrokeShape>
@@ -337,3 +426,4 @@
         </Grid>
     </Grid>
 </ContentPage>
+

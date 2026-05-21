@@ -1,22 +1,32 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1024" height="1024" fill="#ffffff"/>
-  <circle cx="512" cy="512" r="407" fill="#0b7d65"/>
-  <circle cx="512" cy="512" r="370" fill="#109563"/>
-  <circle cx="512" cy="512" r="337" fill="url(#paint0_radial)"/>
-  <circle cx="512" cy="512" r="382" stroke="#ffffff" stroke-width="12"/>
-  <circle cx="512" cy="512" r="407" stroke="#108759" stroke-width="28"/>
-  <path d="M394 318H462V516C462 551 480 568 517 568C539 568 559 560 577 543L692 318H773L644 565L786 708H695L593 604C565 628 532 640 494 640C428 640 394 607 394 540V318Z" fill="#ffffff"/>
-  <path d="M302 553C344 458 407 411 492 414C431 435 389 474 366 531C350 571 369 595 424 601C499 609 591 577 701 506" stroke="#ffffff" stroke-width="42" stroke-linecap="round"/>
-  <path d="M325 540C356 480 399 444 456 433C419 459 395 492 384 533C374 571 396 590 451 591C523 590 608 558 706 495" stroke="#0b7d65" stroke-width="18" stroke-linecap="round"/>
-  <path d="M523 303C648 258 735 276 782 357C796 382 798 411 789 443" stroke="#ffffff" stroke-width="38" stroke-linecap="round"/>
-  <path d="M715 444L750 395L793 440L754 486L715 444Z" fill="#ffffff"/>
-  <path d="M730 434H782M715 444H793M738 397L754 486M773 398L754 486M715 444L738 397M793 440L773 398" stroke="#0b7d65" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="512" y="797" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800" letter-spacing="3">KUYUMHESAP</text>
-  <text x="512" y="842" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" letter-spacing="1.5">JEWELRY ACCOUNTING SOFTWARE</text>
+  <rect width="1024" height="1024" fill="#050505"/>
+  <g transform="translate(238 92) scale(1.05)">
+    <path d="M305 0C360 0 412 23 446 63C401 36 352 36 305 58C271 73 244 99 225 136C264 113 302 110 340 127C294 135 258 158 232 197C207 235 203 274 220 314C189 294 171 264 167 225C131 263 111 313 105 375C98 450 122 516 177 573C153 520 153 472 177 430C193 512 239 580 315 635C301 583 310 538 342 500C372 463 414 446 469 451C451 488 438 528 430 572C473 538 498 489 508 426C517 372 506 324 475 281C509 290 541 310 571 343C570 286 551 237 516 199C477 158 426 133 361 123C328 118 296 119 265 128C284 85 313 53 351 32C333 28 318 18 305 0Z" fill="url(#gold)"/>
+    <path d="M212 74C158 89 111 125 71 181C121 170 162 149 194 117C185 150 165 184 135 219C184 198 226 164 260 117C242 99 226 85 212 74Z" fill="url(#goldLight)"/>
+    <path d="M162 215C112 245 77 294 58 363C101 342 134 306 157 256C159 242 161 229 162 215Z" fill="url(#gold)"/>
+    <path d="M152 368C102 404 70 457 55 528C102 501 135 458 154 399C153 388 153 378 152 368Z" fill="url(#goldLight)"/>
+    <path d="M181 535C168 593 181 640 220 678C157 664 111 627 84 568C121 566 153 555 181 535Z" fill="url(#gold)"/>
+    <path d="M245 372C206 432 204 493 240 555C197 515 174 467 171 411C193 402 218 389 245 372Z" fill="#C99625"/>
+    <path d="M302 492C328 545 327 600 299 657C362 628 401 580 417 512C374 511 336 504 302 492Z" fill="url(#goldLight)"/>
+    <path d="M386 476C383 540 361 594 321 637C389 622 438 581 468 514C437 507 410 495 386 476Z" fill="#D4A62E"/>
+    <path d="M245 151C279 119 327 118 389 147C424 164 458 189 490 220C512 241 537 249 566 242L592 236C576 262 548 275 508 274C451 273 404 254 367 218C332 184 291 162 245 151Z" fill="url(#gold)"/>
+    <path d="M455 196C493 204 526 225 554 260C521 249 488 244 455 247C449 228 449 212 455 196Z" fill="#A87517"/>
+    <path d="M426 252C451 251 472 257 491 269C465 276 441 273 418 261C420 256 423 253 426 252Z" fill="#050505"/>
+    <path d="M482 333C510 348 539 347 568 332C558 359 535 376 499 381C468 384 440 378 416 361C442 363 464 354 482 333Z" fill="#050505"/>
+    <path d="M344 253C307 256 280 272 263 302C247 329 247 362 263 401C229 365 222 325 243 282C263 241 297 221 344 253Z" fill="#050505"/>
+    <path d="M303 188C282 231 269 276 264 325C246 286 249 247 273 208C281 195 291 188 303 188Z" fill="#050505"/>
+  </g>
+  <text x="512" y="787" text-anchor="middle" fill="url(#gold)" font-family="Georgia, 'Times New Roman', serif" font-size="142" font-weight="500" letter-spacing="18">ASLAN</text>
+  <text x="512" y="876" text-anchor="middle" fill="url(#gold)" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="500" letter-spacing="23">KUYUMCULUK</text>
   <defs>
-    <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(548 333) rotate(90) scale(478)">
-      <stop stop-color="#4fbd75"/>
-      <stop offset="1" stop-color="#006155"/>
-    </radialGradient>
+    <linearGradient id="gold" x1="237" y1="92" x2="761" y2="836" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8D875"/>
+      <stop offset="0.48" stop-color="#D4AF37"/>
+      <stop offset="1" stop-color="#9F6810"/>
+    </linearGradient>
+    <linearGradient id="goldLight" x1="295" y1="111" x2="627" y2="650" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE084"/>
+      <stop offset="1" stop-color="#B98517"/>
+    </linearGradient>
   </defs>
 </svg>

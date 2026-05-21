@@ -9,15 +9,8 @@ namespace KuyumHesapFiyatEkran.UI
         public App(AppShell appShell)
         {
             InitializeComponent();
-
-            MainPage = new SplashPage();
-            _ = ShowMainPageAsync(appShell);
-        }
-
-        private async Task ShowMainPageAsync(AppShell appShell)
-        {
-            await Task.Delay(1500);
-            MainThread.BeginInvokeOnMainThread(() => MainPage = appShell);
+            AppThemeManager.Apply(AppThemeManager.GetSavedTheme(), Resources, save: false);
+            MainPage = appShell;
         }
 
         protected override void OnSleep()
