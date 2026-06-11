@@ -2,6 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KuyumHesapFiyatEkran.UI.MainPage"
+             Title="Canlı Fiyatlar"
+             Shell.NavBarIsVisible="False"
              BackgroundColor="{DynamicResource AppBackground}">
 
     <ContentPage.Resources>
@@ -49,10 +51,28 @@
                     <Grid x:Name="HeaderContent"
                           RowDefinitions="Auto,Auto"
                           RowSpacing="22">
-                        <Grid ColumnDefinitions="*,Auto"
-                              ColumnSpacing="12">
-                            <HorizontalStackLayout Spacing="10"
-                                                   VerticalOptions="Center">
+                        <Grid RowDefinitions="Auto,Auto"
+                              ColumnDefinitions="*,Auto"
+                              ColumnSpacing="12"
+                              RowSpacing="6">
+                            <Button x:Name="FlyoutMenuButton"
+                                    Text="☰"
+                                    Padding="0"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    FontSize="24"
+                                    FontAttributes="Bold"
+                                    TextColor="{DynamicResource AppAccent}"
+                                    BackgroundColor="Transparent"
+                                    BorderWidth="0"
+                                    Clicked="OnFlyoutMenuButtonClicked"
+                                    VerticalOptions="Start"
+                                    HorizontalOptions="Start" />
+
+                            <HorizontalStackLayout Grid.Row="1"
+                                                   Spacing="10"
+                                                   HorizontalOptions="Start"
+                                                   VerticalOptions="Start">
                                 <Border x:Name="BrandLogoFrame"
                                         WidthRequest="42"
                                         HeightRequest="42"
@@ -100,6 +120,7 @@
 
                             <VerticalStackLayout Grid.Column="1"
                                                  Spacing="0"
+                                                 VerticalOptions="Start"
                                                  HorizontalOptions="End">
                                 <Label Text="Son G&#252;ncelleme"
                                        FontSize="13"
@@ -233,11 +254,12 @@
 
                     <Grid RowDefinitions="Auto,*">
                         <Grid x:Name="TableHeader"
-                              ColumnDefinitions="120,*,*"
+                              ColumnDefinitions="36,*,*,*"
                               ColumnSpacing="4"
                               Padding="10,10"
                               BackgroundColor="{DynamicResource AppAccent}">
                             <Label Text="{Binding SelectedCategoryTitle}"
+                                   Grid.ColumnSpan="2"
                                    FontAttributes="Bold"
                                    FontSize="17"
                                    CharacterSpacing="1"
@@ -246,14 +268,14 @@
                                    LineBreakMode="NoWrap"
                                    MaxLines="1"
                                    VerticalOptions="Center" />
-                            <Label Grid.Column="1"
+                            <Label Grid.Column="2"
                                    Text="ALI&#350;"
                                    FontAttributes="Bold"
                                    FontSize="17"
                                    TextColor="{DynamicResource AppHeaderText}"
                                    FontAutoScalingEnabled="False"
                                    HorizontalTextAlignment="Center" />
-                            <Label Grid.Column="2"
+                            <Label Grid.Column="3"
                                    Text="SATI&#350;"
                                    FontAttributes="Bold"
                                    FontSize="17"
@@ -262,98 +284,116 @@
                                    HorizontalTextAlignment="Center" />
                         </Grid>
 
-                        <CollectionView x:Name="RatesCollectionView"
-                                        Grid.Row="1"
-                                        ItemsSource="{Binding DisplayRates}"
-                                        ItemSizingStrategy="MeasureFirstItem"
-                                        SelectionMode="None">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid ColumnDefinitions="120,*,*"
-                                          ColumnSpacing="4"
-                                          Padding="{DynamicResource RateRowPadding}"
-                                          HeightRequest="{DynamicResource RateRowHeight}"
-                                          BackgroundColor="{DynamicResource AppPanelBackground}">
-                                        <Grid.Triggers>
-                                            <DataTrigger TargetType="Grid"
-                                                         Binding="{Binding IsAlternateRow}"
-                                                         Value="True">
-                                                <Setter Property="BackgroundColor"
-                                                        Value="{DynamicResource AppAlternateRowBackground}" />
-                                            </DataTrigger>
-                                            <DataTrigger TargetType="Grid"
-                                                         Binding="{Binding IsAlternateRow}"
-                                                         Value="False">
-                                                <Setter Property="BackgroundColor"
-                                                        Value="{DynamicResource AppPanelBackground}" />
-                                            </DataTrigger>
-                                        </Grid.Triggers>
+                        <Grid Grid.Row="1"
+                              RowDefinitions="Auto,*">
+                            <Label Text="{Binding ErrorMessage}"
+                                   Padding="12,8"
+                                   TextColor="{DynamicResource AppNegative}"
+                                   IsVisible="{Binding HasErrorMessage}" />
 
-                                        <VerticalStackLayout Spacing="1"
-                                                             VerticalOptions="Center">
-                                            <Label Text="{Binding Name}"
-                                                   FontSize="17"
-                                                   FontAutoScalingEnabled="False"
-                                                   TextColor="{DynamicResource AppTextPrimary}" />
-                                            <Label Text="{Binding Code}"
-                                                   FontSize="12"
-                                                   FontAutoScalingEnabled="False"
-                                                   TextColor="{DynamicResource AppTextMuted}"
-                                                   IsVisible="{Binding HasCode}" />
-                                        </VerticalStackLayout>
+                            <CollectionView x:Name="RatesCollectionView"
+                                            Grid.Row="1"
+                                            Margin="0"
+                                            ItemsSource="{Binding DisplayRates}"
+                                            ItemSizingStrategy="MeasureFirstItem"
+                                            SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="36,*,*,*"
+                                              ColumnSpacing="4"
+                                              Padding="{DynamicResource RateRowPadding}"
+                                              HeightRequest="{DynamicResource RateRowHeight}"
+                                              BackgroundColor="{DynamicResource AppPanelBackground}">
+                                            <Grid.Triggers>
+                                                <DataTrigger TargetType="Grid"
+                                                             Binding="{Binding IsAlternateRow}"
+                                                             Value="True">
+                                                    <Setter Property="BackgroundColor"
+                                                            Value="{DynamicResource AppAlternateRowBackground}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Grid"
+                                                             Binding="{Binding IsAlternateRow}"
+                                                             Value="False">
+                                                    <Setter Property="BackgroundColor"
+                                                            Value="{DynamicResource AppPanelBackground}" />
+                                                </DataTrigger>
+                                            </Grid.Triggers>
 
-                                        <VerticalStackLayout Grid.Column="1"
-                                                             Spacing="0"
-                                                             WidthRequest="102"
-                                                             HorizontalOptions="Center"
-                                                             VerticalOptions="Center">
-                                            <Label Text="{Binding Buy}"
-                                                   WidthRequest="102"
-                                                   FontSize="15"
-                                                   FontAutoScalingEnabled="False"
-                                                   TextColor="{DynamicResource AppTextPrimary}"
-                                                   HorizontalTextAlignment="Center"
-                                                   LineBreakMode="NoWrap"
-                                                   MaxLines="1" />
-                                        </VerticalStackLayout>
+                                                <Button Text="{Binding FavoriteText}"
+                                                        Padding="0"
+                                                        WidthRequest="32"
+                                                        HeightRequest="32"
+                                                        FontSize="19"
+                                                        TextColor="{DynamicResource AppAccent}"
+                                                        BackgroundColor="Transparent"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleFavoriteCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        VerticalOptions="Center" />
 
-                                        <VerticalStackLayout Grid.Column="2"
-                                                             Spacing="0"
-                                                             WidthRequest="102"
-                                                             HorizontalOptions="Center"
-                                                             VerticalOptions="Center">
-                                            <Label Text="{Binding Sell}"
-                                                   WidthRequest="102"
-                                                   FontSize="15"
-                                                   FontAutoScalingEnabled="False"
-                                                   TextColor="{DynamicResource AppTextPrimary}"
-                                                   HorizontalTextAlignment="Center"
-                                                   LineBreakMode="NoWrap"
-                                                   MaxLines="1" />
-                                            <Label Text="{Binding TrendText}"
-                                                   WidthRequest="102"
-                                                   FontSize="11"
-                                                   FontAutoScalingEnabled="False"
-                                                   TextColor="{DynamicResource AppPositive}"
-                                                   HorizontalTextAlignment="Center"
-                                                   LineBreakMode="NoWrap"
-                                                   MaxLines="1"
-                                                   Loaded="OnTrendLabelLoaded"
-                                                   Unloaded="OnTrendLabelUnloaded">
-                                                <Label.Triggers>
-                                                    <DataTrigger TargetType="Label"
-                                                                 Binding="{Binding IsUp}"
-                                                                 Value="False">
-                                                        <Setter Property="TextColor"
-                                                                Value="{DynamicResource AppNegative}" />
-                                                    </DataTrigger>
-                                                </Label.Triggers>
-                                            </Label>
-                                        </VerticalStackLayout>
-                                    </Grid>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                                                <VerticalStackLayout Grid.Column="1"
+                                                                     Spacing="1"
+                                                                     VerticalOptions="Center">
+                                                    <Label Text="{Binding Name}"
+                                                           FontSize="15"
+                                                           FontAttributes="Bold"
+                                                           FontAutoScalingEnabled="False"
+                                                           TextColor="{DynamicResource AppTextPrimary}"
+                                                           LineBreakMode="TailTruncation"
+                                                           MaxLines="2" />
+                                                    <Label Text="{Binding Code}"
+                                                           FontSize="11"
+                                                           FontAutoScalingEnabled="False"
+                                                           TextColor="{DynamicResource AppTextMuted}"
+                                                           IsVisible="{Binding HasCode}" />
+                                                </VerticalStackLayout>
+
+                                                <Label Grid.Column="2"
+                                                       Text="{Binding Buy}"
+                                                       FontSize="15"
+                                                       FontAttributes="Bold"
+                                                       FontAutoScalingEnabled="False"
+                                                       TextColor="{DynamicResource AppTextPrimary}"
+                                                       HorizontalTextAlignment="Center"
+                                                       VerticalTextAlignment="Center"
+                                                       LineBreakMode="NoWrap"
+                                                       MaxLines="1" />
+
+                                                <VerticalStackLayout Grid.Column="3"
+                                                                     Spacing="1"
+                                                                     HorizontalOptions="Center"
+                                                                     VerticalOptions="Center">
+                                                    <Label Text="{Binding Sell}"
+                                                           FontSize="15"
+                                                           FontAttributes="Bold"
+                                                           FontAutoScalingEnabled="False"
+                                                           TextColor="{DynamicResource AppTextPrimary}"
+                                                           HorizontalTextAlignment="Center"
+                                                           LineBreakMode="NoWrap"
+                                                           MaxLines="1" />
+                                                    <Label Text="{Binding TrendText}"
+                                                           FontSize="10"
+                                                           FontAutoScalingEnabled="False"
+                                                           TextColor="{DynamicResource AppPositive}"
+                                                           HorizontalTextAlignment="Center"
+                                                           LineBreakMode="NoWrap"
+                                                           MaxLines="1"
+                                                           Loaded="OnTrendLabelLoaded"
+                                                           Unloaded="OnTrendLabelUnloaded">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label"
+                                                                         Binding="{Binding IsUp}"
+                                                                         Value="False">
+                                                                <Setter Property="TextColor"
+                                                                        Value="{DynamicResource AppNegative}" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                </VerticalStackLayout>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>
@@ -426,4 +466,3 @@
         </Grid>
     </Grid>
 </ContentPage>
-

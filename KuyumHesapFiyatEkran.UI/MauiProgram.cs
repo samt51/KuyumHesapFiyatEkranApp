@@ -1,5 +1,7 @@
 using System.Reflection;
 using KuyumHesapFiyatEkran.Core;
+using KuyumHesapFiyatEkran.UI.Pages;
+using KuyumHesapFiyatEkran.UI.Services;
 using KuyumHesapFiyatEkran.UI.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -21,8 +23,13 @@ namespace KuyumHesapFiyatEkran.UI
 
             AddAppSettings(builder.Configuration);
             builder.Services.AddCoreServices(builder.Configuration);
+            builder.Services.AddSingleton<LiveRatesStore>();
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<GoldCalculatorPage>();
+            builder.Services.AddTransient<FavoritesPage>();
+            builder.Services.AddTransient<ContactPage>();
+            builder.Services.AddTransient<AboutPage>();
             builder.Services.AddTransient<MainPageViewModel>();
 
 #if DEBUG

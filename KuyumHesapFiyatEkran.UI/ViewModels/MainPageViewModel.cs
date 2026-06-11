@@ -3,13 +3,14 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using KuyumHesapFiyatEkran.Core.Features.LiveRates.Queries.GetLiveRates;
-using MediatR;
+using KuyumHesapFiyatEkran.UI.Models;
+using KuyumHesapFiyatEkran.UI.Services;
 
 namespace KuyumHesapFiyatEkran.UI.ViewModels;
 
 public sealed class MainPageViewModel : INotifyPropertyChanged
 {
-    private readonly IMediator mediator;
+    private readonly LiveRatesStore liveRatesStore;
     private bool isBusy;
     private bool isInitialLoading = true;
     private string lastUpdate = string.Empty;
@@ -17,11 +18,13 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
     private string selectedCategory = "Sarrafiye";
     private CancellationTokenSource? tickerSwitchCancellationTokenSource;
 
-    public MainPageViewModel(IMediator mediator)
+    public MainPageViewModel(LiveRatesStore liveRatesStore)
     {
-        this.mediator = mediator;
+        this.liveRatesStore = liveRatesStore;
         RefreshCommand = new Command(async () => await LoadAsync(CancellationToken.None, updateTicker: true, showBusy: true), () => !IsBusy);
         SelectCategoryCommand = new Command<string>(category => _ = SelectCategoryAsync(category));
+        ToggleFavoriteCommand = new Command<RateDisplayItem>(ToggleFavorite);
+        liveRatesStore.FavoritesChanged += (_, _) => RefreshDisplayRates();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -30,13 +33,15 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
 
     public ICommand SelectCategoryCommand { get; }
 
+    public ICommand ToggleFavoriteCommand { get; }
+
     public ObservableCollection<LiveRateItem> Sarrafiye { get; } = new();
 
     public ObservableCollection<LiveRateItem> Maden { get; } = new();
 
     public ObservableCollection<LiveRateItem> Doviz { get; } = new();
 
-    public ObservableCollection<LiveRateItem> DisplayRates { get; } = new();
+    public ObservableCollection<RateDisplayItem> DisplayRates { get; } = new();
 
     public ObservableCollection<LiveRateItem> TickerRates { get; } = new();
 
@@ -83,8 +88,16 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
     public string? ErrorMessage
     {
         get => errorMessage;
-        private set => SetProperty(ref errorMessage, value);
+        private set
+        {
+            if (SetProperty(ref errorMessage, value))
+            {
+                OnPropertyChanged(nameof(HasErrorMessage));
+            }
+        }
     }
+
+    public bool HasErrorMessage => !string.IsNullOrWhiteSpace(ErrorMessage);
 
     public string SelectedCategory
     {
@@ -138,20 +151,20 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
 
             ErrorMessage = null;
 
-            var response = await mediator.Send(new GetLiveRatesQuery(), cancellationToken);
+            var data = await liveRatesStore.LoadAsync(cancellationToken);
 
-            if (!response.IsSuccess || response.Data is null)
+            if (data is null)
             {
-                ErrorMessage = response.Errors?.Count > 0
-                    ? string.Join(Environment.NewLine, response.Errors)
-                    : "Canli kur bilgileri alinamadi.";
+                ErrorMessage = string.IsNullOrWhiteSpace(liveRatesStore.LastError)
+                    ? "Canli fiyat bilgileri alinamadi."
+                    : liveRatesStore.LastError;
                 return;
             }
 
-            LastUpdate = response.Data.LastUpdate;
-            SyncItems(Sarrafiye, response.Data.Sarrafiye ?? Enumerable.Empty<LiveRateItem>());
-            SyncItems(Maden, response.Data.Maden ?? Enumerable.Empty<LiveRateItem>());
-            SyncItems(Doviz, response.Data.Doviz ?? Enumerable.Empty<LiveRateItem>());
+            LastUpdate = data.LastUpdate;
+            SyncItems(Sarrafiye, data.Sarrafiye ?? Enumerable.Empty<LiveRateItem>());
+            SyncItems(Maden, data.Maden ?? Enumerable.Empty<LiveRateItem>());
+            SyncItems(Doviz, data.Doviz ?? Enumerable.Empty<LiveRateItem>());
             RefreshCategoryAvailability();
             EnsureSelectedCategoryAvailable();
             RefreshDisplayRates();
@@ -233,7 +246,36 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
 
     private void RefreshDisplayRates()
     {
-        SyncItems(DisplayRates, GetSelectedRates());
+        var source = GetSelectedRates()
+            .Select(item => new RateDisplayItem(item, liveRatesStore.IsFavorite(item)))
+            .ToList();
+
+        for (var index = 0; index < source.Count; index++)
+        {
+            if (index >= DisplayRates.Count)
+            {
+                DisplayRates.Add(source[index]);
+                continue;
+            }
+
+            DisplayRates[index] = source[index];
+        }
+
+        while (DisplayRates.Count > source.Count)
+        {
+            DisplayRates.RemoveAt(DisplayRates.Count - 1);
+        }
+    }
+
+    private void ToggleFavorite(RateDisplayItem? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        liveRatesStore.ToggleFavorite(item.Rate);
+        RefreshDisplayRates();
     }
 
     private void RefreshTickerText()

@@ -3,13 +3,73 @@
     x:Class="KuyumHesapFiyatEkran.UI.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Shell.FlyoutBehavior="Disabled"
-    Shell.NavBarIsVisible="False"
+    Shell.FlyoutBehavior="Flyout"
+    Shell.NavBarIsVisible="True"
+    Shell.BackgroundColor="{DynamicResource AppBackground}"
+    Shell.ForegroundColor="{DynamicResource AppAccent}"
+    Shell.TitleColor="{DynamicResource AppBrandText}"
+    Shell.FlyoutBackgroundColor="{DynamicResource AppBackground}"
     Title="Aslan Kuyumculuk">
 
-    <ShellContent
-        x:Name="HomeContent"
-        Title="Aslan Kuyumculuk"
-        Route="MainPage" />
+    <Shell.FlyoutHeader>
+        <Grid Padding="22,28,22,18"
+              BackgroundColor="{DynamicResource AppBackground}">
+            <VerticalStackLayout Spacing="12">
+                <Border WidthRequest="86"
+                        HeightRequest="86"
+                        Stroke="#D4AF37"
+                        StrokeThickness="1"
+                        BackgroundColor="{DynamicResource AppPanelBackground}"
+                        HorizontalOptions="Start">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8" />
+                    </Border.StrokeShape>
+                    <Image Source="aslan_logo.png"
+                           Aspect="AspectFit" />
+                </Border>
+                <Label Text="ASLAN KUYUMCULUK"
+                       FontAttributes="Bold"
+                       FontSize="20"
+                       TextColor="{DynamicResource AppBrandText}" />
+                <Label Text="Canlı fiyat, hesaplama ve iletişim"
+                       FontSize="13"
+                       TextColor="{DynamicResource AppAccent}" />
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <Grid Padding="22,14"
+                  ColumnDefinitions="*,Auto">
+                <Label Text="{Binding Title}"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="{DynamicResource AppBrandText}"
+                       VerticalOptions="Center" />
+                <BoxView Grid.Column="1"
+                         WidthRequest="4"
+                         HeightRequest="22"
+                         Color="{DynamicResource AppAccent}"
+                         VerticalOptions="Center" />
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+    <ShellContent x:Name="HomeContent"
+                  Title="Canlı Fiyatlar"
+                  Route="MainPage" />
+    <ShellContent x:Name="GoldCalculatorContent"
+                  Title="Altın Hesaplama"
+                  Route="GoldCalculator" />
+    <ShellContent x:Name="FavoritesContent"
+                  Title="Favoriler"
+                  Route="Favorites" />
+    <ShellContent x:Name="ContactContent"
+                  Title="İletişim"
+                  Route="Contact" />
+    <ShellContent x:Name="AboutContent"
+                  Title="Hakkımızda"
+                  Route="About" />
 
 </Shell>

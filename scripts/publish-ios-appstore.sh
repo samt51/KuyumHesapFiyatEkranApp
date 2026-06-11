@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PROJECT="KuyumHesapFiyatEkran.UI/KuyumHesapFiyatEkran.UI.csproj"
-FRAMEWORK="net10.0-ios"
+FRAMEWORK="net9.0-ios"
 CONFIGURATION="Release"
 RUNTIME="ios-arm64"
 

@@ -321,6 +321,9 @@ namespace KuyumHesapFiyatEkran.UI
             ContentGrid.Padding = isLandscape ? new Thickness(8, 4, 8, 6) : new Thickness(10, 22, 10, 18);
             HeaderCard.Padding = isLandscape ? new Thickness(12, 8) : new Thickness(18, 16);
             HeaderContent.RowSpacing = isLandscape ? 8 : 22;
+            FlyoutMenuButton.WidthRequest = isLandscape ? 34 : 40;
+            FlyoutMenuButton.HeightRequest = isLandscape ? 34 : 40;
+            FlyoutMenuButton.FontSize = isLandscape ? 20 : 24;
             BrandLogoFrame.WidthRequest = isLandscape ? 34 : 42;
             BrandLogoFrame.HeightRequest = isLandscape ? 34 : 42;
             BrandLogoImage.WidthRequest = isLandscape ? 34 : 42;
@@ -340,6 +343,14 @@ namespace KuyumHesapFiyatEkran.UI
 
             RefreshRateRows();
             UpdateTickerWidth();
+        }
+
+        private void OnFlyoutMenuButtonClicked(object? sender, EventArgs e)
+        {
+            if (Shell.Current is not null)
+            {
+                Shell.Current.FlyoutIsPresented = true;
+            }
         }
 
         private void UpdateThemeSelector(AslanThemeMode mode)

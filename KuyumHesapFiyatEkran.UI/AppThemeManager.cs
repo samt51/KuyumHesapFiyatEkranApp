@@ -10,7 +10,9 @@ namespace KuyumHesapFiyatEkran.UI
 
     public static class AppThemeManager
     {
-        private const string PreferenceKey = "AslanThemeMode";
+        private const string PreferenceKey = "AslanThemeModeV2";
+
+        public static event EventHandler<AslanThemeMode>? ThemeChanged;
 
         private static readonly IReadOnlyDictionary<string, Color> LightColors = new Dictionary<string, Color>
         {
@@ -56,8 +58,8 @@ namespace KuyumHesapFiyatEkran.UI
 
         public static AslanThemeMode GetSavedTheme()
         {
-            var value = Preferences.Get(PreferenceKey, AslanThemeMode.Light.ToString());
-            return Enum.TryParse<AslanThemeMode>(value, out var mode) ? mode : AslanThemeMode.Light;
+            var value = Preferences.Get(PreferenceKey, AslanThemeMode.Dark.ToString());
+            return Enum.TryParse<AslanThemeMode>(value, out var mode) ? mode : AslanThemeMode.Dark;
         }
 
         public static void Apply(AslanThemeMode mode, ResourceDictionary? pageResources = null, bool save = true)
@@ -70,6 +72,7 @@ namespace KuyumHesapFiyatEkran.UI
             var colors = GetColors(mode);
             ApplyTo(Application.Current?.Resources, colors);
             ApplyTo(pageResources, colors);
+            ThemeChanged?.Invoke(null, mode);
         }
 
         public static Color GetColor(string key, string fallback)
