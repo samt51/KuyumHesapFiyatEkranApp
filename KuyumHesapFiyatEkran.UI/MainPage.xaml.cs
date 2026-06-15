@@ -527,7 +527,7 @@ namespace KuyumHesapFiyatEkran.UI
             ContentGrid.RowSpacing = 0;
             CategoryTabs.Margin = new Thickness(12, 4, 12, 6);
 
-            // Remove the redundant initial loading overlay for Sinan brand
+            // Remove the redundant initial loading overlay for Salih brand
             LoadingOverlay.IsVisible = false;
             LoadingOverlay.RemoveBinding(Grid.IsVisibleProperty);
             // Enable vector icons and clean up tab label texts

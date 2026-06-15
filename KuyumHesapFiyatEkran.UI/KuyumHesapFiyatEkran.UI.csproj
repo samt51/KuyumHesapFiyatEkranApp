@@ -41,7 +41,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Brand)' == 'SalihCetinkaya'">
-		<ApplicationTitle>Sinan Çetinkaya Kuyumcu</ApplicationTitle>
+		<ApplicationTitle>Salih Çetinkaya Kuyumcu</ApplicationTitle>
 		<ApplicationId>com.salihcetinkaya.kuyumhesap</ApplicationId>
 	</PropertyGroup>
 
@@ -51,9 +51,9 @@
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(Brand)' == 'SalihCetinkaya'">
-		<!-- App Icon for Sinan Cetinkaya -->
+		<!-- App Icon for Salih Cetinkaya -->
 		<MauiIcon Include="Resources\AppIcon\SalihCetinkaya\appicon.png" Color="#050505" />
-		<!-- Splash Screen for Sinan Cetinkaya -->
+		<!-- Splash Screen for Salih Cetinkaya -->
 		<MauiSplashScreen Include="Resources\Splash\SalihCetinkaya\splash.png" Color="#050505" BaseSize="180,180" />
 	</ItemGroup>
 
