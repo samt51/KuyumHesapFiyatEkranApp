@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="MainPageRoot"
              x:Class="KuyumHesapFiyatEkran.UI.MainPage"
              Title="Canlı Fiyatlar"
              Shell.NavBarIsVisible="False"
@@ -36,46 +37,48 @@
         <RefreshView Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsBusy}">
             <Grid x:Name="ContentGrid"
-                  Padding="10,22,10,18"
-                  RowDefinitions="Auto,*"
-                  RowSpacing="4">
+                  Padding="4,8,4,18"
+                  RowDefinitions="Auto,Auto,*"
+                  RowSpacing="0">
                 <Border x:Name="HeaderCard"
                         BackgroundColor="{DynamicResource AppCardBackground}"
                         Stroke="{DynamicResource AppBorder}"
                         StrokeThickness="1"
-                        Padding="18,16">
+                        Padding="8,6,6,6"
+                        HeightRequest="72">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="8" />
                     </Border.StrokeShape>
 
                     <Grid x:Name="HeaderContent"
-                          RowDefinitions="Auto,Auto"
-                          RowSpacing="22">
-                        <Grid RowDefinitions="Auto,Auto"
-                              ColumnDefinitions="*,Auto"
-                              ColumnSpacing="12"
-                              RowSpacing="6">
+                          RowDefinitions="Auto"
+                          RowSpacing="0">
+                        <Grid x:Name="HeaderTopGrid"
+                              ColumnDefinitions="34,146,*,50"
+                              ColumnSpacing="6"
+                              HeightRequest="56"
+                              VerticalOptions="Center">
                             <Button x:Name="FlyoutMenuButton"
                                     Text="☰"
                                     Padding="0"
-                                    WidthRequest="40"
-                                    HeightRequest="40"
+                                    WidthRequest="34"
+                                    HeightRequest="44"
                                     FontSize="24"
                                     FontAttributes="Bold"
                                     TextColor="{DynamicResource AppAccent}"
                                     BackgroundColor="Transparent"
                                     BorderWidth="0"
                                     Clicked="OnFlyoutMenuButtonClicked"
-                                    VerticalOptions="Start"
+                                    VerticalOptions="Center"
                                     HorizontalOptions="Start" />
 
-                            <HorizontalStackLayout Grid.Row="1"
-                                                   Spacing="10"
+                            <HorizontalStackLayout Grid.Column="1"
+                                                   Spacing="6"
                                                    HorizontalOptions="Start"
-                                                   VerticalOptions="Start">
+                                                   VerticalOptions="Center">
                                 <Border x:Name="BrandLogoFrame"
-                                        WidthRequest="42"
-                                        HeightRequest="42"
+                                        WidthRequest="40"
+                                        HeightRequest="40"
                                         Padding="0"
                                         StrokeThickness="0"
                                         BackgroundColor="#050505"
@@ -83,20 +86,29 @@
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="8" />
                                     </Border.StrokeShape>
-                                    <Image x:Name="BrandLogoImage"
-                                           Source="aslan_logo.png"
-                                           WidthRequest="42"
-                                           HeightRequest="42"
-                                           Aspect="AspectFit" />
+                                    <Grid>
+                                        <Image x:Name="BrandLogoImage"
+                                               Source="aslan_logo.png"
+                                               WidthRequest="40"
+                                               HeightRequest="40"
+                                               Aspect="AspectFit" />
+                                        <Label x:Name="BrandLogoFallback"
+                                               IsVisible="False"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="{DynamicResource AppAccent}"
+                                               FontAutoScalingEnabled="False"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center" />
+                                    </Grid>
                                 </Border>
                                 <VerticalStackLayout x:Name="BrandTextStack"
-                                                     WidthRequest="150"
+                                                     WidthRequest="98"
                                                      Spacing="-4"
                                                      VerticalOptions="Center">
                                     <Label x:Name="BrandAslanLabel"
-                                           Text="ASLAN"
                                            FontAttributes="Bold"
-                                           FontSize="32"
+                                           FontSize="27"
                                            TextColor="{DynamicResource AppBrandText}"
                                            CharacterSpacing="0"
                                            FontAutoScalingEnabled="False"
@@ -104,9 +116,8 @@
                                            LineBreakMode="NoWrap"
                                            MaxLines="1" />
                                     <Label x:Name="BrandKuyumculukLabel"
-                                           Text="KUYUMCULUK"
                                            FontAttributes="Bold"
-                                           FontSize="17"
+                                           FontSize="13"
                                            TextColor="{DynamicResource AppBrandText}"
                                            CharacterSpacing="0"
                                            FontAutoScalingEnabled="False"
@@ -118,133 +129,168 @@
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
 
-                            <VerticalStackLayout Grid.Column="1"
+                            <VerticalStackLayout Grid.Column="2"
                                                  Spacing="0"
-                                                 VerticalOptions="Start"
+                                                 VerticalOptions="Center"
                                                  HorizontalOptions="End">
                                 <Label Text="Son G&#252;ncelleme"
-                                       FontSize="13"
+                                       FontSize="11"
                                        TextColor="{DynamicResource AppTextMuted}"
+                                       FontAutoScalingEnabled="False"
                                        HorizontalTextAlignment="End" />
                                 <Label Text="{Binding LastUpdate}"
-                                       FontSize="16"
+                                       FontSize="11"
                                        FontAttributes="Bold"
                                        TextColor="{DynamicResource AppTextPrimary}"
-                                       HorizontalTextAlignment="End" />
-                                <Border x:Name="ThemeToggle"
-                                        Margin="0,6,0,0"
-                                        WidthRequest="46"
-                                        HeightRequest="46"
-                                        Padding="0"
-                                        StrokeThickness="0"
-                                        HorizontalOptions="End">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="12" />
-                                    </Border.StrokeShape>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnThemeToggleTapped" />
-                                    </Border.GestureRecognizers>
-                                    <Label x:Name="ThemeToggleIcon"
-                                           FontSize="25"
-                                           FontAttributes="Bold"
-                                           FontAutoScalingEnabled="False"
-                                           HorizontalTextAlignment="Center"
-                                           VerticalTextAlignment="Center" />
-                                </Border>
+                                       FontAutoScalingEnabled="False"
+                                       HorizontalTextAlignment="End"
+                                       LineBreakMode="NoWrap"
+                                       MaxLines="1" />
                             </VerticalStackLayout>
+
+                            <Border x:Name="ThemeToggle"
+                                    Grid.Column="3"
+                                    WidthRequest="42"
+                                    HeightRequest="42"
+                                    Padding="0"
+                                    StrokeThickness="0"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnThemeToggleTapped" />
+                                </Border.GestureRecognizers>
+                                <Label x:Name="ThemeToggleIcon"
+                                       FontSize="23"
+                                       FontAttributes="Bold"
+                                       FontAutoScalingEnabled="False"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center" />
+                            </Border>
                         </Grid>
 
-                        <FlexLayout x:Name="CategoryTabs"
-                                    Grid.Row="1"
-                                    Direction="Row"
-                                    AlignItems="Stretch"
-                                    JustifyContent="SpaceAround"
-                                    HeightRequest="50">
-                            <Grid RowDefinitions="*,4"
-                                  FlexLayout.Grow="1"
+                    </Grid>
+                </Border>
+
+                <Grid x:Name="CategoryTabs"
+                      Grid.Row="1"
+                      ColumnSpacing="0"
+                      HeightRequest="36"
+                      Margin="0,-1,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="SarrafiyeTabColumn"
+                                          Width="*" />
+                        <ColumnDefinition x:Name="MadenTabColumn"
+                                          Width="*" />
+                        <ColumnDefinition x:Name="DovizTabColumn"
+                                          Width="0" />
+                    </Grid.ColumnDefinitions>
+
+                    <BoxView x:Name="SarrafiyeTabIndicator"
+                             Grid.Row="0"
+                             Grid.Column="0"
+                             HeightRequest="4"
+                             HorizontalOptions="Fill"
+                             VerticalOptions="Start"
+                             BackgroundColor="{DynamicResource AppAccent}" />
+                    <BoxView x:Name="MadenTabIndicator"
+                             Grid.Row="0"
+                             Grid.Column="1"
+                             HeightRequest="4"
+                             HorizontalOptions="Fill"
+                             VerticalOptions="Start"
+                             BackgroundColor="{DynamicResource AppAccent}" />
+                    <BoxView x:Name="DovizTabIndicator"
+                             Grid.Row="0"
+                             Grid.Column="2"
+                             HeightRequest="4"
+                             HorizontalOptions="Fill"
+                             VerticalOptions="Start"
+                             BackgroundColor="{DynamicResource AppAccent}" />
+
+                            <Grid Grid.Row="1"
+                                  Grid.Column="0"
                                   IsVisible="{Binding IsSarrafiyeEnabled}">
-                                <Label Text="SARRAF&#304;YE"
+                                <Label x:Name="SarrafiyeTabLabel"
+                                       Text="SARRAF&#304;YE"
                                        FontSize="18"
                                        FontAttributes="Bold"
                                        TextColor="{DynamicResource AppTextInactive}"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center">
                                     <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding SelectCategoryCommand}"
+                                        <TapGestureRecognizer Command="{Binding Source={x:Reference MainPageRoot}, Path=BindingContext.SelectCategoryCommand}"
                                                               CommandParameter="Sarrafiye" />
                                     </Label.GestureRecognizers>
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label"
-                                                     Binding="{Binding IsSarrafiyeSelected}"
+                                                     Binding="{Binding Source={x:Reference MainPageRoot}, Path=BindingContext.IsSarrafiyeSelected}"
                                                      Value="True">
                                             <Setter Property="TextColor"
                                                     Value="{DynamicResource AppTextPrimary}" />
                                         </DataTrigger>
                                     </Label.Triggers>
                                 </Label>
-                                <BoxView Grid.Row="1"
-                                         BackgroundColor="{DynamicResource AppAccent}"
-                                         IsVisible="{Binding IsSarrafiyeSelected}" />
                             </Grid>
 
-                            <Grid RowDefinitions="*,4"
-                                  FlexLayout.Grow="1"
+                            <Grid Grid.Row="1"
+                                  Grid.Column="1"
                                   IsVisible="{Binding IsMadenEnabled}">
-                                <Label Text="MADEN"
+                                <Label x:Name="MadenTabLabel"
+                                       Text="MADEN"
                                        FontSize="18"
                                        FontAttributes="Bold"
                                        TextColor="{DynamicResource AppTextInactive}"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center">
                                     <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding SelectCategoryCommand}"
+                                        <TapGestureRecognizer Command="{Binding Source={x:Reference MainPageRoot}, Path=BindingContext.SelectCategoryCommand}"
                                                               CommandParameter="Maden" />
                                     </Label.GestureRecognizers>
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label"
-                                                     Binding="{Binding IsMadenSelected}"
+                                                     Binding="{Binding Source={x:Reference MainPageRoot}, Path=BindingContext.IsMadenSelected}"
                                                      Value="True">
                                             <Setter Property="TextColor"
                                                     Value="{DynamicResource AppTextPrimary}" />
                                         </DataTrigger>
                                     </Label.Triggers>
                                 </Label>
-                                <BoxView Grid.Row="1"
-                                         BackgroundColor="{DynamicResource AppAccent}"
-                                         IsVisible="{Binding IsMadenSelected}" />
                             </Grid>
 
-                            <Grid RowDefinitions="*,4"
-                                  FlexLayout.Grow="1"
+                            <Grid Grid.Row="1"
+                                  Grid.Column="2"
                                   IsVisible="{Binding IsDovizEnabled}">
-                                <Label Text="D&#214;V&#304;Z"
+                                <Label x:Name="DovizTabLabel"
+                                       Text="D&#214;V&#304;Z"
                                        FontSize="18"
                                        FontAttributes="Bold"
                                        TextColor="{DynamicResource AppTextInactive}"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center">
                                     <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding SelectCategoryCommand}"
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectCategoryCommand}"
                                                               CommandParameter="Doviz" />
                                     </Label.GestureRecognizers>
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label"
-                                                     Binding="{Binding IsDovizSelected}"
+                                                     Binding="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsDovizSelected}"
                                                      Value="True">
                                             <Setter Property="TextColor"
                                                     Value="{DynamicResource AppTextPrimary}" />
                                         </DataTrigger>
                                     </Label.Triggers>
                                 </Label>
-                                <BoxView Grid.Row="1"
-                                         BackgroundColor="{DynamicResource AppAccent}"
-                                         IsVisible="{Binding IsDovizSelected}" />
                             </Grid>
-                        </FlexLayout>
-                    </Grid>
-                </Border>
+                        </Grid>
 
-                <Border Grid.Row="1"
+                <Border Grid.Row="2"
                         Stroke="{DynamicResource AppBorder}"
                         StrokeThickness="1"
                         BackgroundColor="{DynamicResource AppPanelBackground}">
@@ -413,10 +459,21 @@
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="28" />
                     </Border.StrokeShape>
-                    <Image Source="aslan_logo.png"
-                           WidthRequest="240"
-                           HeightRequest="240"
-                           Aspect="AspectFit" />
+                    <Grid>
+                        <Image x:Name="LoadingLogoImage"
+                               Source="aslan_logo.png"
+                               WidthRequest="240"
+                               HeightRequest="240"
+                               Aspect="AspectFit" />
+                        <Label x:Name="LoadingLogoFallback"
+                               IsVisible="False"
+                               FontSize="58"
+                               FontAttributes="Bold"
+                               TextColor="{DynamicResource AppAccent}"
+                               FontAutoScalingEnabled="False"
+                               HorizontalTextAlignment="Center"
+                               VerticalTextAlignment="Center" />
+                    </Grid>
                 </Border>
                 <ActivityIndicator IsRunning="{Binding IsInitialLoading}"
                                    Color="{DynamicResource AppAccent}"

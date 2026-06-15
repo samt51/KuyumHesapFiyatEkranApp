@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using KuyumHesapFiyatEkran.Core.Features.LiveRates.Queries.GetLiveRates;
+using KuyumHesapFiyatEkran.UI.Services;
 using KuyumHesapFiyatEkran.UI.ViewModels;
 
 namespace KuyumHesapFiyatEkran.UI
@@ -13,6 +14,7 @@ namespace KuyumHesapFiyatEkran.UI
         private static readonly TimeSpan LiveRatesRefreshInterval = TimeSpan.FromSeconds(15);
 
         private readonly MainPageViewModel viewModel;
+        private readonly BrandSettings brandSettings;
         private IDispatcherTimer? tickerTimer;
         private IDispatcherTimer? liveRatesTimer;
         private CancellationTokenSource? refreshCancellationTokenSource;
@@ -23,13 +25,16 @@ namespace KuyumHesapFiyatEkran.UI
         private double tickerDragStartX;
         private bool disposed;
 
-        public MainPage(MainPageViewModel viewModel)
+        public MainPage(MainPageViewModel viewModel, BrandSettings brandSettings)
         {
             InitializeComponent();
             this.viewModel = viewModel;
+            this.brandSettings = brandSettings;
+            ApplyBranding();
             ApplyTheme(AppThemeManager.GetSavedTheme(), save: false);
             BindingContext = viewModel;
             viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            UpdateCategoryTabs();
             App.AppSleeping += OnAppSleeping;
             App.AppResumed += OnAppResumed;
         }
@@ -197,6 +202,17 @@ namespace KuyumHesapFiyatEkran.UI
 
         private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName is nameof(MainPageViewModel.SelectedCategory)
+                or nameof(MainPageViewModel.IsSarrafiyeSelected)
+                or nameof(MainPageViewModel.IsMadenSelected)
+                or nameof(MainPageViewModel.IsDovizSelected)
+                or nameof(MainPageViewModel.IsSarrafiyeEnabled)
+                or nameof(MainPageViewModel.IsMadenEnabled)
+                or nameof(MainPageViewModel.IsDovizEnabled))
+            {
+                MainThread.BeginInvokeOnMainThread(UpdateCategoryTabs);
+            }
+
             if (e.PropertyName != nameof(MainPageViewModel.TickerText))
             {
                 return;
@@ -296,6 +312,30 @@ namespace KuyumHesapFiyatEkran.UI
             RefreshRateRows();
             BuildTickerSegments();
             UpdateTickerWidth();
+            UpdateCategoryTabs();
+        }
+
+        private void UpdateCategoryTabs()
+        {
+            if (SarrafiyeTabIndicator is null || MadenTabIndicator is null || DovizTabIndicator is null)
+            {
+                return;
+            }
+
+            SarrafiyeTabIndicator.IsVisible = viewModel.IsSarrafiyeSelected;
+            MadenTabIndicator.IsVisible = viewModel.IsMadenSelected;
+            DovizTabIndicator.IsVisible = viewModel.IsDovizSelected;
+            DovizTabColumn.Width = viewModel.IsDovizEnabled ? GridLength.Star : new GridLength(0);
+
+            SarrafiyeTabLabel.TextColor = GetThemeColor(
+                viewModel.IsSarrafiyeSelected ? "AppTextPrimary" : "AppTextInactive",
+                viewModel.IsSarrafiyeSelected ? "#2F2A1D" : "#A8872B");
+            MadenTabLabel.TextColor = GetThemeColor(
+                viewModel.IsMadenSelected ? "AppTextPrimary" : "AppTextInactive",
+                viewModel.IsMadenSelected ? "#2F2A1D" : "#A8872B");
+            DovizTabLabel.TextColor = GetThemeColor(
+                viewModel.IsDovizSelected ? "AppTextPrimary" : "AppTextInactive",
+                viewModel.IsDovizSelected ? "#2F2A1D" : "#A8872B");
         }
 
         private void RefreshRateRows()
@@ -318,23 +358,28 @@ namespace KuyumHesapFiyatEkran.UI
 
             isLandscapeLayout = isLandscape;
 
-            ContentGrid.Padding = isLandscape ? new Thickness(8, 4, 8, 6) : new Thickness(10, 22, 10, 18);
-            HeaderCard.Padding = isLandscape ? new Thickness(12, 8) : new Thickness(18, 16);
-            HeaderContent.RowSpacing = isLandscape ? 8 : 22;
-            FlyoutMenuButton.WidthRequest = isLandscape ? 34 : 40;
-            FlyoutMenuButton.HeightRequest = isLandscape ? 34 : 40;
+            ContentGrid.Padding = isLandscape ? new Thickness(8, 4, 8, 6) : new Thickness(4, 8, 4, 18);
+            HeaderCard.Padding = isLandscape ? new Thickness(10, 6, 6, 6) : new Thickness(8, 6, 6, 6);
+            HeaderCard.HeightRequest = isLandscape ? 60 : 72;
+            HeaderContent.RowSpacing = 0;
+            HeaderTopGrid.HeightRequest = isLandscape ? 44 : 56;
+            HeaderTopGrid.ColumnDefinitions[0].Width = new GridLength(isLandscape ? 32 : 34);
+            HeaderTopGrid.ColumnDefinitions[1].Width = new GridLength(isLandscape ? 116 : 146);
+            HeaderTopGrid.ColumnDefinitions[3].Width = new GridLength(isLandscape ? 46 : 50);
+            HeaderTopGrid.ColumnSpacing = isLandscape ? 5 : 6;
+            FlyoutMenuButton.WidthRequest = isLandscape ? 32 : 34;
+            FlyoutMenuButton.HeightRequest = isLandscape ? 34 : 44;
             FlyoutMenuButton.FontSize = isLandscape ? 20 : 24;
-            BrandLogoFrame.WidthRequest = isLandscape ? 34 : 42;
-            BrandLogoFrame.HeightRequest = isLandscape ? 34 : 42;
-            BrandLogoImage.WidthRequest = isLandscape ? 34 : 42;
-            BrandLogoImage.HeightRequest = isLandscape ? 34 : 42;
-            BrandTextStack.WidthRequest = isLandscape ? 132 : 150;
-            BrandAslanLabel.FontSize = isLandscape ? 26 : 32;
-            BrandKuyumculukLabel.FontSize = isLandscape ? 14 : 17;
-            ThemeToggle.WidthRequest = isLandscape ? 38 : 46;
-            ThemeToggle.HeightRequest = isLandscape ? 38 : 46;
-            ThemeToggleIcon.FontSize = isLandscape ? 21 : 25;
-            CategoryTabs.HeightRequest = isLandscape ? 34 : 50;
+            BrandLogoFrame.WidthRequest = isLandscape ? 32 : 40;
+            BrandLogoFrame.HeightRequest = isLandscape ? 32 : 40;
+            BrandLogoImage.WidthRequest = isLandscape ? 32 : 40;
+            BrandLogoImage.HeightRequest = isLandscape ? 32 : 40;
+            BrandTextStack.WidthRequest = isLandscape ? 82 : 98;
+            ApplyBrandTextSizing(isLandscape);
+            ThemeToggle.WidthRequest = isLandscape ? 38 : 42;
+            ThemeToggle.HeightRequest = isLandscape ? 38 : 42;
+            ThemeToggleIcon.FontSize = isLandscape ? 21 : 23;
+            CategoryTabs.HeightRequest = isLandscape ? 30 : 34;
             TableHeader.Padding = isLandscape ? new Thickness(10, 6) : new Thickness(10, 10);
             TickerViewport.HeightRequest = isLandscape ? 38 : 54;
 
@@ -343,6 +388,51 @@ namespace KuyumHesapFiyatEkran.UI
 
             RefreshRateRows();
             UpdateTickerWidth();
+        }
+
+        private void ApplyBranding()
+        {
+            BrandAslanLabel.Text = brandSettings.PrimaryName;
+            BrandKuyumculukLabel.Text = brandSettings.SecondaryName;
+            BrandLogoFallback.Text = brandSettings.LogoMonogram;
+            LoadingLogoFallback.Text = brandSettings.LogoMonogram;
+
+            var hasLogo = !string.IsNullOrWhiteSpace(brandSettings.LogoImage);
+            BrandLogoImage.IsVisible = hasLogo;
+            BrandLogoFallback.IsVisible = !hasLogo;
+            LoadingLogoImage.IsVisible = hasLogo;
+            LoadingLogoFallback.IsVisible = !hasLogo;
+
+            if (hasLogo)
+            {
+                BrandLogoImage.Source = brandSettings.LogoImage;
+                LoadingLogoImage.Source = brandSettings.LogoImage;
+            }
+        }
+
+        private void ApplyBrandTextSizing(bool isLandscape)
+        {
+            var primaryLength = brandSettings.PrimaryName.Length;
+
+            if (primaryLength > 14)
+            {
+                BrandAslanLabel.FontSize = isLandscape ? 10 : 11;
+                BrandKuyumculukLabel.FontSize = isLandscape ? 10 : 11;
+                BrandTextStack.Spacing = 0;
+                return;
+            }
+
+            if (primaryLength > 8)
+            {
+                BrandAslanLabel.FontSize = isLandscape ? 15 : 16;
+                BrandKuyumculukLabel.FontSize = isLandscape ? 11 : 12;
+                BrandTextStack.Spacing = -2;
+                return;
+            }
+
+            BrandAslanLabel.FontSize = isLandscape ? 23 : 27;
+            BrandKuyumculukLabel.FontSize = isLandscape ? 12 : 13;
+            BrandTextStack.Spacing = -4;
         }
 
         private void OnFlyoutMenuButtonClicked(object? sender, EventArgs e)

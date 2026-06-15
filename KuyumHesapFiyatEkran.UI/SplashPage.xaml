@@ -7,10 +7,20 @@
         <VerticalStackLayout HorizontalOptions="Center"
                              VerticalOptions="Center"
                              Spacing="0">
-            <Image Source="aslan_logo.png"
-                   WidthRequest="300"
-                   HeightRequest="300"
-                   Aspect="AspectFit" />
+            <Grid WidthRequest="300"
+                  HeightRequest="300">
+                <Image x:Name="SplashLogoImage"
+                       Source="aslan_logo.png"
+                       Aspect="AspectFit" />
+                <Label x:Name="SplashLogoFallback"
+                       IsVisible="False"
+                       FontSize="72"
+                       FontAttributes="Bold"
+                       TextColor="#D4AF37"
+                       FontAutoScalingEnabled="False"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Center" />
+            </Grid>
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

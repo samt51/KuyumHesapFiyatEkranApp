@@ -22,7 +22,13 @@ namespace KuyumHesapFiyatEkran.UI
                 });
 
             AddAppSettings(builder.Configuration);
+            var brandSettings = builder.Configuration
+                .GetSection(nameof(BrandSettings))
+                .Get<BrandSettings>() ?? new BrandSettings();
+            BusinessInfo.Configure(brandSettings);
+
             builder.Services.AddCoreServices(builder.Configuration);
+            builder.Services.AddSingleton(brandSettings);
             builder.Services.AddSingleton<LiveRatesStore>();
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<MainPage>();
@@ -45,6 +51,7 @@ namespace KuyumHesapFiyatEkran.UI
 
             AddJsonResource(configuration, assembly, "KuyumHesapFiyatEkran.UI.appsettings.json", required: true);
             AddJsonResource(configuration, assembly, "KuyumHesapFiyatEkran.UI.appsettings.Production.json", required: false);
+            AddJsonResource(configuration, assembly, "KuyumHesapFiyatEkran.UI.appsettings.Brand.json", required: false);
         }
 
         private static void AddJsonResource(ConfigurationManager configuration, Assembly assembly, string resourceName, bool required)

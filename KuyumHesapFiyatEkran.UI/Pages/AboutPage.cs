@@ -11,7 +11,7 @@ public sealed class AboutPage : ContentPage
 
         Content = GoldCalculatorPage.CreateLayout(
             "Hakkımızda",
-            "Aslan Kuyumculuk mobil uygulaması, güncel altın ve döviz fiyatlarını kolayca takip edebilmeniz ve temel hesaplamaları hızlıca yapabilmeniz için geliştirilmiştir.",
+            $"{BusinessInfo.CompanyName} mobil uygulaması, güncel altın ve döviz fiyatlarını kolayca takip edebilmeniz ve temel hesaplamaları hızlıca yapabilmeniz için geliştirilmiştir.",
             CreateText($"Uygulama versiyonu: {AppInfo.Current.VersionString} ({AppInfo.Current.BuildString})"),
             new Button
             {

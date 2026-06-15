@@ -9,6 +9,7 @@
     Shell.ForegroundColor="{DynamicResource AppAccent}"
     Shell.TitleColor="{DynamicResource AppBrandText}"
     Shell.FlyoutBackgroundColor="{DynamicResource AppBackground}"
+    x:Name="ShellRoot"
     Title="Aslan Kuyumculuk">
 
     <Shell.FlyoutHeader>
@@ -24,14 +25,27 @@
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="8" />
                     </Border.StrokeShape>
-                    <Image Source="aslan_logo.png"
-                           Aspect="AspectFit" />
+                    <Grid>
+                        <Image x:Name="FlyoutLogoImage"
+                               Source="aslan_logo.png"
+                               Aspect="AspectFit" />
+                        <Label x:Name="FlyoutLogoFallback"
+                               IsVisible="False"
+                               FontSize="28"
+                               FontAttributes="Bold"
+                               TextColor="{DynamicResource AppAccent}"
+                               FontAutoScalingEnabled="False"
+                               HorizontalTextAlignment="Center"
+                               VerticalTextAlignment="Center" />
+                    </Grid>
                 </Border>
-                <Label Text="ASLAN KUYUMCULUK"
+                <Label x:Name="FlyoutBrandNameLabel"
+                       Text="ASLAN KUYUMCULUK"
                        FontAttributes="Bold"
                        FontSize="20"
                        TextColor="{DynamicResource AppBrandText}" />
-                <Label Text="Canlı fiyat, hesaplama ve iletişim"
+                <Label x:Name="FlyoutSubtitleLabel"
+                       Text="Canlı fiyat, hesaplama ve iletişim"
                        FontSize="13"
                        TextColor="{DynamicResource AppAccent}" />
             </VerticalStackLayout>

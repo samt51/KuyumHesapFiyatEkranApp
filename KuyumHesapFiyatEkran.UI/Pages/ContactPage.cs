@@ -50,6 +50,8 @@ public sealed class ContactPage : ContentPage
             Spacing = 16
         };
 
+        var brand = BusinessInfo.Current;
+        var hasLogo = !string.IsNullOrWhiteSpace(brand.LogoImage);
         var logoCard = new Border
         {
             WidthRequest = 66,
@@ -58,7 +60,24 @@ public sealed class ContactPage : ContentPage
             Stroke = Color.FromArgb("#D4AF37"),
             BackgroundColor = Color.FromArgb("#050505"),
             StrokeShape = new RoundRectangle { CornerRadius = 8 },
-            Content = new Image { Source = "aslan_logo.png", Aspect = Aspect.AspectFit }
+            Content = new Grid
+            {
+                Children =
+                {
+                    new Image { Source = brand.LogoImage, Aspect = Aspect.AspectFit, IsVisible = hasLogo },
+                    new Label
+                    {
+                        Text = brand.LogoMonogram,
+                        IsVisible = !hasLogo,
+                        FontSize = 24,
+                        FontAttributes = FontAttributes.Bold,
+                        TextColor = Color.FromArgb("#D4AF37"),
+                        FontAutoScalingEnabled = false,
+                        HorizontalTextAlignment = TextAlignment.Center,
+                        VerticalTextAlignment = TextAlignment.Center
+                    }
+                }
+            }
         };
         var heroText = CreateHeroText();
         var heroGrid = new Grid
@@ -119,7 +138,7 @@ public sealed class ContactPage : ContentPage
             Children =
             {
                 new Label { Text = BusinessInfo.CompanyName, FontSize = 22, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#FFFFFF") },
-                new Label { Text = "İçerenköy Şubesi", FontSize = 14, TextColor = Color.FromArgb("#D4AF37") },
+                new Label { Text = BusinessInfo.Current.BranchName, FontSize = 14, TextColor = Color.FromArgb("#D4AF37") },
                 new Label { Text = "Altın ve döviz işlemleriniz için hızlı iletişim", FontSize = 12, TextColor = Color.FromArgb("#A8872B") }
             }
         };
