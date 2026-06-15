@@ -1,4 +1,5 @@
 using Microsoft.Maui.Storage;
+using KuyumHesapFiyatEkran.UI.Services;
 
 namespace KuyumHesapFiyatEkran.UI
 {
@@ -14,7 +15,7 @@ namespace KuyumHesapFiyatEkran.UI
 
         public static event EventHandler<AslanThemeMode>? ThemeChanged;
 
-        private static readonly IReadOnlyDictionary<string, Color> LightColors = new Dictionary<string, Color>
+        private static readonly IReadOnlyDictionary<string, Color> AslanLightColors = new Dictionary<string, Color>
         {
             ["AppBackground"] = Color.FromArgb("#FFFFFF"),
             ["AppCardBackground"] = Color.FromArgb("#FFFFFF"),
@@ -35,7 +36,7 @@ namespace KuyumHesapFiyatEkran.UI
             ["AppLoadingBackground"] = Color.FromArgb("#FFFFFF")
         };
 
-        private static readonly IReadOnlyDictionary<string, Color> DarkColors = new Dictionary<string, Color>
+        private static readonly IReadOnlyDictionary<string, Color> AslanDarkColors = new Dictionary<string, Color>
         {
             ["AppBackground"] = Color.FromArgb("#050505"),
             ["AppCardBackground"] = Color.FromArgb("#101010"),
@@ -54,6 +55,48 @@ namespace KuyumHesapFiyatEkran.UI
             ["AppTickerCardBackground"] = Color.FromArgb("#101010"),
             ["AppTickerText"] = Color.FromArgb("#F1D16A"),
             ["AppLoadingBackground"] = Color.FromArgb("#000000")
+        };
+
+        private static readonly IReadOnlyDictionary<string, Color> SalihLightColors = new Dictionary<string, Color>
+        {
+            ["AppBackground"] = Color.FromArgb("#FAF6EA"),
+            ["AppCardBackground"] = Color.FromArgb("#FFFFFF"),
+            ["AppPanelBackground"] = Color.FromArgb("#F6EEDC"),
+            ["AppAlternateRowBackground"] = Color.FromArgb("#F9F4E6"),
+            ["AppBorder"] = Color.FromArgb("#C5A028"),
+            ["AppAccent"] = Color.FromArgb("#9A7417"),
+            ["AppTextPrimary"] = Color.FromArgb("#2F2A1D"),
+            ["AppTextMuted"] = Color.FromArgb("#A8872B"),
+            ["AppTextInactive"] = Color.FromArgb("#8B6D20"),
+            ["AppBrandText"] = Color.FromArgb("#231F20"),
+            ["AppHeaderText"] = Color.FromArgb("#FAF6EA"),
+            ["AppPositive"] = Color.FromArgb("#1FA463"),
+            ["AppNegative"] = Color.FromArgb("#D84555"),
+            ["AppTickerBackground"] = Color.FromArgb("#FAF6EA"),
+            ["AppTickerCardBackground"] = Color.FromArgb("#FFFFFF"),
+            ["AppTickerText"] = Color.FromArgb("#2F2A1D"),
+            ["AppLoadingBackground"] = Color.FromArgb("#FAF6EA")
+        };
+
+        private static readonly IReadOnlyDictionary<string, Color> SalihDarkColors = new Dictionary<string, Color>
+        {
+            ["AppBackground"] = Color.FromArgb("#070707"),
+            ["AppCardBackground"] = Color.FromArgb("#121212"),
+            ["AppPanelBackground"] = Color.FromArgb("#0D0D0D"),
+            ["AppAlternateRowBackground"] = Color.FromArgb("#141414"),
+            ["AppBorder"] = Color.FromArgb("#3A2C0E"),
+            ["AppAccent"] = Color.FromArgb("#D4AF37"),
+            ["AppTextPrimary"] = Color.FromArgb("#FFFFFF"),
+            ["AppTextMuted"] = Color.FromArgb("#8A8A8A"),
+            ["AppTextInactive"] = Color.FromArgb("#FFFFFF"),
+            ["AppBrandText"] = Color.FromArgb("#D4AF37"),
+            ["AppHeaderText"] = Color.FromArgb("#FFFFFF"),
+            ["AppPositive"] = Color.FromArgb("#31C278"),
+            ["AppNegative"] = Color.FromArgb("#FF4F5E"),
+            ["AppTickerBackground"] = Color.FromArgb("#070707"),
+            ["AppTickerCardBackground"] = Color.FromArgb("#121212"),
+            ["AppTickerText"] = Color.FromArgb("#D4AF37"),
+            ["AppLoadingBackground"] = Color.FromArgb("#070707")
         };
 
         public static AslanThemeMode GetSavedTheme()
@@ -88,7 +131,12 @@ namespace KuyumHesapFiyatEkran.UI
 
         private static IReadOnlyDictionary<string, Color> GetColors(AslanThemeMode mode)
         {
-            return mode == AslanThemeMode.Dark ? DarkColors : LightColors;
+            bool isSalih = string.Equals(BusinessInfo.Current.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase);
+            if (isSalih)
+            {
+                return mode == AslanThemeMode.Dark ? SalihDarkColors : SalihLightColors;
+            }
+            return mode == AslanThemeMode.Dark ? AslanDarkColors : AslanLightColors;
         }
 
         private static void ApplyTo(ResourceDictionary? resources, IReadOnlyDictionary<string, Color> colors)

@@ -1,6 +1,7 @@
 using KuyumHesapFiyatEkran.Core.Features.LiveRates.Queries.GetLiveRates;
 using KuyumHesapFiyatEkran.UI.Services;
 using Microsoft.Maui.Controls.Shapes;
+using KuyumHesapFiyatEkran.UI.Views;
 
 namespace KuyumHesapFiyatEkran.UI.Pages;
 
@@ -23,6 +24,7 @@ public sealed class GoldCalculatorPage : ContentPage
     {
         this.liveRatesStore = liveRatesStore;
         Title = "Altın Hesaplama";
+        SetDynamicResource(BackgroundColorProperty, "AppBackground");
         goldPicker.ItemDisplayBinding = new Binding(nameof(LiveRateItem.Name));
         StyleInput(goldPicker);
         StyleInput(amountEntry);
@@ -34,7 +36,31 @@ public sealed class GoldCalculatorPage : ContentPage
         buyModeButton.Clicked += (_, _) => SelectPriceType(1);
 
         SelectPriceType(0);
-        Content = CreateGoldLayout();
+        
+        var goldContent = CreateGoldLayout();
+        if (string.Equals(BusinessInfo.Current.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase))
+        {
+            var pageGrid = new Grid
+            {
+                RowDefinitions =
+                {
+                    new RowDefinition(GridLength.Star),
+                    new RowDefinition(GridLength.Auto)
+                }
+            };
+            pageGrid.Add(goldContent);
+
+            var bottomBar = new BottomNavigationBar(2);
+            Grid.SetRow(bottomBar, 1);
+            pageGrid.Add(bottomBar);
+
+            Content = pageGrid;
+        }
+        else
+        {
+            Content = goldContent;
+        }
+
         ApplyTheme();
         AppThemeManager.ThemeChanged += OnThemeChanged;
     }
@@ -61,7 +87,7 @@ public sealed class GoldCalculatorPage : ContentPage
         if (goldRates.Count == 0)
         {
             resultLabel.Text = "Sonuç: -";
-            messageLabel.Text = "Altın fiyatları henuz alinamadi. Canli Fiyatlar ekranindan fiyatlar yuklendikten sonra tekrar deneyin.";
+            messageLabel.Text = "Altın fiyatları henüz alınamadı. Canlı Fiyatlar ekranından fiyatlar yüklendikten sonra tekrar deneyin.";
             messageLabel.IsVisible = true;
             return;
         }
@@ -75,7 +101,7 @@ public sealed class GoldCalculatorPage : ContentPage
         if (unitPrice <= 0)
         {
             resultLabel.Text = "Sonuç: -";
-            messageLabel.Text = "Bu kalem icin fiyat bilgisi henuz alinamadi.";
+            messageLabel.Text = "Bu kalem için fiyat bilgisi henüz alınamadı.";
             messageLabel.IsVisible = true;
             return;
         }
@@ -145,49 +171,61 @@ public sealed class GoldCalculatorPage : ContentPage
             Spacing = 16
         };
 
-        root.Add(new Border
+        var titleLabel = new Label { Text = "Altın Hesaplama", FontSize = 22, FontAttributes = FontAttributes.Bold };
+        titleLabel.SetDynamicResource(Label.TextColorProperty, "AppBrandText");
+        var subtitleLabel = new Label { Text = "Canlı fiyatla hızlı TL hesaplama", FontSize = 13 };
+        subtitleLabel.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+
+        var currencySymbol = new Label { Text = "₺", FontSize = 24, FontAttributes = FontAttributes.Bold };
+        currencySymbol.SetDynamicResource(Label.TextColorProperty, "AppAccent");
+
+        var currencyBorder = new Border
+        {
+            Padding = 10,
+            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            Content = currencySymbol
+        };
+        currencyBorder.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        currencyBorder.SetDynamicResource(Border.BackgroundColorProperty, "AppBackground");
+
+        var headerGrid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            Children =
+            {
+                new VerticalStackLayout
+                {
+                    Spacing = 5,
+                    Children = { titleLabel, subtitleLabel }
+                },
+                currencyBorder
+            }
+        };
+        Grid.SetColumn(currencyBorder, 1);
+
+        var headerCard = new Border
         {
             Padding = 16,
-            Stroke = Color.FromArgb("#8D6F1F"),
-            BackgroundColor = Color.FromArgb("#101010"),
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
-            Content = new Grid
-            {
-                ColumnDefinitions =
-                {
-                    new ColumnDefinition(GridLength.Star),
-                    new ColumnDefinition(GridLength.Auto)
-                },
-                Children =
-                {
-                    new VerticalStackLayout
-                    {
-                        Spacing = 5,
-                        Children =
-                        {
-                            new Label { Text = "Altın Hesaplama", FontSize = 24, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#FFFFFF") },
-                            new Label { Text = "Canli fiyatla hizli TL hesaplama", FontSize = 13, TextColor = Color.FromArgb("#D4AF37") }
-                        }
-                    },
-                    new Border
-                    {
-                        Padding = 10,
-                        BackgroundColor = Color.FromArgb("#050505"),
-                        Stroke = Color.FromArgb("#7E6421"),
-                        StrokeShape = new RoundRectangle { CornerRadius = 8 },
-                        Content = new Label { Text = "₺", FontSize = 24, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#D4AF37") }
-                    }
-                }
-            }
-        });
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
+            Content = headerGrid
+        };
+        headerCard.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        headerCard.SetDynamicResource(Border.BackgroundColorProperty, "AppCardBackground");
 
-        var iconBorder = (Border)((Grid)((Border)root.Children[0]).Content).Children[1];
-        Grid.SetColumn(iconBorder, 1);
+        root.Add(headerCard);
 
         var formStack = new VerticalStackLayout { Spacing = 12 };
         formStack.Add(CreateField("Altın türü", goldPicker));
         formStack.Add(CreateField("Miktar", amountEntry));
-        formStack.Add(new Label { Text = "Hesap fiyatı", FontSize = 12, TextColor = Color.FromArgb("#A8872B") });
+        
+        var accountPriceLabel = new Label { Text = "Hesap fiyatı", FontSize = 12 };
+        accountPriceLabel.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+        formStack.Add(accountPriceLabel);
+        
         formStack.Add(new Grid
         {
             ColumnDefinitions =
@@ -220,8 +258,6 @@ public sealed class GoldCalculatorPage : ContentPage
             Text = "Hesapla",
             FontAttributes = FontAttributes.Bold,
             FontSize = 16,
-            TextColor = Color.FromArgb("#050505"),
-            BackgroundColor = Color.FromArgb("#D4AF37"),
             CornerRadius = 8,
             Padding = new Thickness(14, 12),
             Command = new Command(() =>
@@ -230,94 +266,104 @@ public sealed class GoldCalculatorPage : ContentPage
                 Calculate();
             })
         };
+        calculateButton.SetDynamicResource(Button.BackgroundColorProperty, "AppAccent");
+        calculateButton.SetDynamicResource(Button.TextColorProperty, "AppBackground");
+        calculateButton.SetDynamicResource(Button.BorderColorProperty, "AppBorder");
         formStack.Add(calculateButton);
 
-        root.Add(new Border
+        var formCard = new Border
         {
             Padding = 16,
-            Stroke = Color.FromArgb("#8D6F1F"),
-            BackgroundColor = Color.FromArgb("#0B0B0B"),
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
             Content = formStack
-        });
+        };
+        formCard.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        formCard.SetDynamicResource(Border.BackgroundColorProperty, "AppCardBackground");
+        root.Add(formCard);
 
-        root.Add(new Border
+        var resultStack = new VerticalStackLayout
+        {
+            Spacing = 8,
+            Children =
+            {
+                unitPriceLabel,
+                resultLabel,
+                messageLabel
+            }
+        };
+
+        var resultCard = new Border
         {
             Padding = 16,
-            Stroke = Color.FromArgb("#D4AF37"),
-            BackgroundColor = Color.FromArgb("#15110A"),
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
-            Content = new VerticalStackLayout
-            {
-                Spacing = 8,
-                Children =
-                {
-                    unitPriceLabel,
-                    resultLabel,
-                    messageLabel
-                }
-            }
-        });
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
+            Content = resultStack
+        };
+        resultCard.SetDynamicResource(Border.StrokeProperty, "AppAccent");
+        resultCard.SetDynamicResource(Border.BackgroundColorProperty, "AppAlternateRowBackground");
+        root.Add(resultCard);
 
-        return new ScrollView { BackgroundColor = Color.FromArgb("#050505"), Content = root };
+        var scrollView = new ScrollView { Content = root };
+        scrollView.SetDynamicResource(VisualElement.BackgroundColorProperty, "AppBackground");
+        return scrollView;
     }
 
     private static Border CreateField(string title, View input)
     {
-        return new Border
+        var label = new Label { Text = title, FontSize = 12 };
+        label.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+
+        var border = new Border
         {
             Padding = new Thickness(12, 8),
-            Stroke = Color.FromArgb("#7E6421"),
-            BackgroundColor = Color.FromArgb("#101010"),
             StrokeShape = new RoundRectangle { CornerRadius = 8 },
             Content = new VerticalStackLayout
             {
                 Spacing = 4,
-                Children =
-                {
-                    new Label { Text = title, FontSize = 12, TextColor = Color.FromArgb("#A8872B") },
-                    input
-                }
+                Children = { label, input }
             }
         };
+        border.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        border.SetDynamicResource(Border.BackgroundColorProperty, "AppBackground");
+        return border;
     }
 
     private static Border CreatePriceTile(string title, Label valueLabel)
     {
         valueLabel.FontSize = 14;
         valueLabel.FontAttributes = FontAttributes.Bold;
+        valueLabel.SetDynamicResource(Label.TextColorProperty, "AppTextPrimary");
 
-        return new Border
+        var label = new Label { Text = title, FontSize = 12 };
+        label.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+
+        var border = new Border
         {
             Padding = 12,
-            Stroke = Color.FromArgb("#3A2C0E"),
-            BackgroundColor = Color.FromArgb("#101010"),
             StrokeShape = new RoundRectangle { CornerRadius = 8 },
             Content = new VerticalStackLayout
             {
                 Spacing = 5,
-                Children =
-                {
-                    new Label { Text = title, FontSize = 12, TextColor = Color.FromArgb("#A8872B") },
-                    valueLabel
-                }
+                Children = { label, valueLabel }
             }
         };
+        border.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        border.SetDynamicResource(Border.BackgroundColorProperty, "AppBackground");
+        return border;
     }
 
     private static void StyleInput(InputView input)
     {
         input.BackgroundColor = Colors.Transparent;
-        input.TextColor = AppThemeManager.GetColor("AppTextPrimary", "#F1D16A");
-        input.PlaceholderColor = AppThemeManager.GetColor("AppTextMuted", "#A8872B");
+        input.SetDynamicResource(InputView.TextColorProperty, "AppTextPrimary");
+        input.SetDynamicResource(InputView.PlaceholderColorProperty, "AppTextMuted");
         input.FontSize = 16;
     }
 
     private static void StyleInput(Picker input)
     {
         input.BackgroundColor = Colors.Transparent;
-        input.TextColor = AppThemeManager.GetColor("AppTextPrimary", "#F1D16A");
-        input.TitleColor = AppThemeManager.GetColor("AppTextMuted", "#A8872B");
+        input.SetDynamicResource(Picker.TextColorProperty, "AppTextPrimary");
+        input.SetDynamicResource(Picker.TitleColorProperty, "AppTextMuted");
         input.FontSize = 16;
     }
 
@@ -336,28 +382,56 @@ public sealed class GoldCalculatorPage : ContentPage
     internal static ScrollView CreateLayout(string title, string subtitle, params View[] children)
     {
         var stack = new VerticalStackLayout { Padding = new Thickness(18, 18, 18, 28), Spacing = 14 };
-        stack.Add(new Label { Text = title, FontSize = 24, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#111111") });
-        stack.Add(new Label { Text = subtitle, FontSize = 14, TextColor = Color.FromArgb("#9A7417") });
+        
+        var titleLabel = new Label 
+        { 
+            Text = title.ToUpperInvariant(), 
+            FontSize = 20, 
+            FontAttributes = FontAttributes.Bold, 
+            CharacterSpacing = 2,
+            FontFamily = "serif",
+            HorizontalTextAlignment = TextAlignment.Center 
+        };
+        titleLabel.SetDynamicResource(Label.TextColorProperty, "AppBrandText");
+        stack.Add(titleLabel);
+
+        var subtitleLabel = new Label { Text = subtitle, FontSize = 14, HorizontalTextAlignment = TextAlignment.Center };
+        subtitleLabel.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+        stack.Add(subtitleLabel);
+
+        var innerStack = new VerticalStackLayout { Spacing = 12 };
+        foreach (var child in children)
+        {
+            innerStack.Add(child);
+        }
 
         var card = new Border
         {
             Padding = 16,
-            Stroke = Color.FromArgb("#D4AF37"),
-            BackgroundColor = Color.FromArgb("#FFFFFF"),
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
-            Content = new VerticalStackLayout { Spacing = 12 }
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
+            Content = innerStack
         };
-
-        foreach (var child in children)
-        {
-            ((VerticalStackLayout)card.Content).Add(child);
-        }
+        card.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        card.SetDynamicResource(Border.BackgroundColorProperty, "AppCardBackground");
 
         stack.Add(card);
-        return new ScrollView { Content = stack };
+
+        var scrollView = new ScrollView { Content = stack };
+        scrollView.SetDynamicResource(VisualElement.BackgroundColorProperty, "AppBackground");
+        return scrollView;
     }
 
-    private static Label CreateValueLabel(string text) => new() { Text = text, FontSize = 15, TextColor = Color.FromArgb("#F1D16A") };
+    private static Label CreateValueLabel(string text)
+    {
+        var label = new Label { Text = text, FontSize = 15 };
+        label.SetDynamicResource(Label.TextColorProperty, "AppTextPrimary");
+        return label;
+    }
 
-    private static Label CreateResultLabel() => new() { Text = "Sonuç: -", FontSize = 26, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#FFFFFF") };
+    private static Label CreateResultLabel()
+    {
+        var label = new Label { Text = "Sonuç: -", FontSize = 24, FontAttributes = FontAttributes.Bold };
+        label.SetDynamicResource(Label.TextColorProperty, "AppBrandText");
+        return label;
+    }
 }

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using KuyumHesapFiyatEkran.UI.Models;
 using KuyumHesapFiyatEkran.UI.Services;
 using Microsoft.Maui.Controls.Shapes;
+using KuyumHesapFiyatEkran.UI.Views;
 
 namespace KuyumHesapFiyatEkran.UI.Pages;
 
@@ -11,9 +12,8 @@ public sealed class FavoritesPage : ContentPage
     private readonly ObservableCollection<RateDisplayItem> favorites = new();
     private readonly Label emptyLabel = new()
     {
-        Text = "Henuz favori eklenmedi. Canli Fiyatlar ekraninda yildiz simgesine dokunarak favori listenizi olusturabilirsiniz.",
-        FontSize = 15,
-        TextColor = Color.FromArgb("#9A7417"),
+        Text = "Henüz favori eklenmedi. Canlı Fiyatlar ekranında yıldız simgesine dokunarak favori listenizi oluşturabilirsiniz.",
+        FontSize = 14,
         HorizontalTextAlignment = TextAlignment.Center
     };
 
@@ -21,8 +21,10 @@ public sealed class FavoritesPage : ContentPage
     {
         this.liveRatesStore = liveRatesStore;
         Title = "Favoriler";
-        BackgroundColor = Color.FromArgb("#FFFFFF");
+        SetDynamicResource(BackgroundColorProperty, "AppBackground");
         liveRatesStore.FavoritesChanged += (_, _) => RefreshFavorites();
+
+        emptyLabel.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
 
         var collection = new CollectionView
         {
@@ -30,23 +32,37 @@ public sealed class FavoritesPage : ContentPage
             SelectionMode = SelectionMode.None,
             ItemTemplate = new DataTemplate(() =>
             {
-                var name = new Label { FontSize = 17, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#2F2A1D") };
+                var name = new Label { FontSize = 16, FontAttributes = FontAttributes.Bold };
+                name.SetDynamicResource(Label.TextColorProperty, "AppTextPrimary");
                 name.SetBinding(Label.TextProperty, nameof(RateDisplayItem.Name));
-                var code = new Label { FontSize = 12, TextColor = Color.FromArgb("#9A7417") };
+
+                var code = new Label { FontSize = 11 };
+                code.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
                 code.SetBinding(Label.TextProperty, nameof(RateDisplayItem.Code));
                 code.SetBinding(IsVisibleProperty, nameof(RateDisplayItem.HasCode));
-                var buy = new Label { FontSize = 14, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.End, TextColor = Color.FromArgb("#2F2A1D") };
+
+                var buy = new Label { FontSize = 15, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.End };
+                buy.SetDynamicResource(Label.TextColorProperty, "AppTextPrimary");
                 buy.SetBinding(Label.TextProperty, nameof(RateDisplayItem.Buy));
-                var sell = new Label { FontSize = 14, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.End, TextColor = Color.FromArgb("#2F2A1D") };
+
+                var sell = new Label { FontSize = 15, FontAttributes = FontAttributes.Bold, HorizontalTextAlignment = TextAlignment.End };
+                sell.SetDynamicResource(Label.TextColorProperty, "AppTextPrimary");
                 sell.SetBinding(Label.TextProperty, nameof(RateDisplayItem.Sell));
+
+                var buyTitle = new Label { Text = "Alış", FontSize = 11, HorizontalTextAlignment = TextAlignment.End };
+                buyTitle.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+
+                var sellTitle = new Label { Text = "Satış", FontSize = 11, HorizontalTextAlignment = TextAlignment.End };
+                sellTitle.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+
                 var priceStack = new VerticalStackLayout
                 {
-                    Spacing = 4,
+                    Spacing = 3,
                     Children =
                     {
-                        new Label { Text = "Alış", FontSize = 11, TextColor = Color.FromArgb("#9A7417"), HorizontalTextAlignment = TextAlignment.End },
+                        buyTitle,
                         buy,
-                        new Label { Text = "Satış", FontSize = 11, TextColor = Color.FromArgb("#9A7417"), HorizontalTextAlignment = TextAlignment.End },
+                        sellTitle,
                         sell
                     }
                 };
@@ -59,22 +75,34 @@ public sealed class FavoritesPage : ContentPage
                         new ColumnDefinition(new GridLength(120))
                     }
                 };
-                row.Add(new VerticalStackLayout { Spacing = 3, Children = { name, code } });
+                row.Add(new VerticalStackLayout { Spacing = 3, VerticalOptions = LayoutOptions.Center, Children = { name, code } });
                 row.Add(priceStack);
 
-                return new Border
+                var border = new Border
                 {
                     Margin = new Thickness(0, 5),
-                    Padding = 14,
-                    Stroke = Color.FromArgb("#D4AF37"),
-                    BackgroundColor = Color.FromArgb("#FFFFFF"),
-                    StrokeShape = new RoundRectangle { CornerRadius = 8 },
+                    Padding = new Thickness(16, 12),
+                    StrokeShape = new RoundRectangle { CornerRadius = 12 },
                     Content = row
                 };
+                border.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+                border.SetDynamicResource(Border.BackgroundColorProperty, "AppCardBackground");
+
+                return border;
             })
         };
 
-        var header = new Label { Text = "Favoriler", FontSize = 24, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#111111") };
+        var header = new Label 
+        { 
+            Text = "FAVORİLER", 
+            FontSize = 20, 
+            FontAttributes = FontAttributes.Bold, 
+            CharacterSpacing = 2,
+            FontFamily = "serif",
+            HorizontalTextAlignment = TextAlignment.Center
+        };
+        header.SetDynamicResource(Label.TextColorProperty, "AppBrandText");
+
         var topStack = new VerticalStackLayout { Margin = new Thickness(0, 12, 0, 12), Children = { emptyLabel } };
         Grid.SetRow(topStack, 1);
         Grid.SetRow(collection, 2);
@@ -92,7 +120,30 @@ public sealed class FavoritesPage : ContentPage
         root.Add(header);
         root.Add(topStack);
         root.Add(collection);
-        Content = root;
+
+        if (string.Equals(BusinessInfo.Current.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase))
+        {
+            var pageGrid = new Grid
+            {
+                RowDefinitions =
+                {
+                    new RowDefinition(GridLength.Star),
+                    new RowDefinition(GridLength.Auto)
+                }
+            };
+            pageGrid.Add(root);
+
+            var bottomBar = new BottomNavigationBar(1);
+            Grid.SetRow(bottomBar, 1);
+            pageGrid.Add(bottomBar);
+
+            Content = pageGrid;
+        }
+        else
+        {
+            Content = root;
+        }
+
         ApplyTheme();
         AppThemeManager.ThemeChanged += OnThemeChanged;
     }

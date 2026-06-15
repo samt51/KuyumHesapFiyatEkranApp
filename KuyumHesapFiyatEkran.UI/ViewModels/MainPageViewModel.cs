@@ -278,6 +278,8 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
         RefreshDisplayRates();
     }
 
+    public bool IsFavorite(LiveRateItem? rate) => rate != null && liveRatesStore.IsFavorite(rate);
+
     private void RefreshTickerText()
     {
         SyncItems(TickerRates, GetSelectedRates());

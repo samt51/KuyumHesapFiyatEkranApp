@@ -1,5 +1,6 @@
 using KuyumHesapFiyatEkran.UI.Services;
 using Microsoft.Maui.Controls.Shapes;
+using KuyumHesapFiyatEkran.UI.Views;
 
 namespace KuyumHesapFiyatEkran.UI.Pages;
 
@@ -13,14 +14,37 @@ public sealed class ContactPage : ContentPage
     public ContactPage()
     {
         Title = "İletişim";
-        BackgroundColor = Color.FromArgb("#FFFFFF");
+        SetDynamicResource(BackgroundColorProperty, "AppBackground");
 
-        callAction = CreateActionTile("Ara", "phone_icon.svg", async () => await OpenOrWarn(string.IsNullOrWhiteSpace(BusinessInfo.Phone) ? null : $"tel:{OnlyDigits(BusinessInfo.Phone)}", "Telefon bilgisi henuz tanimli degil."));
-        whatsAppAction = CreateActionTile("WhatsApp'tan Yaz", "whatsapp_icon.svg", async () => await OpenOrWarn(string.IsNullOrWhiteSpace(BusinessInfo.WhatsApp) ? null : $"https://wa.me/{OnlyDigits(BusinessInfo.WhatsApp)}", "WhatsApp bilgisi henuz tanimli degil."));
-        directionsAction = CreateActionTile("Yol Tarifi Al", "directions_icon.svg", async () => await OpenOrWarn(string.IsNullOrWhiteSpace(BusinessInfo.Address) ? null : $"https://maps.apple.com/?q={Uri.EscapeDataString(BusinessInfo.Address)}", "Adres bilgisi henuz tanimli degil."));
-        websiteAction = CreateActionTile("Web Sitesini Aç", "web_icon.svg", async () => await OpenOrWarn(BusinessInfo.Website, "Web sitesi acilamadi."));
+        callAction = CreateActionTile("Ara", "phone_icon.png", async () => await OpenOrWarn(string.IsNullOrWhiteSpace(BusinessInfo.Phone) ? null : $"tel:{OnlyDigits(BusinessInfo.Phone)}", "Telefon bilgisi henüz tanımlı değil."));
+        whatsAppAction = CreateActionTile("WhatsApp'tan Yaz", "whatsapp_icon.png", async () => await OpenOrWarn(string.IsNullOrWhiteSpace(BusinessInfo.WhatsApp) ? null : $"https://wa.me/{OnlyDigits(BusinessInfo.WhatsApp)}", "WhatsApp bilgisi henüz tanımlı değil."));
+        directionsAction = CreateActionTile("Yol Tarifi Al", "directions_icon.png", async () => await OpenOrWarn(string.IsNullOrWhiteSpace(BusinessInfo.Address) ? null : $"https://maps.apple.com/?q={Uri.EscapeDataString(BusinessInfo.Address)}", "Adres bilgisi henüz tanımlı değil."));
+        websiteAction = CreateActionTile("Web Sitesini Aç", "web_icon.png", async () => await OpenOrWarn(BusinessInfo.Website, "Web sitesi açılamadı."));
 
-        Content = CreateContactLayout();
+        var contactContent = CreateContactLayout();
+        if (string.Equals(BusinessInfo.Current.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase))
+        {
+            var pageGrid = new Grid
+            {
+                RowDefinitions =
+                {
+                    new RowDefinition(GridLength.Star),
+                    new RowDefinition(GridLength.Auto)
+                }
+            };
+            pageGrid.Add(contactContent);
+
+            var bottomBar = new BottomNavigationBar(3);
+            Grid.SetRow(bottomBar, 1);
+            pageGrid.Add(bottomBar);
+
+            Content = pageGrid;
+        }
+        else
+        {
+            Content = contactContent;
+        }
+
         ApplyTheme();
         AppThemeManager.ThemeChanged += OnThemeChanged;
     }
@@ -52,33 +76,37 @@ public sealed class ContactPage : ContentPage
 
         var brand = BusinessInfo.Current;
         var hasLogo = !string.IsNullOrWhiteSpace(brand.LogoImage);
+        
+        var monogramLabel = new Label
+        {
+            Text = brand.LogoMonogram,
+            IsVisible = !hasLogo,
+            FontSize = 24,
+            FontAttributes = FontAttributes.Bold,
+            FontAutoScalingEnabled = false,
+            HorizontalTextAlignment = TextAlignment.Center,
+            VerticalTextAlignment = TextAlignment.Center
+        };
+        monogramLabel.SetDynamicResource(Label.TextColorProperty, "AppAccent");
+
         var logoCard = new Border
         {
             WidthRequest = 66,
             HeightRequest = 66,
             Padding = 6,
-            Stroke = Color.FromArgb("#D4AF37"),
-            BackgroundColor = Color.FromArgb("#050505"),
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
             Content = new Grid
             {
                 Children =
                 {
                     new Image { Source = brand.LogoImage, Aspect = Aspect.AspectFit, IsVisible = hasLogo },
-                    new Label
-                    {
-                        Text = brand.LogoMonogram,
-                        IsVisible = !hasLogo,
-                        FontSize = 24,
-                        FontAttributes = FontAttributes.Bold,
-                        TextColor = Color.FromArgb("#D4AF37"),
-                        FontAutoScalingEnabled = false,
-                        HorizontalTextAlignment = TextAlignment.Center,
-                        VerticalTextAlignment = TextAlignment.Center
-                    }
+                    monogramLabel
                 }
             }
         };
+        logoCard.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        logoCard.SetDynamicResource(Border.BackgroundColorProperty, "AppBackground");
+
         var heroText = CreateHeroText();
         var heroGrid = new Grid
         {
@@ -93,54 +121,68 @@ public sealed class ContactPage : ContentPage
         heroGrid.SetColumn(heroText, 1);
         heroGrid.Add(heroText);
 
-        stack.Add(new Border
+        var heroCard = new Border
         {
             Padding = 16,
-            Stroke = Color.FromArgb("#D4AF37"),
-            BackgroundColor = Color.FromArgb("#101010"),
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
             Content = heroGrid
-        });
+        };
+        heroCard.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        heroCard.SetDynamicResource(Border.BackgroundColorProperty, "AppCardBackground");
+        stack.Add(heroCard);
 
-        stack.Add(new Border
+        var quickContactTitle = new Label { Text = "Hızlı iletişim", FontSize = 18, FontAttributes = FontAttributes.Bold };
+        quickContactTitle.SetDynamicResource(Label.TextColorProperty, "AppTextPrimary");
+
+        var quickContactDesc = new Label { Text = "Mağazaya ulaşmak, mesaj göndermek veya yol tarifi almak için aşağıdaki seçenekleri kullanabilirsiniz.", FontSize = 13 };
+        quickContactDesc.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+
+        var quickContactCard = new Border
         {
             Padding = 16,
-            Stroke = Color.FromArgb("#D4AF37"),
-            BackgroundColor = Color.FromArgb("#FFFFFF"),
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
             Content = new VerticalStackLayout
             {
                 Spacing = 12,
                 Children =
                 {
-                    new Label { Text = "Hızlı iletişim", FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#2F2A1D") },
-                    new Label { Text = "Mağazaya ulaşmak, mesaj göndermek veya yol tarifi almak için aşağıdaki seçenekleri kullanabilirsiniz.", FontSize = 13, TextColor = Color.FromArgb("#9A7417") },
+                    quickContactTitle,
+                    quickContactDesc,
                     whatsAppAction.View,
                     CreateTwoColumnActions(callAction.View, directionsAction.View),
                     websiteAction.View
                 }
             }
-        });
+        };
+        quickContactCard.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        quickContactCard.SetDynamicResource(Border.BackgroundColorProperty, "AppCardBackground");
+        stack.Add(quickContactCard);
 
         stack.Add(CreateInfo("Adres", BusinessInfo.Address));
         stack.Add(CreateInfo("Çalışma saatleri", BusinessInfo.WorkingHours));
         stack.Add(CreateInfo("Web sitesi", BusinessInfo.Website));
 
-        return new ScrollView { Content = stack };
+        var scrollView = new ScrollView { Content = stack };
+        scrollView.SetDynamicResource(VisualElement.BackgroundColorProperty, "AppBackground");
+        return scrollView;
     }
 
     private static VerticalStackLayout CreateHeroText()
     {
+        var companyName = new Label { Text = BusinessInfo.CompanyName, FontSize = 22, FontAttributes = FontAttributes.Bold };
+        companyName.SetDynamicResource(Label.TextColorProperty, "AppBrandText");
+
+        var branchName = new Label { Text = BusinessInfo.Current.BranchName, FontSize = 14 };
+        branchName.SetDynamicResource(Label.TextColorProperty, "AppAccent");
+
+        var subtitle = new Label { Text = "Altın ve döviz işlemleriniz için hızlı iletişim", FontSize = 12 };
+        subtitle.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+
         return new VerticalStackLayout
         {
             Spacing = 5,
             VerticalOptions = LayoutOptions.Center,
-            Children =
-            {
-                new Label { Text = BusinessInfo.CompanyName, FontSize = 22, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#FFFFFF") },
-                new Label { Text = BusinessInfo.Current.BranchName, FontSize = 14, TextColor = Color.FromArgb("#D4AF37") },
-                new Label { Text = "Altın ve döviz işlemleriniz için hızlı iletişim", FontSize = 12, TextColor = Color.FromArgb("#A8872B") }
-            }
+            Children = { companyName, branchName, subtitle }
         };
     }
 
@@ -192,7 +234,7 @@ public sealed class ContactPage : ContentPage
         {
             Padding = new Thickness(12, 0),
             HeightRequest = 56,
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
             Content = content
         };
 
@@ -236,21 +278,25 @@ public sealed class ContactPage : ContentPage
 
     private static Border CreateInfo(string title, string value)
     {
-        return new Border
+        var titleLabel = new Label { Text = title, FontSize = 12, FontAttributes = FontAttributes.Bold };
+        titleLabel.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+
+        var valueLabel = new Label { Text = value, FontSize = 15, FontAttributes = FontAttributes.Bold, LineBreakMode = LineBreakMode.WordWrap };
+        valueLabel.SetDynamicResource(Label.TextColorProperty, "AppTextPrimary");
+
+        var border = new Border
         {
             Padding = 15,
-            Stroke = Color.FromArgb("#E8D596"),
-            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
             Content = new VerticalStackLayout
             {
                 Spacing = 5,
-                Children =
-                {
-                    new Label { Text = title, FontSize = 12, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#9A7417") },
-                    new Label { Text = value, FontSize = 16, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#2F2A1D"), LineBreakMode = LineBreakMode.WordWrap }
-                }
+                Children = { titleLabel, valueLabel }
             }
         };
+        border.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+        border.SetDynamicResource(Border.BackgroundColorProperty, "AppCardBackground");
+        return border;
     }
 
     private static string OnlyDigits(string value)

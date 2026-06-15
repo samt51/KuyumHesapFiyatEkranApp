@@ -6,7 +6,10 @@ public static class ThemePageStyler
 {
     public static void Apply(ContentPage page)
     {
-        page.BackgroundColor = ThemeColor("AppBackground", "#050505");
+        if (!page.IsSet(VisualElement.BackgroundColorProperty))
+        {
+            page.SetDynamicResource(VisualElement.BackgroundColorProperty, "AppBackground");
+        }
 
         if (page.Content is not null)
         {
@@ -19,7 +22,10 @@ public static class ThemePageStyler
         switch (element)
         {
             case ScrollView scrollView:
-                scrollView.BackgroundColor = ThemeColor("AppBackground", "#050505");
+                if (!scrollView.IsSet(VisualElement.BackgroundColorProperty))
+                {
+                    scrollView.SetDynamicResource(VisualElement.BackgroundColorProperty, "AppBackground");
+                }
                 if (scrollView.Content is not null)
                 {
                     ApplyTo(scrollView.Content);
@@ -27,8 +33,14 @@ public static class ThemePageStyler
                 break;
 
             case Border border:
-                border.Stroke = ThemeColor("AppBorder", "#D4AF37");
-                border.BackgroundColor = ThemeColor("AppCardBackground", "#101010");
+                if (!border.IsSet(Border.StrokeProperty))
+                {
+                    border.SetDynamicResource(Border.StrokeProperty, "AppBorder");
+                }
+                if (!border.IsSet(Border.BackgroundColorProperty))
+                {
+                    border.SetDynamicResource(Border.BackgroundColorProperty, "AppCardBackground");
+                }
                 border.StrokeShape ??= new RoundRectangle { CornerRadius = 8 };
                 if (border.Content is not null)
                 {
@@ -37,34 +49,58 @@ public static class ThemePageStyler
                 break;
 
             case Label label:
-                if (label.TextColor == Microsoft.Maui.Graphics.Color.FromArgb("#D84555") || label.TextColor == Microsoft.Maui.Graphics.Color.FromArgb("#E34F61"))
+                if (!label.IsSet(Label.TextColorProperty))
                 {
-                    label.TextColor = ThemeColor("AppNegative", "#E34F61");
-                }
-                else
-                {
-                    label.TextColor = label.FontSize <= 13
-                        ? ThemeColor("AppTextMuted", "#A8872B")
-                        : ThemeColor("AppTextPrimary", "#F1D16A");
+                    if (label.TextColor == Microsoft.Maui.Graphics.Color.FromArgb("#D84555") || label.TextColor == Microsoft.Maui.Graphics.Color.FromArgb("#E34F61"))
+                    {
+                        label.SetDynamicResource(Label.TextColorProperty, "AppNegative");
+                    }
+                    else
+                    {
+                        label.SetDynamicResource(
+                            Label.TextColorProperty,
+                            label.FontSize <= 13 ? "AppTextMuted" : "AppTextPrimary");
+                    }
                 }
                 break;
 
             case Button button:
-                button.BackgroundColor = ThemeColor("AppAccent", "#D4AF37");
-                button.TextColor = ThemeColor("AppHeaderText", "#111111");
-                button.BorderColor = ThemeColor("AppBorder", "#7E6421");
+                if (!button.IsSet(VisualElement.BackgroundColorProperty))
+                {
+                    button.SetDynamicResource(VisualElement.BackgroundColorProperty, "AppAccent");
+                }
+                if (!button.IsSet(Button.TextColorProperty))
+                {
+                    button.SetDynamicResource(Button.TextColorProperty, "AppHeaderText");
+                }
+                if (!button.IsSet(Button.BorderColorProperty))
+                {
+                    button.SetDynamicResource(Button.BorderColorProperty, "AppBorder");
+                }
                 break;
 
             case Entry entry:
                 entry.BackgroundColor = Colors.Transparent;
-                entry.TextColor = ThemeColor("AppTextPrimary", "#F1D16A");
-                entry.PlaceholderColor = ThemeColor("AppTextMuted", "#A8872B");
+                if (!entry.IsSet(Entry.TextColorProperty))
+                {
+                    entry.SetDynamicResource(Entry.TextColorProperty, "AppTextPrimary");
+                }
+                if (!entry.IsSet(Entry.PlaceholderColorProperty))
+                {
+                    entry.SetDynamicResource(Entry.PlaceholderColorProperty, "AppTextMuted");
+                }
                 break;
 
             case Picker picker:
                 picker.BackgroundColor = Colors.Transparent;
-                picker.TextColor = ThemeColor("AppTextPrimary", "#F1D16A");
-                picker.TitleColor = ThemeColor("AppTextMuted", "#A8872B");
+                if (!picker.IsSet(Picker.TextColorProperty))
+                {
+                    picker.SetDynamicResource(Picker.TextColorProperty, "AppTextPrimary");
+                }
+                if (!picker.IsSet(Picker.TitleColorProperty))
+                {
+                    picker.SetDynamicResource(Picker.TitleColorProperty, "AppTextMuted");
+                }
                 break;
 
             case Layout layout:
@@ -82,10 +118,5 @@ public static class ThemePageStyler
                 ApplyTo(contentView.Content);
                 break;
         }
-    }
-
-    private static Color ThemeColor(string key, string fallback)
-    {
-        return AppThemeManager.GetColor(key, fallback);
     }
 }
