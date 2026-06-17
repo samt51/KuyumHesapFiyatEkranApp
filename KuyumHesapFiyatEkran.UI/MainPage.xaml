@@ -179,10 +179,35 @@
                           RowDefinitions="Auto"
                           RowSpacing="0">
                         <Grid x:Name="HeaderTopGrid"
-                              ColumnDefinitions="0,146,*,50"
+                              ColumnDefinitions="34,146,*,50"
                               ColumnSpacing="6"
                               HeightRequest="56"
                               VerticalOptions="Center">
+
+                            <Border x:Name="FlyoutMenuButton"
+                                    Grid.Column="0"
+                                    WidthRequest="34"
+                                    HeightRequest="34"
+                                    Padding="0"
+                                    Stroke="{DynamicResource AppBorder}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{DynamicResource AppCardBackground}"
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnFlyoutMenuButtonClicked" />
+                                </Border.GestureRecognizers>
+                                <Label Text="☰"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="{DynamicResource AppAccent}"
+                                       FontAutoScalingEnabled="False"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center" />
+                            </Border>
 
                             <HorizontalStackLayout Grid.Column="1"
                                                    Spacing="6"
@@ -294,9 +319,9 @@
                         Margin="12,4,12,6"
                         Padding="2"
                         HeightRequest="46"
-                        Stroke="#7E6421"
+                        Stroke="{DynamicResource AppBorder}"
                         StrokeThickness="1"
-                        BackgroundColor="#101010">
+                        BackgroundColor="{DynamicResource AppTickerCardBackground}">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="23" />
                     </Border.StrokeShape>

@@ -34,7 +34,7 @@ namespace KuyumHesapFiyatEkran.UI
             this.brandSettings = brandSettings;
             isSalihBrand = string.Equals(brandSettings.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase);
             ApplyBranding();
-            ApplyTheme(AppThemeManager.GetSavedTheme(), save: false);
+            ApplyTheme(AslanThemeMode.Light);
             ApplyBrandLayout();
             SalihHeaderArt.Drawable = isSalihBrand ? new SalihHeaderDrawable() : null;
             BindingContext = viewModel;
@@ -300,11 +300,11 @@ namespace KuyumHesapFiyatEkran.UI
             }
         }
 
-        private static HorizontalStackLayout CreateTickerItem(LiveRateItem item)
+        private HorizontalStackLayout CreateTickerItem(LiveRateItem item)
         {
             var percentColor = item.ChangePercent.TrimStart().StartsWith("-", StringComparison.Ordinal)
-                ? GetThemeColor("AppNegative", "#E34F61")
-                : GetThemeColor("AppPositive", "#26BF72");
+                ? GetPageThemeColor("AppNegative", "#E34F61")
+                : GetPageThemeColor("AppPositive", "#26BF72");
 
             var layout = new HorizontalStackLayout
             {
@@ -312,7 +312,7 @@ namespace KuyumHesapFiyatEkran.UI
                 VerticalOptions = LayoutOptions.Center
             };
 
-            var tickerTextColor = GetThemeColor("AppTickerText", "#F1D16A");
+            var tickerTextColor = GetPageThemeColor("AppTickerText", "#F1D16A");
 
             layout.Add(CreateTickerLabel(item.Name, tickerTextColor));
             layout.Add(CreateTickerLabel("ALIŞ:", tickerTextColor));
@@ -323,6 +323,13 @@ namespace KuyumHesapFiyatEkran.UI
             layout.Add(CreateTickerLabel("|", tickerTextColor));
 
             return layout;
+        }
+
+        private Color GetPageThemeColor(string key, string fallback)
+        {
+            return Resources.TryGetValue(key, out var value) && value is Color color
+                ? color
+                : GetThemeColor(key, fallback);
         }
 
         private async void OnThemeToggleTapped(object? sender, TappedEventArgs e)
@@ -371,6 +378,10 @@ namespace KuyumHesapFiyatEkran.UI
             if (isSalihBrand)
             {
                 ApplySalihThemeResources(mode);
+            }
+            else
+            {
+                ApplyAslanThemeResources(mode);
             }
 
             UpdateThemeSelector(mode);
@@ -554,6 +565,30 @@ namespace KuyumHesapFiyatEkran.UI
             TickerSegment.Padding = new Thickness(10, 8);
             TickerSegment.Background = CreateVerticalGradient("#101010", "#080808");
             SalihThemeToggle.Shadow = CreateSoftGoldShadow();
+        }
+
+        private void ApplyAslanThemeResources(AslanThemeMode mode)
+        {
+            var isLight = mode == AslanThemeMode.Light;
+
+            if (isLight)
+            {
+                Resources["RateNameText"] = Color.FromArgb("#2F2A1D");
+                Resources["RatePriceText"] = Color.FromArgb("#2F2A1D");
+                Resources["RateDivider"] = Color.FromRgba(212, 175, 55, 0.10f);
+                Resources["AppTextInactive"] = Color.FromArgb("#A8872B");
+                Resources["AppTickerText"] = Color.FromArgb("#2F2A1D");
+            }
+            else
+            {
+                Resources["RateNameText"] = Color.FromArgb("#F1D16A");
+                Resources["RatePriceText"] = Color.FromArgb("#F1D16A");
+                Resources["RateDivider"] = Color.FromRgba(212, 175, 55, 0.24f);
+                Resources["AppTextInactive"] = Color.FromArgb("#C9A237");
+                Resources["AppTickerText"] = Color.FromArgb("#F1D16A");
+            }
+
+            RootLayout.BackgroundColor = (Color)Resources["AppBackground"];
         }
 
         private void ApplySalihThemeResources(AslanThemeMode mode)

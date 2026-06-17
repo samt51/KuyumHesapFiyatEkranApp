@@ -101,8 +101,8 @@ namespace KuyumHesapFiyatEkran.UI
 
         public static AslanThemeMode GetSavedTheme()
         {
-            var value = Preferences.Get(PreferenceKey, AslanThemeMode.Dark.ToString());
-            return Enum.TryParse<AslanThemeMode>(value, out var mode) ? mode : AslanThemeMode.Dark;
+            var value = Preferences.Get(PreferenceKey, AslanThemeMode.Light.ToString());
+            return Enum.TryParse<AslanThemeMode>(value, out var mode) ? mode : AslanThemeMode.Light;
         }
 
         public static void Apply(AslanThemeMode mode, ResourceDictionary? pageResources = null, bool save = true)

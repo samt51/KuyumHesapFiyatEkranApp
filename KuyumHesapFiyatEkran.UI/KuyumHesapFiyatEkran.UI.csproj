@@ -29,8 +29,8 @@
 		<ApplicationId>com.aslankuyumculuk.kuyumhesap</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0.1</ApplicationDisplayVersion>
-		<ApplicationVersion>4</ApplicationVersion>
+		<ApplicationDisplayVersion>1.0.2</ApplicationDisplayVersion>
+		<ApplicationVersion>6</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">12.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
@@ -42,13 +42,17 @@
 
 	<PropertyGroup Condition="'$(Brand)' == 'SalihCetinkaya'">
 		<ApplicationTitle>Salih Çetinkaya Kuyumcu</ApplicationTitle>
-		<ApplicationId>com.salihcetinkaya.kuyumhesap</ApplicationId>
+		<ApplicationId>com.salihcetinkaya.kuyumculuk</ApplicationId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
 		<AndroidEnableFastDeployment>false</AndroidEnableFastDeployment>
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<MauiIcon Remove="Resources\AppIcon\**\*" />
+	</ItemGroup>
 
 	<ItemGroup Condition="'$(Brand)' == 'SalihCetinkaya'">
 		<!-- App Icon for Salih Cetinkaya -->

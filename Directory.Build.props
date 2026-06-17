@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'KuyumHesapFiyatEkran.UI'">
+    <Brand Condition="'$(Brand)' == ''">Aslan</Brand>
+    <BaseIntermediateOutputPath>obj\$(Brand)\</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin\$(Brand)\</BaseOutputPath>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj\**;bin\**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

@@ -9,7 +9,7 @@ namespace KuyumHesapFiyatEkran.UI
         public App(AppShell appShell)
         {
             InitializeComponent();
-            AppThemeManager.Apply(AppThemeManager.GetSavedTheme(), Resources, save: false);
+            AppThemeManager.Apply(AslanThemeMode.Light, Resources);
             MainPage = appShell;
         }
 
