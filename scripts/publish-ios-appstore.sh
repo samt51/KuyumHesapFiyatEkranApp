@@ -5,6 +5,7 @@ PROJECT="KuyumHesapFiyatEkran.UI/KuyumHesapFiyatEkran.UI.csproj"
 FRAMEWORK="net9.0-ios"
 CONFIGURATION="Release"
 RUNTIME="ios-arm64"
+BRAND="${BRAND:-SalihCetinkaya}"
 
 if [[ -z "${CODESIGN_KEY:-}" ]]; then
   echo "CODESIGN_KEY is required. Example: Apple Distribution: Company Name (TEAMID)"
@@ -16,10 +17,14 @@ if [[ -z "${CODESIGN_PROVISION:-}" ]]; then
   exit 1
 fi
 
-dotnet workload restore "$PROJECT"
+if [[ "${RUN_WORKLOAD_RESTORE:-0}" == "1" ]]; then
+  dotnet workload restore "$PROJECT"
+fi
+
 dotnet publish "$PROJECT" \
   -f "$FRAMEWORK" \
   -c "$CONFIGURATION" \
+  -p:Brand="$BRAND" \
   -p:RuntimeIdentifier="$RUNTIME" \
   -p:ArchiveOnBuild=true \
   -p:CodesignKey="$CODESIGN_KEY" \

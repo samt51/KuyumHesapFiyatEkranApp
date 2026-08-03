@@ -13,7 +13,15 @@ sudo dotnet workload install maui
 dotnet workload update
 ```
 
-4. In Apple Developer, create an iOS App Store provisioning profile for:
+4. In Apple Developer, create an iOS App Store provisioning profile for the target bundle id.
+
+Salih Çetinkaya Kuyumcu:
+
+```text
+com.salihcetinkaya.kuyumculuk
+```
+
+Aslan Kuyumculuk:
 
 ```text
 com.aslankuyumculuk.kuyumhesap
@@ -28,6 +36,7 @@ From the repository root on the Mac:
 ```bash
 export CODESIGN_KEY="Apple Distribution: Company Name (TEAMID)"
 export CODESIGN_PROVISION="Provisioning Profile Name"
+export BRAND="SalihCetinkaya"
 bash scripts/publish-ios-appstore.sh
 ```
 

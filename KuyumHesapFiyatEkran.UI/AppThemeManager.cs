@@ -98,6 +98,50 @@ namespace KuyumHesapFiyatEkran.UI
             ["AppTickerText"] = Color.FromArgb("#D4AF37"),
             ["AppLoadingBackground"] = Color.FromArgb("#070707")
         };
+        
+private static readonly IReadOnlyDictionary<string, Color> MazlumLightColors =
+    new Dictionary<string, Color>
+    {
+        ["AppBackground"] = Color.FromArgb("#F8F3EE"),
+        ["AppCardBackground"] = Color.FromArgb("#FFFDFC"),
+        ["AppPanelBackground"] = Color.FromArgb("#F3E8E2"),
+        ["AppAlternateRowBackground"] = Color.FromArgb("#F6ECE7"),
+        ["AppBorder"] = Color.FromArgb("#D7BFA9"),
+        ["AppAccent"] = Color.FromArgb("#6D1F2F"),
+        ["AppTextPrimary"] = Color.FromArgb("#2C2022"),
+        ["AppTextMuted"] = Color.FromArgb("#725E62"),
+        ["AppTextInactive"] = Color.FromArgb("#9A7B81"),
+        ["AppBrandText"] = Color.FromArgb("#48121E"),
+        ["AppHeaderText"] = Color.FromArgb("#FFFFFF"),
+        ["AppPositive"] = Color.FromArgb("#1FA463"),
+        ["AppNegative"] = Color.FromArgb("#D84555"),
+        ["AppTickerBackground"] = Color.FromArgb("#F8F3EE"),
+        ["AppTickerCardBackground"] = Color.FromArgb("#FFFDFC"),
+        ["AppTickerText"] = Color.FromArgb("#48121E"),
+        ["AppLoadingBackground"] = Color.FromArgb("#F8F3EE")
+    };
+
+private static readonly IReadOnlyDictionary<string, Color> MazlumDarkColors =
+    new Dictionary<string, Color>
+    {
+        ["AppBackground"] = Color.FromArgb("#160B0E"),
+        ["AppCardBackground"] = Color.FromArgb("#241116"),
+        ["AppPanelBackground"] = Color.FromArgb("#1C0D11"),
+        ["AppAlternateRowBackground"] = Color.FromArgb("#2B171C"),
+        ["AppBorder"] = Color.FromArgb("#7B4E58"),
+        ["AppAccent"] = Color.FromArgb("#C79A73"),
+        ["AppTextPrimary"] = Color.FromArgb("#FFF4ED"),
+        ["AppTextMuted"] = Color.FromArgb("#C8AEB4"),
+        ["AppTextInactive"] = Color.FromArgb("#A88189"),
+        ["AppBrandText"] = Color.FromArgb("#E3B892"),
+        ["AppHeaderText"] = Color.FromArgb("#160B0E"),
+        ["AppPositive"] = Color.FromArgb("#31C278"),
+        ["AppNegative"] = Color.FromArgb("#FF6673"),
+        ["AppTickerBackground"] = Color.FromArgb("#160B0E"),
+        ["AppTickerCardBackground"] = Color.FromArgb("#241116"),
+        ["AppTickerText"] = Color.FromArgb("#E3B892"),
+        ["AppLoadingBackground"] = Color.FromArgb("#160B0E")
+    };
 
         public static AslanThemeMode GetSavedTheme()
         {
@@ -131,12 +175,35 @@ namespace KuyumHesapFiyatEkran.UI
 
         private static IReadOnlyDictionary<string, Color> GetColors(AslanThemeMode mode)
         {
-            bool isSalih = string.Equals(BusinessInfo.Current.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase);
+            var brandKey = BusinessInfo.Current.Key;
+
+            bool isSalih = string.Equals(
+                brandKey,
+                "SalihCetinkaya",
+                StringComparison.OrdinalIgnoreCase);
+
+            bool isMazlum = string.Equals(
+                brandKey,
+                "Mazlum",
+                StringComparison.OrdinalIgnoreCase);
+
+            if (isMazlum)
+            {
+                return mode == AslanThemeMode.Dark
+                    ? MazlumDarkColors
+                    : MazlumLightColors;
+            }
+
             if (isSalih)
             {
-                return mode == AslanThemeMode.Dark ? SalihDarkColors : SalihLightColors;
+                return mode == AslanThemeMode.Dark
+                    ? SalihDarkColors
+                    : SalihLightColors;
             }
-            return mode == AslanThemeMode.Dark ? AslanDarkColors : AslanLightColors;
+
+            return mode == AslanThemeMode.Dark
+                ? AslanDarkColors
+                : AslanLightColors;
         }
 
         private static void ApplyTo(ResourceDictionary? resources, IReadOnlyDictionary<string, Color> colors)

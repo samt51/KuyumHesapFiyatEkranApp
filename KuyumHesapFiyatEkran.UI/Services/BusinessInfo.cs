@@ -14,6 +14,8 @@ public static class BusinessInfo
 
     public static string Address => current.Address;
 
+    public static string MapUrl => current.MapUrl;
+
     public static string Website => current.Website;
 
     public static string WorkingHours => current.WorkingHours;

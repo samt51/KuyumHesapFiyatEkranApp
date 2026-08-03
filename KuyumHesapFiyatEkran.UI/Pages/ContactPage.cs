@@ -16,9 +16,9 @@ public sealed class ContactPage : ContentPage
         Title = "İletişim";
         SetDynamicResource(BackgroundColorProperty, "AppBackground");
 
-        callAction = CreateActionTile("Ara", "phone_icon.png", async () => await OpenOrWarn(string.IsNullOrWhiteSpace(BusinessInfo.Phone) ? null : $"tel:{OnlyDigits(BusinessInfo.Phone)}", "Telefon bilgisi henüz tanımlı değil."));
+        callAction = CreateActionTile("Ara", "phone_icon.png", OpenPhoneOrWarn);
         whatsAppAction = CreateActionTile("WhatsApp'tan Yaz", "whatsapp_icon.png", async () => await OpenOrWarn(string.IsNullOrWhiteSpace(BusinessInfo.WhatsApp) ? null : $"https://wa.me/{OnlyDigits(BusinessInfo.WhatsApp)}", "WhatsApp bilgisi henüz tanımlı değil."));
-        directionsAction = CreateActionTile("Yol Tarifi Al", "directions_icon.png", async () => await OpenOrWarn(string.IsNullOrWhiteSpace(BusinessInfo.Address) ? null : $"https://maps.apple.com/?q={Uri.EscapeDataString(BusinessInfo.Address)}", "Adres bilgisi henüz tanımlı değil."));
+        directionsAction = CreateActionTile("Yol Tarifi Al", "directions_icon.png", OpenDirectionsOrWarn);
         websiteAction = CreateActionTile("Web Sitesini Aç", "web_icon.png", async () => await OpenOrWarn(BusinessInfo.Website, "Web sitesi açılamadı."));
 
         var contactContent = CreateContactLayout();
@@ -276,6 +276,50 @@ public sealed class ContactPage : ContentPage
         }
     }
 
+    private async Task OpenPhoneOrWarn()
+    {
+        if (string.IsNullOrWhiteSpace(BusinessInfo.Phone))
+        {
+            await DisplayAlert("Bilgi", "Telefon bilgisi henüz tanımlı değil.", "Tamam");
+            return;
+        }
+
+        var phoneUri = $"tel:{OnlyDigits(BusinessInfo.Phone)}";
+        try
+        {
+            if (!await Launcher.Default.TryOpenAsync(phoneUri))
+            {
+                await DisplayAlert("Bilgi", $"Arama başlatılamadı. Telefon: {BusinessInfo.Phone}", "Tamam");
+            }
+        }
+        catch
+        {
+            await DisplayAlert("Bilgi", $"Arama başlatılamadı. Telefon: {BusinessInfo.Phone}", "Tamam");
+        }
+    }
+
+    private async Task OpenDirectionsOrWarn()
+    {
+        const string message = "Adres bilgisi henüz tanımlı değil.";
+
+        try
+        {
+            foreach (var uri in GetDirectionsUris())
+            {
+                if (await Launcher.Default.TryOpenAsync(uri))
+                {
+                    return;
+                }
+            }
+
+            await DisplayAlert("Bilgi", message, "Tamam");
+        }
+        catch
+        {
+            await DisplayAlert("Bilgi", message, "Tamam");
+        }
+    }
+
     private static Border CreateInfo(string title, string value)
     {
         var titleLabel = new Label { Text = title, FontSize = 12, FontAttributes = FontAttributes.Bold };
@@ -302,6 +346,32 @@ public sealed class ContactPage : ContentPage
     private static string OnlyDigits(string value)
     {
         return new string(value.Where(char.IsDigit).ToArray());
+    }
+
+    private static IEnumerable<string> GetDirectionsUris()
+    {
+        if (string.Equals(BusinessInfo.Current.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase))
+        {
+            const string salihCetinkayaCoordinates = "36.8243844,34.6478696";
+
+#if IOS
+            yield return $"comgooglemaps://?daddr={salihCetinkayaCoordinates}&directionsmode=driving";
+            yield return $"https://maps.apple.com/?daddr={salihCetinkayaCoordinates}&dirflg=d";
+#elif ANDROID
+            yield return $"google.navigation:q={salihCetinkayaCoordinates}";
+            yield return $"geo:0,0?q={salihCetinkayaCoordinates}(Salih%20%C3%87etinkaya%20Kuyumculuk)";
+#endif
+        }
+
+        if (!string.IsNullOrWhiteSpace(BusinessInfo.Address))
+        {
+            yield return $"https://maps.apple.com/?q={Uri.EscapeDataString(BusinessInfo.Address)}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(BusinessInfo.MapUrl))
+        {
+            yield return BusinessInfo.MapUrl;
+        }
     }
 
     private sealed record ActionTile(Border View, Label Label, Image Icon);

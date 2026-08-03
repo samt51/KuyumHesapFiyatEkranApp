@@ -30,7 +30,7 @@
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0.2</ApplicationDisplayVersion>
-		<ApplicationVersion>6</ApplicationVersion>
+		<ApplicationVersion>7</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">12.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
@@ -43,8 +43,17 @@
 	<PropertyGroup Condition="'$(Brand)' == 'SalihCetinkaya'">
 		<ApplicationTitle>Salih Çetinkaya Kuyumcu</ApplicationTitle>
 		<ApplicationId>com.salihcetinkaya.kuyumculuk</ApplicationId>
+		<ApplicationDisplayVersion>1.0.3</ApplicationDisplayVersion>
+		<ApplicationVersion>9</ApplicationVersion>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Brand)' == 'MazlumKuyumculuk'">
+		<ApplicationTitle>Mazlum Kuyumculuk</ApplicationTitle>
+		<ApplicationId>com.mazlumkuyumculuk.kuyumhesap</ApplicationId>
+		<ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+	</PropertyGroup>
+	
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
 		<AndroidEnableFastDeployment>false</AndroidEnableFastDeployment>
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
@@ -61,11 +70,28 @@
 		<MauiSplashScreen Include="Resources\Splash\SalihCetinkaya\splash.png" Color="#050505" BaseSize="180,180" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(Brand)' != 'SalihCetinkaya'">
+	<ItemGroup Condition="'$(Brand)' == 'MazlumKuyumculuk'">
+		<MauiIcon
+				Include="Resources\AppIcon\MazlumKuyumculuk\appicon.png"
+				BaseSize="1024,1024"
+				Color="#050505" />
+
+		<MauiSplashScreen
+				Include="Resources\Splash\splash.png"
+				Color="#050505"
+				BaseSize="180,180" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Brand)' == 'Aslan'">
 		<!-- App Icon for Aslan -->
-		<MauiIcon Include="Resources\AppIcon\Aslan\appicon.svg" ForegroundFile="Resources\AppIcon\Aslan\appiconfg.png" Color="#050505" />
+		<MauiIcon Include="Resources\AppIcon\Aslan\appicon.svg"
+		          ForegroundFile="Resources\AppIcon\Aslan\appiconfg.png"
+		          Color="#050505" />
+
 		<!-- Splash Screen for Aslan -->
-		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#050505" BaseSize="180,180" />
+		<MauiSplashScreen Include="Resources\Splash\splash.png"
+		                  Color="#050505"
+		                  BaseSize="180,180" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -96,6 +122,11 @@
 		<EmbeddedResource Include="appsettings.json" />
 		<EmbeddedResource Include="appsettings.Production.json" />
 		<EmbeddedResource Include="Brands\$(Brand)\appsettings.json" LogicalName="KuyumHesapFiyatEkran.UI.appsettings.Brand.json" />
+
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Resources\AppIcon\MazlumKuyumculuk\" />
 	</ItemGroup>
 
 </Project>

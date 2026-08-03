@@ -24,6 +24,8 @@ public sealed class BrandSettings
 
     public string Address { get; set; } = string.Empty;
 
+    public string MapUrl { get; set; } = string.Empty;
+
     public string Website { get; set; } = string.Empty;
 
     public string WorkingHours { get; set; } = string.Empty;
