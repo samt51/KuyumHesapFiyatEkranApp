@@ -7,6 +7,7 @@ namespace KuyumHesapFiyatEkran.UI
     {
         public AppShell(
             MainPage mainPage,
+            SalihHomePage salihHomePage,
             GoldCalculatorPage goldCalculatorPage,
             FavoritesPage favoritesPage,
             ContactPage contactPage,
@@ -15,11 +16,17 @@ namespace KuyumHesapFiyatEkran.UI
         {
             InitializeComponent();
             ApplyBranding(brandSettings);
+            DashboardContent.Content = salihHomePage;
             HomeContent.Content = mainPage;
             GoldCalculatorContent.Content = goldCalculatorPage;
             FavoritesContent.Content = favoritesPage;
             ContactContent.Content = contactPage;
             AboutContent.Content = aboutPage;
+
+            if (!string.Equals(brandSettings.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase))
+            {
+                Items.Remove(DashboardContent);
+            }
         }
 
         private void ApplyBranding(BrandSettings brandSettings)

@@ -2,6 +2,7 @@ using System.ComponentModel;
 using KuyumHesapFiyatEkran.Core.Features.LiveRates.Queries.GetLiveRates;
 using KuyumHesapFiyatEkran.UI.Services;
 using KuyumHesapFiyatEkran.UI.ViewModels;
+using KuyumHesapFiyatEkran.UI.Views;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace KuyumHesapFiyatEkran.UI
@@ -33,8 +34,12 @@ namespace KuyumHesapFiyatEkran.UI
             this.viewModel = viewModel;
             this.brandSettings = brandSettings;
             isSalihBrand = string.Equals(brandSettings.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase);
+            Resources["ShowRateUpdateTime"] = isSalihBrand;
+            Resources["ShowRateProductIcon"] = !isSalihBrand;
+            Resources["RateProductNameColumn"] = isSalihBrand ? 1 : 2;
+            Resources["RateProductNameColumnSpan"] = isSalihBrand ? 2 : 1;
             ApplyBranding();
-            ApplyTheme(AslanThemeMode.Light);
+            ApplyTheme(AppThemeManager.GetEffectiveTheme(), false);
             ApplyBrandLayout();
             SalihHeaderArt.Drawable = isSalihBrand ? new SalihHeaderDrawable() : null;
             BindingContext = viewModel;
@@ -42,6 +47,7 @@ namespace KuyumHesapFiyatEkran.UI
             UpdateCategoryTabs();
             App.AppSleeping += OnAppSleeping;
             App.AppResumed += OnAppResumed;
+            AppThemeManager.ThemeChanged += OnGlobalThemeChanged;
         }
 
         protected override async void OnAppearing()
@@ -83,6 +89,7 @@ namespace KuyumHesapFiyatEkran.UI
             viewModel.PropertyChanged -= OnViewModelPropertyChanged;
             App.AppSleeping -= OnAppSleeping;
             App.AppResumed -= OnAppResumed;
+            AppThemeManager.ThemeChanged -= OnGlobalThemeChanged;
             refreshCancellationTokenSource?.Dispose();
         }
 
@@ -302,9 +309,11 @@ namespace KuyumHesapFiyatEkran.UI
 
         private HorizontalStackLayout CreateTickerItem(LiveRateItem item)
         {
-            var percentColor = item.ChangePercent.TrimStart().StartsWith("-", StringComparison.Ordinal)
+            var percentColor = item.HasNegativeChange
                 ? GetPageThemeColor("AppNegative", "#E34F61")
-                : GetPageThemeColor("AppPositive", "#26BF72");
+                : item.HasPositiveChange
+                    ? GetPageThemeColor("AppPositive", "#26BF72")
+                    : GetPageThemeColor("AppTickerText", "#F1D16A");
 
             var layout = new HorizontalStackLayout
             {
@@ -317,7 +326,7 @@ namespace KuyumHesapFiyatEkran.UI
             layout.Add(CreateTickerLabel(item.Name, tickerTextColor));
             layout.Add(CreateTickerLabel("ALIŞ:", tickerTextColor));
             layout.Add(CreateTickerLabel(item.Buy, tickerTextColor));
-            layout.Add(CreateTickerLabel(item.ChangePercent, percentColor));
+            layout.Add(CreateTickerLabel(item.ChangeDisplay, percentColor));
             layout.Add(CreateTickerLabel("SATIŞ:", tickerTextColor));
             layout.Add(CreateTickerLabel(item.Sell, tickerTextColor));
             layout.Add(CreateTickerLabel("|", tickerTextColor));
@@ -372,6 +381,11 @@ namespace KuyumHesapFiyatEkran.UI
             }
         }
 
+        private async void OnSalihPriceBackTapped(object? sender, TappedEventArgs e)
+        {
+            await SalihUi.GoBackAsync();
+        }
+
         private void ApplyTheme(AslanThemeMode mode, bool save = true)
         {
             AppThemeManager.Apply(mode, Resources, save);
@@ -389,6 +403,22 @@ namespace KuyumHesapFiyatEkran.UI
             BuildTickerSegments();
             UpdateTickerWidth();
             UpdateCategoryTabs();
+        }
+
+        private void OnGlobalThemeChanged(object? sender, AslanThemeMode mode)
+        {
+            if (!isSalihBrand || disposed)
+            {
+                return;
+            }
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ApplySalihThemeResources(mode);
+                UpdateThemeSelector(mode);
+                UpdateCategoryTabs();
+                RefreshRateRows();
+            });
         }
 
         private void UpdateCategoryTabs()
@@ -475,7 +505,7 @@ namespace KuyumHesapFiyatEkran.UI
             ApplyBrandTextSizing(isLandscape);
             ThemeToggle.WidthRequest = isLandscape ? 38 : 42;
             ThemeToggle.HeightRequest = isLandscape ? 38 : 42;
-            ThemeToggleIcon.FontSize = isLandscape ? 21 : 23;
+            ThemeToggleIcon.Size = isLandscape ? 21 : 23;
             CategoryTabs.HeightRequest = isLandscape ? 30 : 34;
             TableHeader.Padding = isLandscape ? new Thickness(10, 6) : new Thickness(10, 10);
             TickerViewport.HeightRequest = isLandscape ? 38 : 54;
@@ -530,13 +560,23 @@ namespace KuyumHesapFiyatEkran.UI
             SalihHeaderCard.IsVisible = false;
             HeaderCard.IsVisible = true;
 
-            var bottomBar = new Views.BottomNavigationBar(0);
-            SalihBottomNavigationContainer.Children.Clear();
-            SalihBottomNavigationContainer.Children.Add(bottomBar);
-            SalihBottomNavigationContainer.IsVisible = true;
-            ThemeToggle.IsVisible = true;
+            FlyoutMenuButton.IsVisible = false;
+            FlyoutMenuButton.InputTransparent = true;
+            BrandLogoFrame.IsVisible = false;
+            BrandTextStack.IsVisible = false;
+            LastUpdateContainer.IsVisible = false;
+            ThemeToggle.IsVisible = false;
+            SalihPriceBackLabel.IsVisible = true;
+            SalihPriceTitleLabel.IsVisible = true;
+            SalihPriceRefreshLabel.IsVisible = true;
+            HeaderCard.StrokeThickness = 0;
+            var dark = AppThemeManager.GetEffectiveTheme() == AslanThemeMode.Dark;
+            HeaderCard.BackgroundColor = dark ? Color.FromArgb("#071522") : Color.FromArgb("#FAF7EF");
+            HeaderCard.StrokeShape = new RoundRectangle { CornerRadius = 0 };
+
+            RebuildSalihBottomNavigation();
             ContentGrid.RowSpacing = 0;
-            CategoryTabs.Margin = new Thickness(12, 4, 12, 6);
+            CategoryTabs.Margin = new Thickness(14, 8, 14, 14);
 
             // Remove the redundant initial loading overlay for Salih brand
             LoadingOverlay.IsVisible = false;
@@ -546,20 +586,22 @@ namespace KuyumHesapFiyatEkran.UI
             MadenTabIcon.IsVisible = true;
             DovizTabIcon.IsVisible = true;
 
-            SarrafiyeTabLabel.Text = "SARRAFİYE";
-            MadenTabLabel.Text = "MADEN";
+            SarrafiyeTabLabel.Text = "Altın";
+            MadenTabLabel.Text = "Gümüş";
             DovizTabLabel.Text = "DÖVİZ";
-            SarrafiyeTabLabel.FontSize = 14;
-            MadenTabLabel.FontSize = 14;
-            DovizTabLabel.FontSize = 14;
+            SarrafiyeTabLabel.FontSize = 12;
+            MadenTabLabel.FontSize = 12;
+            DovizTabLabel.FontSize = 12;
             TableCategoryHeaderLabel.Text = "Ürün";
             TableBuyHeaderLabel.Text = "Alış";
             TableSellHeaderLabel.Text = "Satış";
             TableCategoryHeaderLabel.FontSize = 15;
             TableBuyHeaderLabel.FontSize = 15;
             TableSellHeaderLabel.FontSize = 15;
-            RatesTableBorder.StrokeShape = new RoundRectangle { CornerRadius = 14 };
-            RatesTableBorder.Margin = new Thickness(12, 0, 12, 0);
+            RatesTableBorder.StrokeShape = new RoundRectangle { CornerRadius = 18 };
+            RatesTableBorder.StrokeThickness = 1;
+            RatesTableBorder.Margin = new Thickness(14, 0, 14, 10);
+            TickerViewport.IsVisible = false;
             TickerViewport.Margin = new Thickness(12, 6, 12, 4);
             TickerSegment.StrokeShape = new RoundRectangle { CornerRadius = 14 };
             TickerSegment.Padding = new Thickness(10, 8);
@@ -597,34 +639,34 @@ namespace KuyumHesapFiyatEkran.UI
 
             if (isLight)
             {
-                Resources["AppBackground"] = Color.FromArgb("#FAF6EA");
+                Resources["AppBackground"] = Color.FromArgb("#FAF7EF");
                 Resources["AppCardBackground"] = Color.FromArgb("#FFFFFF");
-                Resources["AppPanelBackground"] = Color.FromArgb("#F6EEDC");
-                Resources["AppAlternateRowBackground"] = Color.FromArgb("#F9F4E6");
-                Resources["AppBorder"] = Color.FromArgb("#C5A028");
-                Resources["AppAccent"] = Color.FromArgb("#9A7417");
-                Resources["AppTextPrimary"] = Color.FromArgb("#2F2A1D");
-                Resources["AppTextMuted"] = Color.FromArgb("#A8872B");
-                Resources["AppTextInactive"] = Color.FromArgb("#8B6D20");
-                Resources["AppBrandText"] = Color.FromArgb("#231F20");
-                Resources["AppHeaderText"] = Color.FromArgb("#FAF6EA");
+                Resources["AppPanelBackground"] = Color.FromArgb("#FFFFFF");
+                Resources["AppAlternateRowBackground"] = Color.FromArgb("#FFFFFF");
+                Resources["AppBorder"] = Color.FromArgb("#ECE4D6");
+                Resources["AppAccent"] = Color.FromArgb("#D5A52B");
+                Resources["AppTextPrimary"] = Color.FromArgb("#17202B");
+                Resources["AppTextMuted"] = Color.FromArgb("#686868");
+                Resources["AppTextInactive"] = Color.FromArgb("#333333");
+                Resources["AppBrandText"] = Color.FromArgb("#17202B");
+                Resources["AppHeaderText"] = Color.FromArgb("#686868");
                 Resources["AppPositive"] = Color.FromArgb("#1FA463");
                 Resources["AppNegative"] = Color.FromArgb("#D84555");
-                Resources["AppTickerBackground"] = Color.FromArgb("#FAF6EA");
+                Resources["AppTickerBackground"] = Color.FromArgb("#FFFFFF");
                 Resources["AppTickerCardBackground"] = Color.FromArgb("#FFFFFF");
                 Resources["AppTickerText"] = Color.FromArgb("#2F2A1D");
-                Resources["AppLoadingBackground"] = Color.FromArgb("#FAF6EA");
-                Resources["RateNameText"] = Color.FromArgb("#2F2A1D");
-                Resources["RatePriceText"] = Color.FromArgb("#2F2A1D");
-                Resources["RateDivider"] = Color.FromRgba(197, 160, 40, 0.22f);
+                Resources["AppLoadingBackground"] = Color.FromArgb("#FAF7EF");
+                Resources["RateNameText"] = Color.FromArgb("#171717");
+                Resources["RatePriceText"] = Color.FromArgb("#171717");
+                Resources["RateDivider"] = Color.FromArgb("#F0ECE4");
             }
             else
             {
-                Resources["AppBackground"] = Color.FromArgb("#070707");
-                Resources["AppCardBackground"] = Color.FromArgb("#121212");
-                Resources["AppPanelBackground"] = Color.FromArgb("#0D0D0D");
-                Resources["AppAlternateRowBackground"] = Color.FromArgb("#141414");
-                Resources["AppBorder"] = Color.FromArgb("#3A2C0E");
+                Resources["AppBackground"] = Color.FromArgb("#071522");
+                Resources["AppCardBackground"] = Color.FromArgb("#10243A");
+                Resources["AppPanelBackground"] = Color.FromArgb("#10243A");
+                Resources["AppAlternateRowBackground"] = Color.FromArgb("#10243A");
+                Resources["AppBorder"] = Color.FromArgb("#30465B");
                 Resources["AppAccent"] = Color.FromArgb("#D4AF37");
                 Resources["AppTextPrimary"] = Color.FromArgb("#FFFFFF");
                 Resources["AppTextMuted"] = Color.FromArgb("#8A8A8A");
@@ -633,28 +675,44 @@ namespace KuyumHesapFiyatEkran.UI
                 Resources["AppHeaderText"] = Color.FromArgb("#FFFFFF");
                 Resources["AppPositive"] = Color.FromArgb("#31C278");
                 Resources["AppNegative"] = Color.FromArgb("#FF4F5E");
-                Resources["AppTickerBackground"] = Color.FromArgb("#070707");
-                Resources["AppTickerCardBackground"] = Color.FromArgb("#121212");
+                Resources["AppTickerBackground"] = Color.FromArgb("#071522");
+                Resources["AppTickerCardBackground"] = Color.FromArgb("#10243A");
                 Resources["AppTickerText"] = Color.FromArgb("#D4AF37");
-                Resources["AppLoadingBackground"] = Color.FromArgb("#070707");
+                Resources["AppLoadingBackground"] = Color.FromArgb("#071522");
                 Resources["RateNameText"] = Color.FromArgb("#FFFFFF");
                 Resources["RatePriceText"] = Color.FromArgb("#D4AF37");
-                Resources["RateDivider"] = Color.FromArgb("#1F180C");
+                Resources["RateDivider"] = Color.FromArgb("#30465B");
             }
 
             RootLayout.BackgroundColor = (Color)Resources["AppBackground"];
+            RebuildSalihBottomNavigation();
+        }
+
+        private void RebuildSalihBottomNavigation()
+        {
+            if (!isSalihBrand || SalihBottomNavigationContainer is null)
+            {
+                return;
+            }
+
+            var dark = AppThemeManager.GetEffectiveTheme() == AslanThemeMode.Dark;
+            SalihBottomNavigationContainer.BackgroundColor = dark ? Color.FromArgb("#0C1D2B") : Colors.White;
+            var bottomBar = new Views.BottomNavigationBar(1);
+            SalihBottomNavigationContainer.Children.Clear();
+            SalihBottomNavigationContainer.Children.Add(bottomBar);
+            SalihBottomNavigationContainer.IsVisible = true;
         }
 
         private void UpdateSalihCategoryTabs()
         {
-            var isLight = AppThemeManager.GetSavedTheme() == AslanThemeMode.Light;
+            var isLight = AppThemeManager.GetEffectiveTheme() == AslanThemeMode.Light;
             var selectedText = isLight ? Color.FromArgb("#FFFFFF") : Color.FromArgb("#101010");
             var inactiveText = isLight ? Color.FromArgb("#8B6D20") : Color.FromArgb("#8A8A8A");
 
-            CategoryTabs.Background = isLight 
-                ? CreateVerticalGradient("#FFFFFF", "#FAF6EA") 
-                : CreateVerticalGradient("#151515", "#0D0D0D");
-            CategoryTabs.Stroke = isLight ? Color.FromArgb("#C5A028") : Color.FromArgb("#7E6421");
+            CategoryTabs.Background = isLight
+                ? new SolidColorBrush(Color.FromArgb("#F6F4F0"))
+                : new SolidColorBrush(Color.FromArgb("#0C1D2B"));
+            CategoryTabs.Stroke = isLight ? Colors.Transparent : Color.FromArgb("#30465B");
 
             SarrafiyeTabCell.BackgroundColor = Colors.Transparent;
             MadenTabCell.BackgroundColor = Colors.Transparent;
@@ -680,13 +738,17 @@ namespace KuyumHesapFiyatEkran.UI
             TableSellHeaderLabel.Text = "Satış";
 
             // Dynamic backgrounds for TableHeader and RatesTableBorder
-            TableHeader.Background = isLight 
-                ? CreateVerticalGradient("#C5A028", "#9A7417") 
-                : CreateVerticalGradient("#1C1710", "#0F0F0F");
+            TableHeader.Background = isLight
+                ? new SolidColorBrush(Color.FromArgb("#FFFFFF"))
+                : new SolidColorBrush(Color.FromArgb("#0C1D2B"));
 
-            RatesTableBorder.Background = isLight 
-                ? new SolidColorBrush(Color.FromArgb("#FFFFFF")) 
-                : CreateVerticalGradient("#101010", "#070707");
+            RatesTableBorder.Background = isLight
+                ? new SolidColorBrush(Color.FromArgb("#FFFFFF"))
+                : new SolidColorBrush(Color.FromArgb("#10243A"));
+            HeaderCard.BackgroundColor = isLight ? Color.FromArgb("#FAF7EF") : Color.FromArgb("#071522");
+            SalihPriceTitleLabel.TextColor = isLight ? Color.FromArgb("#171717") : Colors.White;
+            SalihPriceBackIcon.IconColor = isLight ? Color.FromArgb("#171717") : Colors.White;
+            SalihPriceRefreshIcon.IconColor = isLight ? Color.FromArgb("#171717") : Colors.White;
         }
 
         private void ApplySalihResponsiveLayout(bool isLandscape)
@@ -697,7 +759,7 @@ namespace KuyumHesapFiyatEkran.UI
             SalihHeaderCard.IsVisible = false;
             HeaderCard.IsVisible = true;
             HeaderCard.Padding = isLandscape ? new Thickness(10, 6, 6, 6) : new Thickness(8, 6, 6, 6);
-            HeaderCard.HeightRequest = isLandscape ? 60 : 72;
+            HeaderCard.HeightRequest = isLandscape ? 58 : 64;
             HeaderContent.RowSpacing = 0;
             HeaderTopGrid.HeightRequest = isLandscape ? 44 : 56;
             
@@ -706,10 +768,10 @@ namespace KuyumHesapFiyatEkran.UI
             // Column 1: Auto (to fit the logo and full SİNAN ÇETİNKAYA brand name stack)
             // Column 2: * (takes the remaining space for Last Update info)
             // Column 3: 50 / 46 (shows the theme toggle button on the right side)
-            HeaderTopGrid.ColumnDefinitions[0].Width = new GridLength(0);
+            HeaderTopGrid.ColumnDefinitions[0].Width = new GridLength(42);
             HeaderTopGrid.ColumnDefinitions[1].Width = GridLength.Auto;
             HeaderTopGrid.ColumnDefinitions[2].Width = GridLength.Star;
-            HeaderTopGrid.ColumnDefinitions[3].Width = new GridLength(isLandscape ? 46 : 50);
+            HeaderTopGrid.ColumnDefinitions[3].Width = new GridLength(42);
             HeaderTopGrid.ColumnSpacing = isLandscape ? 5 : 6;
             
             BrandLogoFrame.WidthRequest = isLandscape ? 32 : 40;
@@ -727,7 +789,7 @@ namespace KuyumHesapFiyatEkran.UI
             // Responsive dimensions for the ThemeToggle button
             ThemeToggle.WidthRequest = isLandscape ? 38 : 42;
             ThemeToggle.HeightRequest = isLandscape ? 38 : 42;
-            ThemeToggleIcon.FontSize = isLandscape ? 21 : 23;
+            ThemeToggleIcon.Size = isLandscape ? 21 : 23;
 
             // Center the Last Update text container and labels in the middle column
             LastUpdateContainer.HorizontalOptions = LayoutOptions.Center;
@@ -735,15 +797,15 @@ namespace KuyumHesapFiyatEkran.UI
             LastUpdateValueLabel.HorizontalTextAlignment = TextAlignment.Center;
 
             SalihHeaderCard.HeightRequest = isLandscape ? 86 : 120;
-            CategoryTabs.HeightRequest = isLandscape ? 38 : 46;
+            CategoryTabs.HeightRequest = isLandscape ? 38 : 50;
             CategoryTabs.Margin = isLandscape ? new Thickness(8, 4, 8, 4) : new Thickness(12, 4, 12, 6);
             TableHeader.Padding = isLandscape ? new Thickness(16, 6) : new Thickness(16, 8);
             TickerViewport.HeightRequest = isLandscape ? 40 : 54;
             SalihBottomNavigationContainer.HeightRequest = isLandscape ? 0 : 68;
             SalihBottomNavigationContainer.IsVisible = !isLandscape;
 
-            Resources["RateRowHeight"] = isLandscape ? 38d : 46d;
-            Resources["RateRowPadding"] = isLandscape ? new Thickness(12, 1) : new Thickness(12, 2);
+            Resources["RateRowHeight"] = isLandscape ? 58d : 72d;
+            Resources["RateRowPadding"] = isLandscape ? new Thickness(12, 4) : new Thickness(12, 6);
 
             RefreshRateRows();
             UpdateTickerWidth();
@@ -815,14 +877,23 @@ namespace KuyumHesapFiyatEkran.UI
             var tickerTextColor = isLight ? Color.FromArgb("#2F2A1D") : Color.FromArgb("#FFFFFF");
             var goldColor = isLight ? Color.FromArgb("#9A7417") : Color.FromArgb("#F1D16A");
             
-            var change = item.ChangePercent;
-            var isDown = change.TrimStart().StartsWith("-", StringComparison.Ordinal) || !item.IsUp;
-            var percentColor = isDown
-                ? (isLight ? Color.FromArgb("#D84555") : Color.FromArgb("#FF4F5E"))
-                : (isLight ? Color.FromArgb("#1FA463") : Color.FromArgb("#31C278"));
+            var change = item.ChangeDisplay;
+            Color percentColor;
+            if (item.HasNegativeChange)
+            {
+                percentColor = isLight ? Color.FromArgb("#D84555") : Color.FromArgb("#FF4F5E");
+            }
+            else if (item.HasPositiveChange)
+            {
+                percentColor = isLight ? Color.FromArgb("#1FA463") : Color.FromArgb("#31C278");
+            }
+            else
+            {
+                percentColor = isLight ? Color.FromArgb("#7C6010") : Color.FromArgb("#A28834");
+            }
 
             var isFavorite = viewModel.IsFavorite(item);
-            var displayName = isFavorite ? $"★ {item.Name.ToUpperInvariant()}" : item.Name.ToUpperInvariant();
+            var displayName = item.Name.ToUpperInvariant();
 
             var layout = new HorizontalStackLayout
             {
@@ -874,11 +945,19 @@ namespace KuyumHesapFiyatEkran.UI
                 VerticalTextAlignment = TextAlignment.Center
             });
 
-            // Change Percent with arrow
-            var arrow = isDown ? "↓" : "↑";
+            var changeLabel = change;
+            if (item.HasPositiveChange)
+            {
+                changeLabel = $"{change} ↑";
+            }
+            else if (item.HasNegativeChange)
+            {
+                changeLabel = $"{change} ↓";
+            }
+
             layout.Add(new Label
             {
-                Text = $"{change} {arrow}",
+                Text = changeLabel,
                 TextColor = percentColor,
                 FontSize = 8,
                 FontAttributes = FontAttributes.Bold,
@@ -1110,8 +1189,8 @@ namespace KuyumHesapFiyatEkran.UI
                 ThemeToggle.BackgroundColor = isLight ? Color.FromArgb("#FFFFFF") : Color.FromArgb("#121212");
                 ThemeToggle.Stroke = GetThemeColor("AppBorder", "#D4AF37");
                 ThemeToggle.StrokeThickness = 1;
-                ThemeToggleIcon.Text = isLight ? "☀" : "☾";
-                ThemeToggleIcon.TextColor = isLight ? Color.FromArgb("#F59E0B") : Color.FromArgb("#D4AF37");
+                ThemeToggleIcon.Kind = isLight ? LucideIconKind.Sun : LucideIconKind.Moon;
+                ThemeToggleIcon.IconColor = isLight ? Color.FromArgb("#F59E0B") : Color.FromArgb("#D4AF37");
                 ThemeToggle.Shadow = null;
                 return;
             }
@@ -1125,8 +1204,8 @@ namespace KuyumHesapFiyatEkran.UI
                 Radius = 16,
                 Opacity = 0.45f
             };
-            ThemeToggleIcon.Text = isLight ? "☀" : "☾";
-            ThemeToggleIcon.TextColor = isLight ? Color.FromArgb("#F59E0B") : Color.FromArgb("#6DA8FF");
+            ThemeToggleIcon.Kind = isLight ? LucideIconKind.Sun : LucideIconKind.Moon;
+            ThemeToggleIcon.IconColor = isLight ? Color.FromArgb("#F59E0B") : Color.FromArgb("#6DA8FF");
         }
 
         private static Color GetThemeColor(string key, string fallback)

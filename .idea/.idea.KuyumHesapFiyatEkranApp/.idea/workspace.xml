@@ -15,21 +15,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0a44f68-f010-4cc0-9b80-c3fb4c4aad02" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Brands/MazlumKuyumculuk/appsettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.KuyumHesapFiyatEkranApp/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.KuyumHesapFiyatEkranApp/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.KuyumHesapFiyatEkranApp/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/APPSTORE_IOS.md" beforeDir="false" afterPath="$PROJECT_DIR$/APPSTORE_IOS.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/AppThemeManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/AppThemeManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Brands/SalihCetinkaya/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Brands/SalihCetinkaya/appsettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/KuyumHesapFiyatEkran.UI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/KuyumHesapFiyatEkran.UI.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Pages/ContactPage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Pages/ContactPage.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Platforms/Android/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Platforms/Android/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Platforms/iOS/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Platforms/iOS/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Services/BrandSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Services/BrandSettings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Services/BusinessInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Services/BusinessInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/screenshots/appstore/salih/01-home_6_5_1242x2688.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/screenshots/appstore/salih/04-contact-raw.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/publish-ios-appstore.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/publish-ios-appstore.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.KuyumHesapFiyatEkranApp/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.KuyumHesapFiyatEkranApp/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,25 +41,26 @@
     <commands />
     <urls />
   </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0001513315063402" />
-      <entry key="MS500" value="1.1721812557978921" />
-      <entry key="S2" value="1.6441640263123913" />
-      <entry key="S5" value="1.8386844427340052" />
-      <entry key="S10" value="1.9157980681674762" />
-      <entry key="S30" value="1.998604519089278" />
-      <entry key="S60" value="2.383452008295469" />
-      <entry key="M2" value="3.5303623700361286" />
-      <entry key="M5" value="5.473465517579784" />
-      <entry key="M10" value="6.564754188391149" />
-      <entry key="M15" value="7.000172443120047" />
-      <entry key="M30" value="7.477250549112889" />
-      <entry key="H1" value="7.732650899590572" />
-      <entry key="H2" value="7.864797317473493" />
-      <entry key="H4" value="7.93201222057644" />
-      <entry key="D1" value="7.988614653421269" />
-      <entry key="W1" value="7.998372193285808" />
+      <entry key="MS100" value="1.000298496161546" />
+      <entry key="MS500" value="1.197236747696669" />
+      <entry key="S2" value="1.696720578230611" />
+      <entry key="S5" value="2.325256704481351" />
+      <entry key="S10" value="3.1149019129019773" />
+      <entry key="S30" value="4.199330751033402" />
+      <entry key="S60" value="4.901737772329704" />
+      <entry key="M2" value="6.198437660362117" />
+      <entry key="M5" value="8.280733884145725" />
+      <entry key="M10" value="9.451542178700505" />
+      <entry key="M15" value="9.920209380388723" />
+      <entry key="M30" value="10.434807461039105" />
+      <entry key="H1" value="10.710769890082458" />
+      <entry key="H2" value="10.853686126781202" />
+      <entry key="H4" value="10.926413206047126" />
+      <entry key="D1" value="10.987675389465489" />
+      <entry key="W1" value="10.998237862611974" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -95,23 +82,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9727991115555263" />
-      <entry key="MS500" value="1.1649886480331337" />
-      <entry key="S2" value="1.6412178348357152" />
-      <entry key="S5" value="1.8373166090082982" />
-      <entry key="S10" value="1.9150766072446075" />
-      <entry key="S30" value="1.9983398803112247" />
-      <entry key="S60" value="2.383194357823905" />
-      <entry key="M2" value="3.5300224543621326" />
-      <entry key="M5" value="5.47317781916536" />
-      <entry key="M10" value="6.564566551749508" />
-      <entry key="M15" value="7.000035594466743" />
-      <entry key="M30" value="7.477175652505794" />
-      <entry key="H1" value="7.732611712671406" />
-      <entry key="H2" value="7.8647772734260055" />
-      <entry key="H4" value="7.932002083857373" />
-      <entry key="D1" value="7.988612947861634" />
-      <entry key="W1" value="7.998371949237668" />
+      <entry key="MS100" value="0.9865230382616703" />
+      <entry key="MS500" value="1.1933773130903003" />
+      <entry key="S2" value="1.6950548238448213" />
+      <entry key="S5" value="2.324186488042349" />
+      <entry key="S10" value="3.114099128492495" />
+      <entry key="S30" value="4.198929535316532" />
+      <entry key="S60" value="4.901407277167465" />
+      <entry key="M2" value="6.198066197128429" />
+      <entry key="M5" value="8.280431822956087" />
+      <entry key="M10" value="9.451345838887688" />
+      <entry key="M15" value="9.920066215781423" />
+      <entry key="M30" value="10.434729092955033" />
+      <entry key="H1" value="10.71072887701881" />
+      <entry key="H2" value="10.853665145419827" />
+      <entry key="H4" value="10.926402594396626" />
+      <entry key="D1" value="10.987673603860552" />
+      <entry key="W1" value="10.998237607106745" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -177,15 +164,37 @@
       <option name="presentableId" value="Default" />
       <updated>1784998746097</updated>
       <workItem from="1784998747145" duration="5534000" />
+      <workItem from="1785769986706" duration="35000" />
+      <workItem from="1785770270518" duration="1314000" />
     </task>
+    <task id="LOCAL-00001" summary="hata">
+      <option name="closed" value="true" />
+      <created>1785769998032</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1785769998032</updated>
+    </task>
+    <task id="LOCAL-00002" summary="hata">
+      <option name="closed" value="true" />
+      <created>1785770010753</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1785770010753</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+    <MESSAGE value="hata" />
+    <option name="LAST_COMMIT_MESSAGE" value="hata" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

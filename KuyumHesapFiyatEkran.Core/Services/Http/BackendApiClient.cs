@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using KuyumHesapFiyatEkran.Core.Abstractions.Http;
 using KuyumHesapFiyatEkran.Core.Common.Models;
+using KuyumHesapFiyatEkran.Core.Serialization;
 
 namespace KuyumHesapFiyatEkran.Core.Services.Http;
 
@@ -12,7 +13,7 @@ internal sealed class BackendApiClient(HttpClient httpClient) : IBackendApiClien
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         PropertyNameCaseInsensitive = true,
-        Converters = { new TurkishDecimalJsonConverter() }
+        Converters = { new TurkishDecimalJsonConverter(), new NullableTurkishDecimalJsonConverter() }
     };
 
     public async Task<ResponseDto<TResponse>> GetAsync<TResponse>(string requestUri, CancellationToken cancellationToken = default)

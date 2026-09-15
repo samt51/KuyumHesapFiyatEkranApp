@@ -1,0 +1,3 @@
+Salih Çetinkaya Kuyumcu — 1.0.9 (17)
+
+Fiyatlar ekranında her ürünün yanında son başarılı güncellemenin saat ve dakika bilgisi gösterilir. Başarısız yenilemelerde önceki güncelleme saati korunur.

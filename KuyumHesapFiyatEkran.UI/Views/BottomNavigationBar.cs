@@ -4,25 +4,26 @@ namespace KuyumHesapFiyatEkran.UI.Views
 {
     public sealed class BottomNavigationBar : Border
     {
-        private static readonly (string Symbol, string Text, string Route)[] Tabs = new[]
+        private static readonly (LucideIconKind Icon, string Text, string Route)[] Tabs = new[]
         {
-            ("⌂", "Anasayfa", "///MainPage"),
-            ("☆", "Favoriler", "///Favorites"),
-            ("⌁", "Hesaplama", "///GoldCalculator"),
-            ("☎", "İletişim", "///Contact"),
-            ("ℹ", "Hakkımızda", "///About")
+            (LucideIconKind.House, "Ana Sayfa", "///Home"),
+            (LucideIconKind.Star, "Fiyatlar", "///MainPage"),
+            (LucideIconKind.Calculator, "Hesaplama", "///GoldCalculator"),
+            (LucideIconKind.Phone, "İletişim", "///Contact"),
+            (LucideIconKind.Info, "Hakkımızda", "///About")
         };
 
         public BottomNavigationBar(int activeIndex)
         {
-            HeightRequest = 56;
-            Margin = new Thickness(12, 0, 12, 8);
-            Padding = new Thickness(4, 2);
-            StrokeShape = new RoundRectangle { CornerRadius = 14 };
+            HeightRequest = 66;
+            Margin = new Thickness(0);
+            Padding = new Thickness(4, 4, 4, 8);
+            StrokeShape = new RoundRectangle { CornerRadius = 0 };
+            StrokeThickness = 1;
 
-            // Bind border styling to dynamic theme resources
-            SetDynamicResource(StrokeProperty, "AppBorder");
-            SetDynamicResource(BackgroundColorProperty, "AppCardBackground");
+            var dark = AppThemeManager.GetEffectiveTheme() == AslanThemeMode.Dark;
+            Stroke = dark ? Color.FromArgb("#213746") : Color.FromArgb("#ECE4D6");
+            BackgroundColor = dark ? Color.FromArgb("#0C1D2B") : Colors.White;
 
             var grid = new Grid
             {
@@ -42,14 +43,8 @@ namespace KuyumHesapFiyatEkran.UI.Views
                 var route = tab.Route;
                 var isSelected = (i == activeIndex);
 
-                var iconLabel = new Label
-                {
-                    Text = tab.Symbol,
-                    FontSize = i == 0 ? 17 : (i == 4 ? 17 : 18),
-                    HorizontalTextAlignment = TextAlignment.Center,
-                    VerticalTextAlignment = TextAlignment.Center,
-                    FontAutoScalingEnabled = false
-                };
+                var iconColor = isSelected ? Color.FromArgb("#D4A72C") : dark ? Color.FromArgb("#B9C1CA") : Color.FromArgb("#535353");
+                var icon = new LucideIcon(tab.Icon, 22, iconColor);
 
                 var textLabel = new Label
                 {
@@ -62,15 +57,12 @@ namespace KuyumHesapFiyatEkran.UI.Views
 
                 if (isSelected)
                 {
-                    iconLabel.SetDynamicResource(Label.TextColorProperty, "AppAccent");
                     textLabel.SetDynamicResource(Label.TextColorProperty, "AppAccent");
-                    iconLabel.FontAttributes = FontAttributes.Bold;
                     textLabel.FontAttributes = FontAttributes.Bold;
                 }
                 else
                 {
-                    iconLabel.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
-                    textLabel.SetDynamicResource(Label.TextColorProperty, "AppTextMuted");
+                    textLabel.TextColor = dark ? Color.FromArgb("#B9C1CA") : Color.FromArgb("#535353");
                 }
 
                 var tabStack = new VerticalStackLayout
@@ -78,7 +70,7 @@ namespace KuyumHesapFiyatEkran.UI.Views
                     Spacing = 0,
                     VerticalOptions = LayoutOptions.Center,
                     HorizontalOptions = LayoutOptions.Center,
-                    Children = { iconLabel, textLabel }
+                    Children = { icon, textLabel }
                 };
 
                 Grid.SetColumn(tabStack, i);
@@ -101,6 +93,11 @@ namespace KuyumHesapFiyatEkran.UI.Views
                     }
                 };
 
+                tapGesture.Tapped += async (_, _) =>
+                {
+                    await tabStack.ScaleTo(0.92, 60, Easing.CubicOut);
+                    await tabStack.ScaleTo(1, 90, Easing.CubicIn);
+                };
                 tabStack.GestureRecognizers.Add(tapGesture);
             }
 

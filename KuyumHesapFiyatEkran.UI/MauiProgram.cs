@@ -32,6 +32,7 @@ namespace KuyumHesapFiyatEkran.UI
             builder.Services.AddSingleton<LiveRatesStore>();
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<SalihHomePage>();
             builder.Services.AddTransient<GoldCalculatorPage>();
             builder.Services.AddTransient<FavoritesPage>();
             builder.Services.AddTransient<ContactPage>();

@@ -9,9 +9,17 @@ namespace KuyumHesapFiyatEkran.UI
         Dark
     }
 
+    public enum ThemeSelection
+    {
+        Auto,
+        Light,
+        Dark
+    }
+
     public static class AppThemeManager
     {
         private const string PreferenceKey = "AslanThemeModeV2";
+        private const string SelectionPreferenceKey = "AppThemeSelectionV2";
 
         public static event EventHandler<AslanThemeMode>? ThemeChanged;
 
@@ -149,14 +157,46 @@ private static readonly IReadOnlyDictionary<string, Color> MazlumDarkColors =
             return Enum.TryParse<AslanThemeMode>(value, out var mode) ? mode : AslanThemeMode.Light;
         }
 
+        public static ThemeSelection GetThemeSelection()
+        {
+            var value = Preferences.Get(SelectionPreferenceKey, ThemeSelection.Auto.ToString());
+            return Enum.TryParse<ThemeSelection>(value, out var selection) ? selection : ThemeSelection.Auto;
+        }
+
+        public static AslanThemeMode GetEffectiveTheme(ThemeSelection? selection = null, DateTime? localTime = null)
+        {
+            return (selection ?? GetThemeSelection()) switch
+            {
+                ThemeSelection.Light => AslanThemeMode.Light,
+                ThemeSelection.Dark => AslanThemeMode.Dark,
+                _ => (localTime ?? DateTime.Now).Hour is >= 6 and < 18 ? AslanThemeMode.Light : AslanThemeMode.Dark
+            };
+        }
+
+        public static void SelectTheme(ThemeSelection selection, ResourceDictionary? pageResources = null)
+        {
+            Preferences.Set(SelectionPreferenceKey, selection.ToString());
+            Apply(GetEffectiveTheme(selection), pageResources, false);
+        }
+
+        public static void ApplySelectedTheme(ResourceDictionary? pageResources = null)
+        {
+            Apply(GetEffectiveTheme(), pageResources, false);
+        }
+
         public static void Apply(AslanThemeMode mode, ResourceDictionary? pageResources = null, bool save = true)
         {
             if (save)
             {
                 Preferences.Set(PreferenceKey, mode.ToString());
+                Preferences.Set(SelectionPreferenceKey, mode == AslanThemeMode.Light ? ThemeSelection.Light.ToString() : ThemeSelection.Dark.ToString());
             }
 
             var colors = GetColors(mode);
+            if (Application.Current is not null)
+            {
+                Application.Current.UserAppTheme = mode == AslanThemeMode.Dark ? AppTheme.Dark : AppTheme.Light;
+            }
             ApplyTo(Application.Current?.Resources, colors);
             ApplyTo(pageResources, colors);
             ThemeChanged?.Invoke(null, mode);

@@ -9,7 +9,7 @@ namespace KuyumHesapFiyatEkran.UI
         public App(AppShell appShell)
         {
             InitializeComponent();
-            AppThemeManager.Apply(AslanThemeMode.Light, Resources);
+            AppThemeManager.ApplySelectedTheme(Resources);
             MainPage = appShell;
         }
 
@@ -22,6 +22,10 @@ namespace KuyumHesapFiyatEkran.UI
         protected override void OnResume()
         {
             base.OnResume();
+            if (AppThemeManager.GetThemeSelection() == ThemeSelection.Auto)
+            {
+                AppThemeManager.ApplySelectedTheme(Resources);
+            }
             AppResumed?.Invoke(this, EventArgs.Empty);
         }
     }

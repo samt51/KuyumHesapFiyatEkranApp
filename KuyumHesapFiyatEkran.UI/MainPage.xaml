@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:KuyumHesapFiyatEkran.UI.Views"
              x:Name="MainPageRoot"
              x:Class="KuyumHesapFiyatEkran.UI.MainPage"
              Title="Canlı Fiyatlar"
@@ -115,11 +116,8 @@
                                     <RoundRectangle CornerRadius="10" />
                                 </Border.StrokeShape>
                                 <HorizontalStackLayout Spacing="4">
-                                    <Label Text="◷"
-                                           FontSize="9"
-                                           TextColor="{DynamicResource AppAccent}"
-                                           FontAutoScalingEnabled="False"
-                                           VerticalTextAlignment="Center" />
+                                    <views:LucideIcon Kind="Clock3" Size="12"
+                                                      IconColor="#D4A72C" />
                                     <Label Text="GÜNCELLEME:"
                                            FontSize="8"
                                            FontAttributes="Bold"
@@ -152,14 +150,9 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnThemeToggleTapped" />
                             </Border.GestureRecognizers>
-                            <Label x:Name="SalihThemeToggleIcon"
-                                   Text="☾"
-                                   FontSize="18"
-                                   FontAttributes="Bold"
-                                   TextColor="{DynamicResource AppAccent}"
-                                   FontAutoScalingEnabled="False"
-                                   HorizontalTextAlignment="Center"
-                                   VerticalTextAlignment="Center" />
+                            <views:LucideIcon x:Name="SalihThemeToggleIcon"
+                                              Kind="Moon" Size="18"
+                                              IconColor="#D4A72C" />
                         </Border>
                     </Grid>
                 </Border>
@@ -184,6 +177,41 @@
                               HeightRequest="56"
                               VerticalOptions="Center">
 
+                            <Grid x:Name="SalihPriceBackLabel"
+                                   IsVisible="False"
+                                   WidthRequest="42"
+                                   HeightRequest="56"
+                                   BackgroundColor="Transparent"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Fill">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnSalihPriceBackTapped" />
+                                </Grid.GestureRecognizers>
+                                <views:LucideIcon x:Name="SalihPriceBackIcon" Kind="ChevronLeft" Size="24" IconColor="#17202B" />
+                            </Grid>
+
+                            <Label x:Name="SalihPriceTitleLabel"
+                                   IsVisible="False"
+                                   Grid.Column="1"
+                                   Grid.ColumnSpan="2"
+                                   Text="Altın Fiyatları"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="#17202B"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center" />
+
+                            <Grid x:Name="SalihPriceRefreshLabel"
+                                   IsVisible="False"
+                                   Grid.Column="3"
+                                   HorizontalOptions="Fill"
+                                   VerticalOptions="Fill">
+                                <views:LucideIcon x:Name="SalihPriceRefreshIcon" Kind="RefreshCw" Size="23" IconColor="#17202B" />
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding RefreshCommand}" />
+                                </Grid.GestureRecognizers>
+                            </Grid>
+
                             <Border x:Name="FlyoutMenuButton"
                                     Grid.Column="0"
                                     WidthRequest="34"
@@ -200,13 +228,8 @@
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnFlyoutMenuButtonClicked" />
                                 </Border.GestureRecognizers>
-                                <Label Text="☰"
-                                       FontSize="20"
-                                       FontAttributes="Bold"
-                                       TextColor="{DynamicResource AppAccent}"
-                                       FontAutoScalingEnabled="False"
-                                       HorizontalTextAlignment="Center"
-                                       VerticalTextAlignment="Center" />
+                                <views:LucideIcon Kind="Menu" Size="22"
+                                                  IconColor="#D4A72C" />
                             </Border>
 
                             <HorizontalStackLayout Grid.Column="1"
@@ -302,12 +325,8 @@
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnThemeToggleTapped" />
                                 </Border.GestureRecognizers>
-                                <Label x:Name="ThemeToggleIcon"
-                                       FontSize="23"
-                                       FontAttributes="Bold"
-                                       FontAutoScalingEnabled="False"
-                                       HorizontalTextAlignment="Center"
-                                       VerticalTextAlignment="Center" />
+                                <views:LucideIcon x:Name="ThemeToggleIcon"
+                                                  Kind="Moon" Size="23" />
                             </Border>
                         </Grid>
 
@@ -488,13 +507,13 @@
 
                     <Grid RowDefinitions="Auto,*">
                         <Grid x:Name="TableHeader"
-                              ColumnDefinitions="36,*,*,*"
-                              ColumnSpacing="4"
-                              Padding="10,10"
+                              ColumnDefinitions="40,34,*,88,98"
+                              ColumnSpacing="3"
+                              Padding="12,12"
                               BackgroundColor="{DynamicResource AppAccent}">
                             <Label x:Name="TableCategoryHeaderLabel"
                                    Text="{Binding SelectedCategoryTitle}"
-                                   Grid.ColumnSpan="2"
+                                   Grid.ColumnSpan="3"
                                    FontAttributes="Bold"
                                    FontSize="17"
                                    CharacterSpacing="1"
@@ -504,7 +523,7 @@
                                    MaxLines="1"
                                    VerticalOptions="Center" />
                             <Label x:Name="TableBuyHeaderLabel"
-                                   Grid.Column="2"
+                                   Grid.Column="3"
                                    Text="ALIŞ"
                                    FontAttributes="Bold"
                                    FontSize="17"
@@ -512,7 +531,7 @@
                                    FontAutoScalingEnabled="False"
                                    HorizontalTextAlignment="Center" />
                             <Label x:Name="TableSellHeaderLabel"
-                                   Grid.Column="3"
+                                   Grid.Column="4"
                                    Text="SATIŞ"
                                    FontAttributes="Bold"
                                    FontSize="17"
@@ -531,16 +550,17 @@
                             <CollectionView x:Name="RatesCollectionView"
                                             Grid.Row="1"
                                             Margin="0"
+                                            VerticalOptions="Fill"
                                             ItemsSource="{Binding DisplayRates}"
-                                            ItemSizingStrategy="MeasureFirstItem"
+                                            ItemSizingStrategy="MeasureAllItems"
                                             SelectionMode="None">
                                 <CollectionView.ItemTemplate>
 	                                    <DataTemplate>
-	                                        <Grid RowDefinitions="*,1"
-                                                  ColumnDefinitions="36,*,*,*"
-	                                              ColumnSpacing="4"
+	                                        <Grid ColumnDefinitions="40,34,*,88,98"
+	                                              ColumnSpacing="3"
 	                                              Padding="{DynamicResource RateRowPadding}"
 	                                              HeightRequest="{DynamicResource RateRowHeight}"
+                                                  VerticalOptions="Start"
                                                   BackgroundColor="{DynamicResource AppPanelBackground}">
                                             <Grid.Triggers>
                                                 <DataTrigger TargetType="Grid"
@@ -557,21 +577,32 @@
                                                 </DataTrigger>
                                             </Grid.Triggers>
 
-                                                <Button Text="{Binding FavoriteText}"
-                                                        Padding="0"
-                                                        WidthRequest="32"
-                                                        HeightRequest="32"
-                                                        FontSize="18"
-                                                        TextColor="{DynamicResource AppAccent}"
-                                                        BackgroundColor="Transparent"
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleFavoriteCommand}"
-                                                        CommandParameter="{Binding .}"
-                                                        VerticalOptions="Center" />
+                                                <Grid WidthRequest="32" HeightRequest="32" VerticalOptions="Center">
+                                                    <Grid.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleFavoriteCommand}"
+                                                                              CommandParameter="{Binding .}" />
+                                                    </Grid.GestureRecognizers>
+                                                    <views:LucideIcon Kind="Star" Size="20" IconColor="#D4A72C" IsVisible="{Binding IsNotFavorite}" />
+                                                    <views:LucideIcon Kind="Star" Size="20" IconColor="#D4A72C" Filled="True" IsVisible="{Binding IsFavorite}" />
+                                                </Grid>
 
-                                                <VerticalStackLayout Grid.Column="1"
+                                                <Border Grid.Column="1"
+                                                        IsVisible="{DynamicResource ShowRateProductIcon}"
+                                                        WidthRequest="30" HeightRequest="30" Padding="5"
+                                                        BackgroundColor="#FFF3C5" StrokeThickness="0">
+                                                    <Border.StrokeShape><RoundRectangle CornerRadius="15" /></Border.StrokeShape>
+                                                    <views:LucideIcon Kind="CircleDollarSign" Size="20" IconColor="#D6A72C" />
+                                                </Border>
+
+                                                <Grid Grid.Column="{DynamicResource RateProductNameColumn}"
+                                                      Grid.ColumnSpan="{DynamicResource RateProductNameColumnSpan}"
+                                                      ColumnDefinitions="*,Auto"
+                                                      ColumnSpacing="0"
+                                                      VerticalOptions="Center">
+                                                    <VerticalStackLayout Grid.Column="0"
                                                                      Spacing="1"
                                                                      VerticalOptions="Center">
- 	                                                    <Label Text="{Binding Name}"
+	                                                    <Label Text="{Binding DisplayName}"
  	                                                           FontSize="14"
  	                                                           FontAttributes="Bold"
  	                                                           FontAutoScalingEnabled="False"
@@ -584,9 +615,25 @@
                                                            TextColor="{DynamicResource AppTextMuted}"
                                                            IsVisible="{Binding HasCode}" />
                                                 </VerticalStackLayout>
+                                                    <HorizontalStackLayout Grid.Column="1"
+                                                                           IsVisible="{DynamicResource ShowRateUpdateTime}"
+                                                                           Margin="4,0,0,0"
+                                                                           Spacing="2"
+                                                                           VerticalOptions="Center"
+                                                                           SemanticProperties.Description="{Binding UpdateTimeAccessibility}">
+                                                        <views:LucideIcon Kind="Clock3" Size="10"
+                                                                          IconColor="#8A8A8A" />
+                                                        <Label Text="{Binding UpdateTime}"
+                                                               FontSize="10"
+                                                               FontAutoScalingEnabled="False"
+                                                               TextColor="{DynamicResource AppTextMuted}"
+                                                               VerticalTextAlignment="Center"
+                                                               LineBreakMode="NoWrap" />
+                                                    </HorizontalStackLayout>
+                                                </Grid>
 
- 	                                            <Label Grid.Column="2"
- 	                                                   Text="{Binding Buy}"
+                                              <Label Grid.Column="3"
+                                                     Text="{Binding BuyDisplay}"
  	                                                   FontSize="14"
  	                                                   FontAttributes="Bold"
  	                                                   FontAutoScalingEnabled="False"
@@ -596,11 +643,11 @@
                                                        LineBreakMode="NoWrap"
                                                        MaxLines="1" />
 
-                                                <VerticalStackLayout Grid.Column="3"
+                                                <VerticalStackLayout Grid.Column="4"
                                                                      Spacing="1"
                                                                      HorizontalOptions="Center"
                                                                      VerticalOptions="Center">
- 	                                                    <Label Text="{Binding Sell}"
+	                                                    <Label Text="{Binding SellDisplay}"
  	                                                           FontSize="14"
  	                                                           FontAttributes="Bold"
  	                                                           FontAutoScalingEnabled="False"
@@ -608,10 +655,14 @@
                                                             HorizontalTextAlignment="Center"
                                                             LineBreakMode="NoWrap"
                                                             MaxLines="1" />
-                                                    <Label Text="{Binding TrendText}"
+                                                    <HorizontalStackLayout Spacing="3" HorizontalOptions="Center"
+                                                                           SemanticProperties.Description="Satış fiyatının yüzde değişimi">
+                                                        <views:LucideIcon Kind="TrendingUp" Size="11" IconColor="#1FA463" IsVisible="{Binding IsUp}" />
+                                                        <views:LucideIcon Kind="TrendingDown" Size="11" IconColor="#D84555" IsVisible="{Binding IsDown}" />
+                                                    <Label Text="{Binding ChangePercent}"
                                                            FontSize="9"
                                                            FontAutoScalingEnabled="False"
-                                                           TextColor="{DynamicResource AppPositive}"
+                                                           TextColor="{DynamicResource AppTextMuted}"
                                                            HorizontalTextAlignment="Center"
                                                            LineBreakMode="NoWrap"
                                                            MaxLines="1"
@@ -620,15 +671,21 @@
                                                         <Label.Triggers>
                                                             <DataTrigger TargetType="Label"
                                                                          Binding="{Binding IsUp}"
-                                                                         Value="False">
+                                                                         Value="True">
+                                                                <Setter Property="TextColor"
+                                                                        Value="{DynamicResource AppPositive}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger TargetType="Label"
+                                                                         Binding="{Binding IsDown}"
+                                                                         Value="True">
                                                                 <Setter Property="TextColor"
                                                                         Value="{DynamicResource AppNegative}" />
                                                             </DataTrigger>
                                                         </Label.Triggers>
  	                                                    </Label>
+	                                                </HorizontalStackLayout>
  	                                                </VerticalStackLayout>
-                                                <BoxView Grid.Row="1"
-                                                         Grid.ColumnSpan="4"
+                                                <BoxView Grid.ColumnSpan="5"
                                                          HeightRequest="1"
                                                          Color="{DynamicResource RateDivider}"
                                                          VerticalOptions="End" />

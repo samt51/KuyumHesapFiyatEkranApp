@@ -70,8 +70,11 @@
         </DataTemplate>
     </Shell.ItemTemplate>
 
+    <ShellContent x:Name="DashboardContent"
+                  Title="Ana Sayfa"
+                  Route="Home" />
     <ShellContent x:Name="HomeContent"
-                  Title="Canlı Fiyatlar"
+                  Title="Altın Fiyatları"
                   Route="MainPage" />
     <ShellContent x:Name="GoldCalculatorContent"
                   Title="Altın Hesaplama"

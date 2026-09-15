@@ -1,3 +1,7 @@
+using System.Text.Json.Serialization;
+using KuyumHesapFiyatEkran.Core.Features.LiveRates;
+using KuyumHesapFiyatEkran.Core.Serialization;
+
 namespace KuyumHesapFiyatEkran.Core.Features.LiveRates.Queries.GetLiveRates;
 
 public sealed class GetLiveRatesQueryResponse
@@ -17,17 +21,50 @@ public sealed class LiveRateItem
 
     public string? Code { get; set; }
 
+    [JsonConverter(typeof(FlexibleStringJsonConverter))]
     public string Buy { get; set; } = string.Empty;
 
+    [JsonConverter(typeof(FlexibleStringJsonConverter))]
     public string Sell { get; set; } = string.Empty;
 
     public string? Description { get; set; }
 
-    public string ChangePercent { get; set; } = "0,00%";
+    public string? ChangePercent { get; set; }
 
-    public bool IsUp { get; set; } = true;
+    public decimal? SellChangePercent { get; set; }
 
-    public string TrendText => $"{(IsUp ? "↑" : "↓")} {ChangePercent}";
+    public bool IsUp { get; set; }
+
+    [JsonIgnore]
+    public string ChangeDisplay => RateChangeFormatter.Format(SellChangePercent, ChangePercent);
+
+    [JsonIgnore]
+    public bool HasPositiveChange => RateChangeFormatter.GetDirection(SellChangePercent, ChangePercent) > 0;
+
+    [JsonIgnore]
+    public bool HasNegativeChange => RateChangeFormatter.GetDirection(SellChangePercent, ChangePercent) < 0;
+
+    [JsonIgnore]
+    public bool IsChangeNeutral => !HasPositiveChange && !HasNegativeChange;
+
+    [JsonIgnore]
+    public string TrendText
+    {
+        get
+        {
+            if (HasPositiveChange)
+            {
+                return $"↑ {ChangeDisplay}";
+            }
+
+            if (HasNegativeChange)
+            {
+                return $"↓ {ChangeDisplay}";
+            }
+
+            return ChangeDisplay;
+        }
+    }
 
     public bool HasCode => !string.IsNullOrWhiteSpace(Code);
 

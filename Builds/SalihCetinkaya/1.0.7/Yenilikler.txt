@@ -1,0 +1,3 @@
+Salih Çetinkaya Kuyumcu — 1.0.7 (15)
+
+Fiyatlar ve favoriler ekranlarındaki ürün simgeleri kaldırıldı. Ürün adları için ayrılan alan genişletilerek liste görünümü sadeleştirildi.

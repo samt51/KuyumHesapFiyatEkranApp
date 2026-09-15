@@ -168,6 +168,10 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
             RefreshCategoryAvailability();
             EnsureSelectedCategoryAvailable();
             RefreshDisplayRates();
+            if (!IsSarrafiyeEnabled && !IsMadenEnabled && !IsDovizEnabled && !string.IsNullOrWhiteSpace(liveRatesStore.LastError))
+            {
+                ErrorMessage = liveRatesStore.LastError;
+            }
             if (updateTicker || string.IsNullOrWhiteSpace(TickerText))
             {
                 RefreshTickerText();
@@ -247,7 +251,7 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
     private void RefreshDisplayRates()
     {
         var source = GetSelectedRates()
-            .Select(item => new RateDisplayItem(item, liveRatesStore.IsFavorite(item)))
+            .Select(item => new RateDisplayItem(item, liveRatesStore.IsFavorite(item), liveRatesStore.LastSuccessfulRefresh))
             .ToList();
 
         for (var index = 0; index < source.Count; index++)
@@ -284,7 +288,7 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
     {
         SyncItems(TickerRates, GetSelectedRates());
         TickerText = string.Join("    |    ", GetSelectedRates()
-            .Select(item => $"{item.Name}  ALI\u015e: {item.Buy} {item.ChangePercent}  SATI\u015e: {item.Sell}"));
+            .Select(item => $"{item.Name}  ALI\u015e: {item.Buy} {item.ChangeDisplay}  SATI\u015e: {item.Sell}"));
     }
 
     private IEnumerable<LiveRateItem> GetSelectedRates()
@@ -349,6 +353,7 @@ public sealed class MainPageViewModel : INotifyPropertyChanged
             && left.Sell == right.Sell
             && left.Description == right.Description
             && left.ChangePercent == right.ChangePercent
+            && left.SellChangePercent == right.SellChangePercent
             && left.IsUp == right.IsUp;
     }
 

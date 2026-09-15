@@ -21,6 +21,15 @@ public sealed class ContactPage : ContentPage
         directionsAction = CreateActionTile("Yol Tarifi Al", "directions_icon.png", OpenDirectionsOrWarn);
         websiteAction = CreateActionTile("Web Sitesini Aç", "web_icon.png", async () => await OpenOrWarn(BusinessInfo.Website, "Web sitesi açılamadı."));
 
+        if (string.Equals(BusinessInfo.Current.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase))
+        {
+            Shell.SetNavBarIsVisible(this, false);
+            Content = SalihUi.Page(CreateSalihContact(), 3);
+            ApplyTheme();
+            AppThemeManager.ThemeChanged += OnThemeChanged;
+            return;
+        }
+
         var contactContent = CreateContactLayout();
         if (string.Equals(BusinessInfo.Current.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase))
         {
@@ -49,6 +58,47 @@ public sealed class ContactPage : ContentPage
         AppThemeManager.ThemeChanged += OnThemeChanged;
     }
 
+    private View CreateSalihContact()
+    {
+        var stack = new VerticalStackLayout { Padding = new Thickness(14, 0, 14, 18), Spacing = 10 };
+        stack.Add(SalihUi.Header("İletişim"));
+        var storeImage = new Image
+        {
+            Source = "light_storefront.png",
+            Aspect = Aspect.AspectFill,
+            HeightRequest = 188
+        };
+        var storeFrame = new Grid { HeightRequest = 188, IsClippedToBounds = true };
+        storeFrame.Add(storeImage);
+        stack.Add(SalihUi.Card(storeFrame, Colors.Transparent, 14, new Thickness(0)));
+        stack.Add(SalihUi.Text("Bize Ulaşın", 16, true));
+        stack.Add(SalihUi.Text("Bizimle iletişime geçmek için aşağıdaki kanallardan bize ulaşabilirsiniz.", 11, false, SalihUi.Muted));
+        stack.Add(ContactRow(LucideIconKind.WhatsApp, "WhatsApp", "Hızlı mesaj gönderin", Color.FromArgb("#29BE57"), async () => await OpenOrWarn($"https://wa.me/{OnlyDigits(BusinessInfo.WhatsApp)}", "WhatsApp bilgisi bulunamadı.")));
+        stack.Add(ContactRow(LucideIconKind.Phone, "Telefon", BusinessInfo.Phone, Color.FromArgb("#29BE57"), OpenPhoneOrWarn));
+        stack.Add(ContactRow(LucideIconKind.MapPin, "Yol Tarifi Al", "Mağazamıza ulaşın", Color.FromArgb("#D5A52B"), OpenDirectionsOrWarn));
+        stack.Add(ContactRow(LucideIconKind.Globe, "Web Sitemizi Ziyaret Edin", BusinessInfo.Website, Color.FromArgb("#D5A52B"), async () => await OpenOrWarn(BusinessInfo.Website, "Web sitesi açılamadı.")));
+        stack.Add(new BoxView { HeightRequest = 1, Color = SalihUi.Line, Margin = new Thickness(0, 8) });
+        stack.Add(SalihUi.Text("Mağaza Bilgileri", 15, true));
+        stack.Add(InfoRow(LucideIconKind.MapPin, "Adres", BusinessInfo.Address));
+        stack.Add(InfoRow(LucideIconKind.Clock3, "Çalışma Saatleri", "Pazartesi - Cumartesi: 09:00 - 19:30\nPazar: Kapalı"));
+        return new ScrollView { Content = stack };
+    }
+
+    private static Border ContactRow(LucideIconKind icon, string title, string detail, Color trailing, Func<Task> action)
+    {
+        var grid = new Grid { ColumnDefinitions = { new ColumnDefinition(new GridLength(34)), new ColumnDefinition(GridLength.Star), new ColumnDefinition(new GridLength(36)) } };
+        grid.Add(new LucideIcon(icon, 19, SalihUi.Gold));
+        var labels = new VerticalStackLayout { Spacing = 1, Children = { SalihUi.Text(title, 12, true), SalihUi.Text(detail, 9, false, SalihUi.Muted) } }; Grid.SetColumn(labels, 1); grid.Add(labels);
+        var end = new LucideIcon(icon == LucideIconKind.Globe ? LucideIconKind.ExternalLink : LucideIconKind.ChevronRight, 18, trailing); Grid.SetColumn(end, 2); grid.Add(end);
+        var card = SalihUi.Card(grid, Colors.White, 9, new Thickness(10, 8)); card.GestureRecognizers.Add(new TapGestureRecognizer { Command = new Command(async () => await action()) }); return card;
+    }
+
+    private static View InfoRow(LucideIconKind icon, string title, string detail)
+    {
+        var grid = new Grid { ColumnDefinitions = { new ColumnDefinition(new GridLength(28)), new ColumnDefinition(GridLength.Star) } };
+        grid.Add(new LucideIcon(icon, 17, SalihUi.Gold)); var text = new VerticalStackLayout { Spacing = 3, Children = { SalihUi.Text(title, 11, true), SalihUi.Text(detail, 10, false, SalihUi.Muted) } }; Grid.SetColumn(text, 1); grid.Add(text); return grid;
+    }
+
     protected override void OnAppearing()
     {
         base.OnAppearing();
@@ -62,6 +112,10 @@ public sealed class ContactPage : ContentPage
 
     private void ApplyTheme()
     {
+        if (string.Equals(BusinessInfo.Current.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase))
+        {
+            Content = null; BackgroundColor = SalihUi.Cream; Content = SalihUi.Page(CreateSalihContact(), 3); return;
+        }
         ThemePageStyler.Apply(this);
         StyleActionTiles();
     }
