@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumAboutPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#101113"
+    NavigationPage.HasNavigationBar="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- HEADER -->
+        <Grid
+            Grid.Row="0"
+            Padding="18,12,18,14"
+            ColumnDefinitions="42,42,*,74"
+            ColumnSpacing="10">
+
+            <Border
+                Grid.Column="0"
+                WidthRequest="42"
+                HeightRequest="42"
+                BackgroundColor="#171819"
+                Stroke="#343537"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="11" />
+                </Border.StrokeShape>
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMenuTapped" />
+                </Border.GestureRecognizers>
+
+                <Label
+                    Text="☰"
+                    FontSize="21"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center" />
+            </Border>
+
+            <Border
+                Grid.Column="1"
+                WidthRequest="42"
+                HeightRequest="42"
+                BackgroundColor="#171819"
+                Stroke="#343537"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="11" />
+                </Border.StrokeShape>
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Border.GestureRecognizers>
+
+                <Label
+                    Text="‹"
+                    FontSize="33"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"
+                    TranslationY="-2" />
+            </Border>
+
+            <Label
+                Grid.Column="2"
+                Text="Hakkımızda"
+                FontSize="18"
+                FontAttributes="Bold"
+                TextColor="#F3F3F3"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center" />
+
+            <Button
+                x:Name="EditButton"
+                Grid.Column="3"
+                Text="Düzenle"
+                IsVisible="False"
+                Padding="4,0"
+                BackgroundColor="Transparent"
+                TextColor="#D4B56A"
+                FontSize="14"
+                Clicked="OnEditClicked" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout
+                Padding="20,22,20,42"
+                Spacing="18">
+
+                <!-- NORMAL VIEW -->
+                <VerticalStackLayout
+                    x:Name="DisplayPanel"
+                    Spacing="20">
+
+                    <Label
+                        x:Name="TitleLabel"
+                        FontSize="22"
+                        FontAttributes="Bold"
+                        TextColor="#F4F4F4" />
+
+                    <VerticalStackLayout
+                        x:Name="ParagraphsPanel"
+                        Spacing="18" />
+
+                    <Label
+                        x:Name="LinkLabel"
+                        FontSize="16"
+                        TextColor="#D4B56A">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnLinkTapped" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </VerticalStackLayout>
+
+                <!-- ADMIN EDIT -->
+                <VerticalStackLayout
+                    x:Name="EditPanel"
+                    IsVisible="False"
+                    Spacing="18">
+
+                    <VerticalStackLayout Spacing="7">
+                        <Label
+                            Text="BAŞLIK"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            TextColor="#A8A8A8" />
+
+                        <Border
+                            BackgroundColor="#171819"
+                            Stroke="#343537"
+                            StrokeThickness="1"
+                            Padding="13,2">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="9" />
+                            </Border.StrokeShape>
+
+                            <Entry
+                                x:Name="TitleEntry"
+                                TextColor="#F3F3F3"
+                                PlaceholderColor="#777777"
+                                BackgroundColor="Transparent" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="7">
+                        <Label
+                            Text="METİN"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            TextColor="#A8A8A8" />
+
+                        <Border
+                            BackgroundColor="#171819"
+                            Stroke="#343537"
+                            StrokeThickness="1"
+                            Padding="13,10">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="9" />
+                            </Border.StrokeShape>
+
+                            <Editor
+                                x:Name="BodyEditor"
+                                HeightRequest="210"
+                                AutoSize="TextChanges"
+                                TextColor="#F3F3F3"
+                                Placeholder="Paragrafları boş satırla ayırın"
+                                PlaceholderColor="#777777"
+                                BackgroundColor="Transparent" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="7">
+                        <Label
+                            Text="BAĞLANTI METNİ"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            TextColor="#A8A8A8" />
+
+                        <Border
+                            BackgroundColor="#171819"
+                            Stroke="#343537"
+                            StrokeThickness="1"
+                            Padding="13,2">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="9" />
+                            </Border.StrokeShape>
+
+                            <Entry
+                                x:Name="LinkLabelEntry"
+                                Placeholder="www.ornek.com"
+                                PlaceholderColor="#777777"
+                                TextColor="#F3F3F3"
+                                BackgroundColor="Transparent" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="7">
+                        <Label
+                            Text="BAĞLANTI ADRESİ"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            TextColor="#A8A8A8" />
+
+                        <Border
+                            BackgroundColor="#171819"
+                            Stroke="#343537"
+                            StrokeThickness="1"
+                            Padding="13,2">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="9" />
+                            </Border.StrokeShape>
+
+                            <Entry
+                                x:Name="LinkUrlEntry"
+                                Placeholder="https://"
+                                PlaceholderColor="#777777"
+                                TextColor="#F3F3F3"
+                                Keyboard="Url"
+                                BackgroundColor="Transparent" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <Button
+                        x:Name="SaveButton"
+                        Text="Kaydet"
+                        HeightRequest="50"
+                        CornerRadius="9"
+                        BackgroundColor="#D4B56A"
+                        TextColor="#111111"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        Clicked="OnSaveClicked" />
+
+                    <Label
+                        x:Name="ErrorLabel"
+                        IsVisible="False"
+                        TextColor="#E57373"
+                        FontSize="13" />
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumLoginChooserPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="{DynamicResource AppBackground}"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- HEADER -->
+        <Grid
+            Grid.Row="0"
+            Padding="18,52,18,16"
+            ColumnDefinitions="40,*,40">
+
+            <Label
+                Grid.Column="0"
+                Text="‹"
+                FontSize="30"
+                TextColor="{DynamicResource AppAccent}"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center">
+
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <Label
+                Grid.Column="1"
+                Text="Giriş"
+                FontSize="17"
+                FontAttributes="Bold"
+                TextColor="{DynamicResource AppTextPrimary}"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center" />
+
+        </Grid>
+
+        <!-- CONTENT -->
+        <VerticalStackLayout
+            Grid.Row="1"
+            Padding="22,35,22,20"
+            Spacing="14">
+
+            <Label
+                Text="Giriş Yap"
+                FontSize="25"
+                FontAttributes="Bold"
+                TextColor="{DynamicResource AppTextPrimary}" />
+
+            <Label
+                Text="Hesap türünü seçin."
+                FontSize="14"
+                TextColor="{DynamicResource AppTextMuted}"
+                Margin="0,-5,0,18" />
+
+            <!-- USER -->
+            <Border
+                HeightRequest="88"
+                Padding="18,0"
+                BackgroundColor="{DynamicResource AppCardBackground}"
+                Stroke="{DynamicResource AppBorder}"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+
+                <Grid
+                    ColumnDefinitions="42,*,24"
+                    ColumnSpacing="12">
+
+                    <Label
+                        Grid.Column="0"
+                        Text="&#xf007;"
+                        FontFamily="FontAwesomeSolid"
+                        FontSize="20"
+                        TextColor="{DynamicResource AppAccent}"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center" />
+
+                    <VerticalStackLayout
+                        Grid.Column="1"
+                        VerticalOptions="Center"
+                        Spacing="4">
+
+                        <Label
+                            Text="Kullanıcı Girişi"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            TextColor="{DynamicResource AppTextPrimary}" />
+
+                        <Label
+                            Text="Fiyatları takip etmek için"
+                            FontSize="12"
+                            TextColor="{DynamicResource AppTextMuted}" />
+
+                    </VerticalStackLayout>
+
+                    <Label
+                        Grid.Column="2"
+                        Text="›"
+                        FontSize="25"
+                        TextColor="{DynamicResource AppAccent}"
+                        VerticalTextAlignment="Center"
+                        HorizontalTextAlignment="Center" />
+
+                </Grid>
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnUserLoginTapped" />
+                </Border.GestureRecognizers>
+            </Border>
+
+            <!-- ADMIN -->
+            <Border
+                HeightRequest="88"
+                Padding="18,0"
+                BackgroundColor="{DynamicResource AppCardBackground}"
+                Stroke="{DynamicResource AppBorder}"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+
+                <Grid
+                    ColumnDefinitions="42,*,24"
+                    ColumnSpacing="12">
+
+                    <Label
+                        Grid.Column="0"
+                        Text="&#xf505;"
+                        FontFamily="FontAwesomeSolid"
+                        FontSize="20"
+                        TextColor="{DynamicResource AppAccent}"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center" />
+
+                    <VerticalStackLayout
+                        Grid.Column="1"
+                        VerticalOptions="Center"
+                        Spacing="4">
+
+                        <Label
+                            Text="Yönetici Girişi"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            TextColor="{DynamicResource AppTextPrimary}" />
+
+                        <Label
+                            Text="Ürün ve fiyat yönetimi"
+                            FontSize="12"
+                            TextColor="{DynamicResource AppTextMuted}" />
+
+                    </VerticalStackLayout>
+
+                    <Label
+                        Grid.Column="2"
+                        Text="›"
+                        FontSize="25"
+                        TextColor="{DynamicResource AppAccent}"
+                        VerticalTextAlignment="Center"
+                        HorizontalTextAlignment="Center" />
+
+                </Grid>
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnAdminLoginTapped" />
+                </Border.GestureRecognizers>
+            </Border>
+
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentPage>

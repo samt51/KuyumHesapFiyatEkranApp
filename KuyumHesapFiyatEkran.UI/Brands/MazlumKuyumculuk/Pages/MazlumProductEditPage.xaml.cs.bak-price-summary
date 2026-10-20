@@ -1,0 +1,404 @@
+using System.Globalization;
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumProductEditPage : ContentPage
+{
+    private readonly IMazlumFirebaseService firebaseService;
+
+    private string selectedList = "other";
+    private bool editingBuyFormula = true;
+
+    private List<MazlumFirebaseKurItem> kurItems = new();
+    private List<MazlumFirebasePrice> products = new();
+    private MazlumFirebasePrice? selectedProduct;
+
+    public MazlumProductEditPage(
+        IMazlumFirebaseService firebaseService)
+    {
+        InitializeComponent();
+
+        this.firebaseService = firebaseService;
+
+        NavigationPage.SetHasNavigationBar(this, false);
+        Shell.SetNavBarIsVisible(this, false);
+
+        OperatorPicker.SelectedIndex = 0;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        NavigationPage.SetHasNavigationBar(this, false);
+        Shell.SetNavBarIsVisible(this, false);
+
+        await LoadKurCatalogAsync();
+        await LoadProductsAsync();
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        try
+        {
+            var result = await firebaseService.GetRatesAsync();
+
+            products = result.Prices
+                .OrderBy(x => x.Order)
+                .ThenBy(x => x.Name)
+                .ToList();
+
+            System.Diagnostics.Debug.WriteLine(
+                $"[MAZLUM] Product picker loaded: {products.Count}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"[MAZLUM] Product picker error: {ex}");
+        }
+    }
+
+    private async void OnProductPickerTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        if (products.Count == 0)
+        {
+            await LoadProductsAsync();
+        }
+
+        if (products.Count == 0)
+        {
+            await DisplayAlert(
+                "Ürünler",
+                "Firebase ürün listesi alınamadı.",
+                "Tamam");
+
+            return;
+        }
+
+        var names = products
+            .Select(x => x.Name)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var selectedName = await DisplayActionSheet(
+            "Ürün seç",
+            "Vazgeç",
+            null,
+            names);
+
+        if (string.IsNullOrWhiteSpace(selectedName) ||
+            selectedName == "Vazgeç")
+        {
+            return;
+        }
+
+        var product = products.FirstOrDefault(
+            x => string.Equals(
+                x.Name,
+                selectedName,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (product is null)
+            return;
+
+        SelectProduct(product);
+    }
+
+    private void SelectProduct(MazlumFirebasePrice product)
+    {
+        selectedProduct = product;
+
+        ProductNameEntry.Text = product.Name;
+
+        selectedList = string.Equals(
+            product.List,
+            "home",
+            StringComparison.OrdinalIgnoreCase)
+                ? "home"
+                : "other";
+
+        ApplySelectedListVisual();
+
+        UpdateProductPriceSummary(product);
+    }
+
+    private void ApplySelectedListVisual()
+    {
+        var isHome = selectedList == "home";
+
+        HomeListButton.BackgroundColor =
+            isHome
+                ? Color.FromArgb("#40391E")
+                : Colors.Transparent;
+
+        OtherListButton.BackgroundColor =
+            isHome
+                ? Colors.Transparent
+                : Color.FromArgb("#40391E");
+
+        if (HomeListButton.Content is Label homeLabel)
+        {
+            homeLabel.TextColor =
+                isHome
+                    ? Color.FromArgb("#D4B56A")
+                    : Color.FromArgb("#A7A79F");
+        }
+
+        OtherListLabel.TextColor =
+            isHome
+                ? Color.FromArgb("#A7A79F")
+                : Color.FromArgb("#D4B56A");
+    }
+
+    private void UpdateProductPriceSummary(
+        MazlumFirebasePrice product)
+    {
+        System.Diagnostics.Debug.WriteLine(
+            $"[MAZLUM] Selected product: {product.Name}, Buy={product.Buy}, Sell={product.Sell}");
+    }
+
+    private async Task LoadKurCatalogAsync()
+    {
+        try
+        {
+            kurItems =
+                await firebaseService.GetKurCatalogAsync();
+
+            BindKurPicker();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"[MAZLUM] Kur catalog error: {ex}");
+        }
+    }
+
+    private void BindKurPicker()
+    {
+        var selectedCode =
+            RatePicker.SelectedItem is KurPickerItem old
+                ? old.Code
+                : null;
+
+        var items = kurItems
+            .Select(x => new KurPickerItem
+            {
+                Code = x.Code,
+                Value = editingBuyFormula
+                    ? x.Alis
+                    : x.Satis
+            })
+            .Where(x => x.Value > 0m)
+            .ToList();
+
+        RatePicker.ItemsSource = items;
+        RatePicker.ItemDisplayBinding =
+            new Binding(nameof(KurPickerItem.Display));
+
+        if (!string.IsNullOrWhiteSpace(selectedCode))
+        {
+            RatePicker.SelectedItem =
+                items.FirstOrDefault(
+                    x => string.Equals(
+                        x.Code,
+                        selectedCode,
+                        StringComparison.OrdinalIgnoreCase));
+        }
+
+        UpdatePreview();
+    }
+
+    private async void OnBackTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await Navigation.PopAsync();
+    }
+
+    private void OnHomeListTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        selectedList = "home";
+
+        HomeListButton.BackgroundColor =
+            Color.FromArgb("#40391E");
+
+        OtherListButton.BackgroundColor =
+            Colors.Transparent;
+
+        if (HomeListButton.Content is Label homeLabel)
+            homeLabel.TextColor = Color.FromArgb("#D4B56A");
+
+        OtherListLabel.TextColor =
+            Color.FromArgb("#A7A79F");
+    }
+
+    private void OnOtherListTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        selectedList = "other";
+
+        HomeListButton.BackgroundColor =
+            Colors.Transparent;
+
+        OtherListButton.BackgroundColor =
+            Color.FromArgb("#40391E");
+
+        if (HomeListButton.Content is Label homeLabel)
+            homeLabel.TextColor = Color.FromArgb("#A7A79F");
+
+        OtherListLabel.TextColor =
+            Color.FromArgb("#D4B56A");
+    }
+
+    private void OnBuyFormulaTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        editingBuyFormula = true;
+        UpdateFormulaTabs();
+        BindKurPicker();
+    }
+
+    private void OnSellFormulaTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        editingBuyFormula = false;
+        UpdateFormulaTabs();
+        BindKurPicker();
+    }
+
+    private void UpdateFormulaTabs()
+    {
+        BuyFormulaButton.BackgroundColor =
+            editingBuyFormula
+                ? Color.FromArgb("#40391E")
+                : Colors.Transparent;
+
+        SellFormulaButton.BackgroundColor =
+            editingBuyFormula
+                ? Colors.Transparent
+                : Color.FromArgb("#40391E");
+
+        BuyFormulaLabel.TextColor =
+            editingBuyFormula
+                ? Color.FromArgb("#D4B56A")
+                : Color.FromArgb("#A7A79F");
+
+        SellFormulaLabel.TextColor =
+            editingBuyFormula
+                ? Color.FromArgb("#A7A79F")
+                : Color.FromArgb("#D4B56A");
+
+        UpdatePreview();
+    }
+
+    private void OnFormulaChanged(
+        object sender,
+        EventArgs e)
+    {
+        UpdatePreview();
+    }
+
+    private void OnFormulaValueChanged(
+        object sender,
+        TextChangedEventArgs e)
+    {
+        UpdatePreview();
+    }
+
+    private void UpdatePreview()
+    {
+        if (RatePicker.SelectedItem is not KurPickerItem rate)
+        {
+            PreviewLabel.Text = "–";
+            return;
+        }
+
+        if (!decimal.TryParse(
+                FormulaValueEntry.Text?
+                    .Replace(",", "."),
+                NumberStyles.Any,
+                CultureInfo.InvariantCulture,
+                out var factor))
+        {
+            factor = 0m;
+        }
+
+        var value = rate.Value;
+
+        switch (OperatorPicker.SelectedIndex)
+        {
+            case 0:
+                value *= factor;
+                break;
+
+            case 1:
+                value = factor == 0m
+                    ? 0m
+                    : value / factor;
+                break;
+
+            case 2:
+                value += factor;
+                break;
+
+            case 3:
+                value -= factor;
+                break;
+        }
+
+        if (value <= 0m)
+        {
+            PreviewLabel.Text = "–";
+            return;
+        }
+
+        value = Math.Round(
+            value,
+            3,
+            MidpointRounding.AwayFromZero);
+
+        PreviewLabel.Text =
+            value.ToString(
+                "N3",
+                CultureInfo.GetCultureInfo("tr-TR"));
+    }
+
+    private sealed class KurPickerItem
+    {
+        public string Code { get; init; } = string.Empty;
+
+        public decimal Value { get; init; }
+
+        public string Display =>
+            $"{Code} · {Value.ToString("N3", CultureInfo.GetCultureInfo("tr-TR"))}";
+    }
+
+    private async void OnSaveClicked(
+        object sender,
+        EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(ProductNameEntry.Text))
+        {
+            await DisplayAlert(
+                "Ürün adı",
+                "Ürün adı girin.",
+                "Tamam");
+
+            return;
+        }
+
+        await DisplayAlert(
+            "Hazır",
+            "Ekran hazır. Firebase kayıt bağlantısı sonraki adımda bağlanacak.",
+            "Tamam");
+    }
+}

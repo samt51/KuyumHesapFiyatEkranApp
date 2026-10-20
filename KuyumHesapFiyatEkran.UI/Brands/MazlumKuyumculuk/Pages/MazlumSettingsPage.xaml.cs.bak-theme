@@ -1,0 +1,665 @@
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumSettingsPage : ContentPage
+{
+    private const string NotificationsEnabledPreferenceKey =
+        "mazlum-notifications-enabled";
+
+    private const string NotificationsPermissionPreferenceKey =
+        "mazlum-notifications-permission";
+    private const string HomeFavoritesPreferenceKey =
+        "mazlum-home-favorites";
+
+    private const string AdminEmail =
+        "admin@mazlumkuyumculuk.com";
+
+    private readonly IMazlumFirebaseService firebaseService;
+    private readonly IMazlumFirebaseAuthService authService;
+
+    private bool loading;
+    private bool contactLoading;
+
+    public MazlumSettingsPage(
+        IMazlumFirebaseService firebaseService,
+        IMazlumFirebaseAuthService authService)
+    {
+        InitializeComponent();
+
+        this.firebaseService = firebaseService;
+        this.authService = authService;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        NavigationPage.SetHasNavigationBar(this, false);
+        Shell.SetNavBarIsVisible(this, false);
+
+        loading = true;
+
+        HomeFavoritesCheckBox.IsChecked =
+            Preferences.Default.Get(
+                HomeFavoritesPreferenceKey,
+                false);
+
+        ActiveThemeLabel.Text =
+            Application.Current?.RequestedTheme == AppTheme.Light
+                ? "Açık"
+                : "Koyu";
+
+        loading = false;
+
+        UpdateNotificationUi();
+
+        await LoadContactAsync();
+    }
+
+    private async Task LoadContactAsync()
+    {
+        if (contactLoading)
+            return;
+
+        contactLoading = true;
+
+        try
+        {
+            var contact =
+                await firebaseService.GetContactAsync();
+
+            PhoneDisplayEntry.Text =
+                contact.PhoneDisplay;
+
+            InstagramEntry.Text =
+                contact.Instagram;
+
+            WhatsappEntry.Text =
+                contact.Whatsapp;
+
+            var isAdmin =
+                authService.IsAuthenticated &&
+                string.Equals(
+                    authService.UserEmail?.Trim(),
+                    AdminEmail,
+                    StringComparison.OrdinalIgnoreCase);
+
+            PhoneDisplayEntry.IsReadOnly = !isAdmin;
+            InstagramEntry.IsReadOnly = !isAdmin;
+            WhatsappEntry.IsReadOnly = !isAdmin;
+
+            SaveContactButton.IsVisible = isAdmin;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Contact load error: {ex}");
+        }
+        finally
+        {
+            contactLoading = false;
+        }
+    }
+
+    private async void OnSaveContactClicked(
+        object? sender,
+        EventArgs e)
+    {
+        var isAdmin =
+            authService.IsAuthenticated &&
+            string.Equals(
+                authService.UserEmail?.Trim(),
+                AdminEmail,
+                StringComparison.OrdinalIgnoreCase);
+
+        if (!isAdmin)
+        {
+            await DisplayAlert(
+                "Yetki",
+                "İletişim bilgilerini yalnızca yönetici güncelleyebilir.",
+                "Tamam");
+
+            return;
+        }
+
+        SaveContactButton.IsEnabled = false;
+        SaveContactButton.Text = "Kaydediliyor...";
+
+        try
+        {
+            var token =
+                await authService.GetIdTokenAsync();
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                await DisplayAlert(
+                    "Oturum",
+                    "Yönetici oturumu yenilenemedi. Lütfen tekrar giriş yapın.",
+                    "Tamam");
+
+                return;
+            }
+
+            var contact = NormalizeContact(
+                PhoneDisplayEntry.Text,
+                InstagramEntry.Text,
+                WhatsappEntry.Text);
+
+            await firebaseService.SaveContactAsync(
+                contact,
+                token);
+
+            PhoneDisplayEntry.Text =
+                contact.PhoneDisplay;
+
+            InstagramEntry.Text =
+                contact.Instagram;
+
+            WhatsappEntry.Text =
+                contact.Whatsapp;
+
+            await DisplayAlert(
+                "İletişim",
+                "İletişim bilgileri güncellendi.",
+                "Tamam");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Contact save error: {ex}");
+
+            await DisplayAlert(
+                "Hata",
+                "İletişim bilgileri kaydedilemedi.",
+                "Tamam");
+        }
+        finally
+        {
+            SaveContactButton.IsEnabled = true;
+            SaveContactButton.Text = "İletişimi kaydet";
+        }
+    }
+
+    private static MazlumFirebaseContact NormalizeContact(
+        string? phoneDisplayRaw,
+        string? instagramRaw,
+        string? whatsappRaw)
+    {
+        var scheme =
+            "https:" + "//";
+
+        var defaultPhoneDisplay =
+            "0555 123 45 67";
+
+        var phoneDisplay =
+            string.IsNullOrWhiteSpace(phoneDisplayRaw)
+                ? defaultPhoneDisplay
+                : phoneDisplayRaw.Trim();
+
+        var digits =
+            new string(
+                phoneDisplay
+                    .Where(char.IsDigit)
+                    .ToArray());
+
+        string withCountry;
+
+        if (digits.StartsWith("0") &&
+            digits.Length >= 10)
+        {
+            withCountry =
+                "90" + digits[1..];
+        }
+        else if (digits.StartsWith("90"))
+        {
+            withCountry = digits;
+        }
+        else if (digits.Length == 10)
+        {
+            withCountry =
+                "90" + digits;
+        }
+        else
+        {
+            withCountry =
+                "905551234567";
+        }
+
+        var instagram =
+            instagramRaw?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(instagram))
+        {
+            instagram =
+                scheme +
+                "www.instagram.com/mazlumkuyumculuk";
+        }
+        else if (
+            !instagram.StartsWith(
+                "http://",
+                StringComparison.OrdinalIgnoreCase) &&
+            !instagram.StartsWith(
+                scheme,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            instagram =
+                scheme +
+                "www.instagram.com/" +
+                instagram.TrimStart('@', '/');
+        }
+
+        var whatsapp =
+            whatsappRaw?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(whatsapp))
+        {
+            whatsapp =
+                scheme +
+                "wa.me/" +
+                withCountry;
+        }
+        else if (
+            !whatsapp.StartsWith(
+                "http://",
+                StringComparison.OrdinalIgnoreCase) &&
+            !whatsapp.StartsWith(
+                scheme,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            var whatsappDigits =
+                new string(
+                    whatsapp
+                        .Where(char.IsDigit)
+                        .ToArray());
+
+            if (whatsappDigits.StartsWith("0"))
+                whatsappDigits =
+                    "90" + whatsappDigits[1..];
+
+            if (whatsappDigits.Length == 10)
+                whatsappDigits =
+                    "90" + whatsappDigits;
+
+            if (string.IsNullOrWhiteSpace(whatsappDigits))
+                whatsappDigits = withCountry;
+
+            whatsapp =
+                scheme +
+                "wa.me/" +
+                whatsappDigits;
+        }
+
+        return new MazlumFirebaseContact
+        {
+            Phone =
+                "+" + withCountry,
+
+            PhoneDisplay =
+                phoneDisplay,
+
+            Instagram =
+                instagram,
+
+            Whatsapp =
+                whatsapp
+        };
+    }
+
+    private async void OnBackTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        if (Navigation.NavigationStack.Count > 1)
+            await Navigation.PopAsync();
+    }
+    private async void OnMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        UpdateSidebarAuthState();
+        await OpenSidebarAsync();
+    }
+
+    private void OnDarkThemeTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        ActiveThemeLabel.Text = "Koyu";
+
+        Application.Current!.UserAppTheme =
+            AppTheme.Dark;
+    }
+
+    private void OnLightThemeTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        ActiveThemeLabel.Text = "Açık";
+
+        Application.Current!.UserAppTheme =
+            AppTheme.Light;
+    }
+
+    private void OnHomeFavoritesChanged(
+        object? sender,
+        CheckedChangedEventArgs e)
+    {
+        if (loading)
+            return;
+
+        Preferences.Default.Set(
+            HomeFavoritesPreferenceKey,
+            e.Value);
+    }
+
+    private async void OnTvModeTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        var services =
+            Handler?.MauiContext?.Services;
+
+        if (services is null)
+            return;
+
+        var page =
+            services.GetRequiredService<MazlumTvPage>();
+
+        await Navigation.PushAsync(page);
+    }
+
+    private void OnNotificationsClicked(
+        object? sender,
+        EventArgs e)
+    {
+        var enabled =
+            Preferences.Default.Get(
+                NotificationsEnabledPreferenceKey,
+                false);
+
+        if (enabled)
+        {
+            Preferences.Default.Set(
+                NotificationsEnabledPreferenceKey,
+                false);
+
+            UpdateNotificationUi();
+            return;
+        }
+
+        // Firebase native push baglantisi tamamlandiginda
+        // burada gercek OS izin istegi + FCM token kaydi yapilacak.
+        //
+        // Simdilik Settings davranisini React uygulamasi
+        // ile ayni state mantiginda tutuyoruz.
+        Preferences.Default.Set(
+            NotificationsPermissionPreferenceKey,
+            "granted");
+
+        Preferences.Default.Set(
+            NotificationsEnabledPreferenceKey,
+            true);
+
+        UpdateNotificationUi();
+    }
+
+    private void UpdateNotificationUi()
+    {
+        var permission =
+            Preferences.Default.Get(
+                NotificationsPermissionPreferenceKey,
+                "default");
+
+        var enabled =
+            Preferences.Default.Get(
+                NotificationsEnabledPreferenceKey,
+                false);
+
+        NotificationPermissionLabel.Text =
+            permission switch
+            {
+                "granted" => "Açık",
+                "denied" => "Kapalı",
+                _ => "Henüz sorulmadı"
+            };
+
+        NotificationEnabledLabel.Text =
+            enabled
+                ? "Açık"
+                : "Kapalı";
+
+        NotificationsButton.Text =
+            enabled
+                ? "Bildirimleri kapat"
+                : "Bildirimleri aç";
+
+        if (enabled)
+        {
+            NotificationsButton.BackgroundColor =
+                Color.FromArgb("#171717");
+
+            NotificationsButton.TextColor =
+                Color.FromArgb("#D4B719");
+
+            NotificationsButton.BorderColor =
+                Color.FromArgb("#4A421A");
+
+            NotificationsButton.BorderWidth = 1;
+        }
+        else
+        {
+            NotificationsButton.BackgroundColor =
+                Color.FromArgb("#D4B719");
+
+            NotificationsButton.TextColor =
+                Color.FromArgb("#090909");
+
+            NotificationsButton.BorderWidth = 0;
+        }
+    }
+
+    public async Task OpenSidebarAsync()
+    {
+        UpdateSidebarAuthState();
+
+        SidebarOverlay.IsVisible = true;
+        SidebarPanel.TranslationX = -340;
+
+        await SidebarPanel.TranslateTo(
+            0,
+            0,
+            220,
+            Easing.CubicOut);
+    }
+
+    private async Task CloseSidebarAsync()
+    {
+        await SidebarPanel.TranslateTo(
+            -340,
+            0,
+            180,
+            Easing.CubicIn);
+
+        SidebarOverlay.IsVisible = false;
+    }
+
+    private async void OnSidebarCloseClicked(
+        object? sender,
+        EventArgs e)
+    {
+        await CloseSidebarAsync();
+    }
+
+    private async void OnSidebarBackdropTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+    }
+
+    private void OnSidebarPanelTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        // Panel icine dokununca kapanmasin.
+    }
+
+    private void UpdateSidebarAuthState()
+    {
+        var isAuthenticated =
+            authService.IsAuthenticated &&
+            !string.IsNullOrWhiteSpace(
+                authService.UserEmail);
+
+        var email =
+            authService.UserEmail?.Trim();
+
+        AuthUserLabel.Text =
+            isAuthenticated
+                ? email
+                : "Giriş Yap";
+
+        LogoutMenuRow.IsVisible =
+            isAuthenticated;
+
+        var isAdmin =
+            isAuthenticated &&
+            string.Equals(
+                email,
+                AdminEmail,
+                StringComparison.OrdinalIgnoreCase);
+
+        NotificationMenuRow.IsVisible =
+            isAdmin;
+    }
+
+    private async void OnAuthMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        if (authService.IsAuthenticated)
+            return;
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumLoginChooserPage>();
+
+        if (page is null)
+            return;
+
+        await Navigation.PushAsync(page);
+    }
+
+    private async void OnLogoutTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        try
+        {
+            await authService.SignOutAsync();
+            UpdateSidebarAuthState();
+            await LoadContactAsync();
+        }
+        catch
+        {
+            await DisplayAlert(
+                "Hata",
+                "Çıkış yapılamadı. Tekrar deneyin.",
+                "Tamam");
+        }
+    }
+
+    private async void OnCalculationMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumCalculationPage>();
+
+        if (page is not null)
+            await Navigation.PushAsync(page);
+    }
+
+    private async void OnBranchesMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumBranchesPage>();
+
+        if (page is not null)
+            await Navigation.PushAsync(page);
+    }
+
+    private async void OnAboutMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumAboutPage>();
+
+        if (page is not null)
+            await Navigation.PushAsync(page);
+    }
+
+    private async void OnLegalMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumLegalPage>();
+
+        if (page is not null)
+            await Navigation.PushAsync(page);
+    }
+
+    private async void OnNotificationMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        var isAdmin =
+            authService.IsAuthenticated &&
+            string.Equals(
+                authService.UserEmail?.Trim(),
+                AdminEmail,
+                StringComparison.OrdinalIgnoreCase);
+
+        if (!isAdmin)
+            return;
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumNotifyPage>();
+
+        if (page is not null)
+            await Navigation.PushAsync(page);
+    }
+
+    private async void OnSettingsMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        // Zaten Ayarlar sayfasindayiz.
+        await CloseSidebarAsync();
+    }
+
+}

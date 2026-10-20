@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumNotifyPage"
+    NavigationPage.HasNavigationBar="False"
+    BackgroundColor="#101113">
+
+    <Grid RowDefinitions="72,*">
+
+        <!-- HEADER -->
+        <Grid
+            Grid.Row="0"
+            Padding="18,12"
+            ColumnDefinitions="42,42,*,84"
+            ColumnSpacing="8">
+
+            <Button
+                Grid.Column="0"
+                Text="☰"
+                FontSize="22"
+                TextColor="#D4B56A"
+                BackgroundColor="Transparent"
+                Padding="0"
+                Clicked="OnMenuClicked" />
+
+            <Border
+                Grid.Column="1"
+                WidthRequest="34"
+                HeightRequest="34"
+                Stroke="#3A3521"
+                StrokeThickness="1"
+                BackgroundColor="#1A1A15"
+                StrokeShape="RoundRectangle 9"
+                VerticalOptions="Center">
+
+                <Label
+                    Text="‹"
+                    FontSize="26"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center" />
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="OnBackTapped" />
+                </Border.GestureRecognizers>
+            </Border>
+
+            <Label
+                Grid.Column="2"
+                Grid.ColumnSpan="2"
+                Text="Bildirim gönder"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="#F2F2F2"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                Margin="0,0,42,0" />
+
+        </Grid>
+
+        <!-- CONTENT -->
+        <ScrollView Grid.Row="1">
+
+            <VerticalStackLayout
+                Padding="20,12,20,35"
+                Spacing="18">
+
+                <Label
+                    Text="Mesaj tüm bildirimleri açmış kullanıcılara iletilir. Uygulama açıkken de bildirim görünür."
+                    FontSize="14"
+                    LineHeight="1.25"
+                    TextColor="#969696" />
+
+                <Label
+                    x:Name="ErrorLabel"
+                    IsVisible="False"
+                    FontSize="14"
+                    TextColor="#E57373" />
+
+                <Label
+                    x:Name="SuccessLabel"
+                    Text="Bildirim gönderildi."
+                    IsVisible="False"
+                    FontSize="14"
+                    TextColor="#75C58A" />
+
+                <!-- BASLIK -->
+                <VerticalStackLayout Spacing="7">
+
+                    <Label
+                        Text="BAŞLIK"
+                        FontSize="12"
+                        CharacterSpacing="2"
+                        TextColor="#999999" />
+
+                    <Border
+                        Stroke="#B99D00"
+                        StrokeThickness="1.4"
+                        BackgroundColor="#181812"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="14,0">
+
+                        <Entry
+                            x:Name="TitleEntry"
+                            Placeholder="Örn. Önemli duyuru"
+                            PlaceholderColor="#777777"
+                            TextColor="#F0F0F0"
+                            FontSize="16"
+                            MaxLength="120"
+                            HeightRequest="52"
+                            TextChanged="OnInputChanged" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <!-- MESAJ -->
+                <VerticalStackLayout Spacing="7">
+
+                    <Label
+                        Text="MESAJ"
+                        FontSize="12"
+                        CharacterSpacing="2"
+                        TextColor="#999999" />
+
+                    <Border
+                        Stroke="#3A3827"
+                        StrokeThickness="1"
+                        BackgroundColor="#181812"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="14,12">
+
+                        <Editor
+                            x:Name="BodyEditor"
+                            Placeholder="Kullanıcılara iletilecek metin…"
+                            PlaceholderColor="#777777"
+                            TextColor="#F0F0F0"
+                            FontSize="16"
+                            MaxLength="500"
+                            AutoSize="TextChanges"
+                            MinimumHeightRequest="155"
+                            TextChanged="OnInputChanged" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <Button
+                    x:Name="SendButton"
+                    Text="Gönder"
+                    HeightRequest="52"
+                    CornerRadius="12"
+                    BackgroundColor="#C5AA18"
+                    TextColor="#080808"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    Clicked="OnSendClicked" />
+
+            </VerticalStackLayout>
+
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>

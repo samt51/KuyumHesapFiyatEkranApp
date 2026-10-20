@@ -1,0 +1,13 @@
+namespace KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+public interface IMazlumFirebaseService
+{
+    Task<MazlumFirebaseRatesResult> GetRatesAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<List<MazlumFirebaseKurItem>> GetKurCatalogAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<List<MazlumFirebaseBranch>> GetBranchesAsync(
+        CancellationToken cancellationToken = default);
+}

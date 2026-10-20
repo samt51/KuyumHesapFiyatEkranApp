@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<ContentPage
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#101214"
+    Shell.NavBarIsVisible="False">
+
+    <Grid
+        Padding="18,58,18,32"
+        RowDefinitions="Auto,*">
+
+        <!-- HEADER -->
+        <Grid
+            ColumnDefinitions="48,*,48"
+            HeightRequest="54">
+
+            <Border
+                WidthRequest="38"
+                HeightRequest="38"
+                Stroke="#303338"
+                StrokeThickness="1"
+                BackgroundColor="#17191C"
+                HorizontalOptions="Start"
+                VerticalOptions="Center">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="OnBackTapped" />
+                </Border.GestureRecognizers>
+
+                <Label
+                    Text="‹"
+                    FontSize="31"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center" />
+
+            </Border>
+
+            <Label
+                x:Name="ProductNameLabel"
+                Grid.Column="1"
+                FontSize="14"
+                FontAttributes="Bold"
+                CharacterSpacing="0.8"
+                TextColor="#E6E6E6"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                LineBreakMode="TailTruncation" />
+
+            <Border
+                Grid.Column="2"
+                WidthRequest="38"
+                HeightRequest="38"
+                Stroke="#303338"
+                StrokeThickness="1"
+                BackgroundColor="#17191C"
+                HorizontalOptions="End"
+                VerticalOptions="Center">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="OnFavoriteTapped" />
+                </Border.GestureRecognizers>
+
+                <Label
+                    x:Name="FavoriteIcon"
+                    Text="☆"
+                    FontSize="25"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center" />
+
+            </Border>
+
+        </Grid>
+
+        <!-- STATS -->
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,*,*"
+            Margin="0,62,0,0"
+            Padding="0,24"
+            VerticalOptions="Start">
+
+            <Grid
+                Grid.ColumnSpan="3"
+                VerticalOptions="Start">
+
+                <BoxView
+                    HeightRequest="1"
+                    Color="#272A2F"
+                    VerticalOptions="Start" />
+
+                <BoxView
+                    HeightRequest="1"
+                    Color="#272A2F"
+                    VerticalOptions="End" />
+
+            </Grid>
+
+            <!-- BUY -->
+            <VerticalStackLayout
+                Grid.Column="0"
+                Padding="5,14"
+                Spacing="9">
+
+                <Label
+                    Text="ALIŞ"
+                    FontSize="10"
+                    CharacterSpacing="1.4"
+                    TextColor="#777C84"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    x:Name="BuyLabel"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="#E6E6E6"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    x:Name="BuyChangeLabel"
+                    FontSize="10"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+            <!-- SELL -->
+            <VerticalStackLayout
+                Grid.Column="1"
+                Padding="5,14"
+                Spacing="9">
+
+                <Label
+                    Text="SATIŞ"
+                    FontSize="10"
+                    CharacterSpacing="1.4"
+                    TextColor="#777C84"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    x:Name="SellLabel"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    x:Name="SellChangeLabel"
+                    FontSize="10"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+            <!-- DIFFERENCE -->
+            <VerticalStackLayout
+                Grid.Column="2"
+                Padding="5,14"
+                Spacing="9">
+
+                <Label
+                    Text="FARK"
+                    FontSize="10"
+                    CharacterSpacing="1.4"
+                    TextColor="#777C84"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    x:Name="DifferenceLabel"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="#E6E6E6"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

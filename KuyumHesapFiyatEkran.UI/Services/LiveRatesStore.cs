@@ -1,6 +1,7 @@
 using System.Globalization;
 using KuyumHesapFiyatEkran.Core.Features.LiveRates.Queries.GetLiveRateScreen;
 using KuyumHesapFiyatEkran.Core.Features.LiveRates.Queries.GetLiveRates;
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
 using MediatR;
 
 namespace KuyumHesapFiyatEkran.UI.Services;
@@ -11,12 +12,17 @@ public sealed class LiveRatesStore
     private static readonly CultureInfo TurkishCulture = CultureInfo.GetCultureInfo("tr-TR");
     private readonly IMediator mediator;
     private readonly BrandSettings brandSettings;
+    private readonly IMazlumFirebaseService mazlumFirebaseService;
     private readonly HashSet<string> favoriteKeys = new(StringComparer.OrdinalIgnoreCase);
 
-    public LiveRatesStore(IMediator mediator, BrandSettings brandSettings)
+    public LiveRatesStore(
+        IMediator mediator,
+        BrandSettings brandSettings,
+        IMazlumFirebaseService mazlumFirebaseService)
     {
         this.mediator = mediator;
         this.brandSettings = brandSettings;
+        this.mazlumFirebaseService = mazlumFirebaseService;
         LoadFavorites();
     }
 
@@ -28,43 +34,81 @@ public sealed class LiveRatesStore
 
     public string? LastError { get; private set; }
 
-    public async Task<GetLiveRatesQueryResponse?> LoadAsync(CancellationToken cancellationToken)
+    public async Task<GetLiveRatesQueryResponse?> LoadAsync(
+        CancellationToken cancellationToken)
     {
         try
         {
             LastError = null;
-            var response = await mediator.Send(new GetLiveRatesQuery(), cancellationToken);
 
-            if (!response.IsSuccess || response.Data is null)
+            var isMazlum = string.Equals(
+                brandSettings.Key,
+                "Mazlum",
+                StringComparison.OrdinalIgnoreCase);
+
+            GetLiveRatesQueryResponse rates;
+
+            if (isMazlum)
             {
-                LastError = response.Errors?.Count > 0
-                    ? string.Join(Environment.NewLine, response.Errors)
-                    : "Canli fiyat bilgileri alinamadi.";
-                return CurrentRates;
+                rates = await LoadMazlumFirebaseRatesAsync(
+                    cancellationToken);
+            }
+            else
+            {
+                var response = await mediator.Send(
+                    new GetLiveRatesQuery(),
+                    cancellationToken);
+
+                if (!response.IsSuccess || response.Data is null)
+                {
+                    LastError = response.Errors?.Count > 0
+                        ? string.Join(
+                            Environment.NewLine,
+                            response.Errors)
+                        : "Canli fiyat bilgileri alinamadi.";
+
+                    return CurrentRates;
+                }
+
+                rates = response.Data;
+
+                await MergeSalihScreenRatesAsync(
+                    rates,
+                    cancellationToken);
             }
 
-            var rates = response.Data;
-            await MergeSalihScreenRatesAsync(rates, cancellationToken);
-            var isSalih = string.Equals(brandSettings.Key, "SalihCetinkaya", StringComparison.OrdinalIgnoreCase);
-            if (isSalih && rates.Sarrafiye.Count == 0 && rates.Maden.Count == 0 && rates.Doviz.Count == 0)
+            var isSalih = string.Equals(
+                brandSettings.Key,
+                "SalihCetinkaya",
+                StringComparison.OrdinalIgnoreCase);
+
+            if (isSalih &&
+                rates.Sarrafiye.Count == 0 &&
+                rates.Maden.Count == 0 &&
+                rates.Doviz.Count == 0)
             {
-                LastError = "Canli fiyat listesi bos dondu. Panelde urun ve kur kaynagi kontrol edilmeli.";
+                LastError =
+                    "Canli fiyat listesi bos dondu. Panelde urun ve kur kaynagi kontrol edilmeli.";
+
                 return CurrentRates;
             }
 
             CurrentRates = rates;
-            if (isSalih)
+
+            if (isSalih || isMazlum)
             {
                 LastSuccessfulRefresh = DateTimeOffset.UtcNow;
             }
 
-            var hasAnyRate = CurrentRates.Sarrafiye.Count > 0
-                || CurrentRates.Maden.Count > 0
-                || CurrentRates.Doviz.Count > 0;
+            var hasAnyRate =
+                CurrentRates.Sarrafiye.Count > 0 ||
+                CurrentRates.Maden.Count > 0 ||
+                CurrentRates.Doviz.Count > 0;
 
             if (!hasAnyRate)
             {
-                LastError = "Canli fiyat listesi bos dondu. Panelde urun ve kur kaynagi kontrol edilmeli.";
+                LastError =
+                    "Canli fiyat listesi bos dondu. Panelde urun ve kur kaynagi kontrol edilmeli.";
             }
 
             return CurrentRates;
@@ -195,6 +239,90 @@ public sealed class LiveRatesStore
         return string.IsNullOrWhiteSpace(item.Code)
             ? item.Name.Trim()
             : $"{item.Code.Trim()}|{item.Name.Trim()}";
+    }
+
+    private async Task<GetLiveRatesQueryResponse> LoadMazlumFirebaseRatesAsync(
+        CancellationToken cancellationToken)
+    {
+        var firebase = await mazlumFirebaseService.GetRatesAsync(
+            cancellationToken);
+
+        var rates = new GetLiveRatesQueryResponse
+        {
+            LastUpdate = firebase.LastUpdate
+        };
+
+        foreach (var item in firebase.Prices)
+        {
+            // React'teki ana fiyat listesi.
+            // "other" ürünleri daha sonra ayrı Mazlum ekranında gösterilecek.
+            if (!string.Equals(
+                    item.List,
+                    "home",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var rate = new LiveRateItem
+            {
+                Name = item.Name,
+                Code = item.Id,
+
+                Buy = FormatFirebasePrice(
+                    item.Buy,
+                    item.Unit),
+
+                Sell = FormatFirebasePrice(
+                    item.Sell,
+                    item.Unit),
+
+                ChangePercent = item.SellChangePercent.HasValue
+                    ? item.SellChangePercent.Value.ToString(
+                        "0.##",
+                        CultureInfo.InvariantCulture)
+                    : null,
+
+                SellChangePercent = item.SellChangePercent,
+
+                IsUp =
+                    item.SellChangePercent.GetValueOrDefault() > 0
+            };
+
+            GetCategoryList(rates, item.Name).Add(rate);
+        }
+
+        RenumberRows(rates.Sarrafiye);
+        RenumberRows(rates.Maden);
+        RenumberRows(rates.Doviz);
+
+        return rates;
+    }
+
+    private static string FormatFirebasePrice(
+        decimal value,
+        string? unit)
+    {
+        var rounded = decimal.Round(
+            value,
+            2,
+            MidpointRounding.AwayFromZero);
+
+        var formatted =
+            rounded == decimal.Truncate(rounded)
+                ? ((long)rounded).ToString(
+                    "N0",
+                    TurkishCulture)
+                : rounded.ToString(
+                    "N2",
+                    TurkishCulture);
+
+        if (string.IsNullOrWhiteSpace(unit))
+        {
+            return formatted;
+        }
+
+        return $"{formatted} {unit.Trim()}";
     }
 
     private async Task MergeSalihScreenRatesAsync(GetLiveRatesQueryResponse rates, CancellationToken cancellationToken)

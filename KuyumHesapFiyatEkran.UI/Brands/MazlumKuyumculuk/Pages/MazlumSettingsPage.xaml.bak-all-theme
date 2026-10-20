@@ -1,0 +1,1010 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumSettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    NavigationPage.HasNavigationBar="False"
+    BackgroundColor="#101113">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- HEADER -->
+        <Grid
+            Grid.Row="0"
+            Padding="18,12,18,14"
+            ColumnDefinitions="42,42,*,74"
+            ColumnSpacing="10">
+
+            <Border
+                Grid.Column="0"
+                WidthRequest="42"
+                HeightRequest="42"
+                BackgroundColor="#171819"
+                Stroke="#343537"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 11">
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMenuTapped" />
+                </Border.GestureRecognizers>
+
+                <Label
+                    Text="☰"
+                    FontSize="22"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center" />
+            </Border>
+
+            <Border
+                Grid.Column="1"
+                WidthRequest="42"
+                HeightRequest="42"
+                BackgroundColor="#171819"
+                Stroke="#343537"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 11">
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Border.GestureRecognizers>
+
+                <Label
+                    Text="‹"
+                    FontSize="28"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center" />
+            </Border>
+
+            <Label
+                Grid.Column="2"
+                Grid.ColumnSpan="2"
+                Text="Ayarlar"
+                FontSize="18"
+                FontAttributes="Bold"
+                TextColor="#F4F4F4"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                Margin="0,0,52,0" />
+
+        </Grid>
+
+        <!-- CONTENT -->
+        <ScrollView
+            Grid.Row="1"
+            BackgroundColor="#101113"
+            VerticalOptions="FillAndExpand">
+
+            <VerticalStackLayout
+                Padding="20,12,20,42"
+                Spacing="25"
+                BackgroundColor="#101113"
+                VerticalOptions="FillAndExpand">
+
+                <!-- TEMA -->
+                <VerticalStackLayout Spacing="9">
+
+                    <Label
+                        Text="TEMA"
+                        FontSize="11"
+                        CharacterSpacing="1.7"
+                        TextColor="#8D8D8D" />
+
+                    <Border
+                        BackgroundColor="#17170F"
+                        Stroke="#3A3722"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="5">
+
+                        <Grid
+                            ColumnDefinitions="*,*"
+                            HeightRequest="48"
+                            ColumnSpacing="5">
+
+                            <Border
+                                x:Name="DarkThemeButton"
+                                Grid.Column="0"
+                                BackgroundColor="#4B4216"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 10">
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnDarkThemeTapped" />
+                                </Border.GestureRecognizers>
+
+                                <Label
+                                    Text="Koyu"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    TextColor="#D5B719"
+                                    HorizontalTextAlignment="Center"
+                                    VerticalTextAlignment="Center" />
+                            </Border>
+
+                            <Border
+                                x:Name="LightThemeButton"
+                                Grid.Column="1"
+                                BackgroundColor="Transparent"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 10">
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnLightThemeTapped" />
+                                </Border.GestureRecognizers>
+
+                                <Label
+                                    Text="Açık"
+                                    FontSize="14"
+                                    TextColor="#A5A5A5"
+                                    HorizontalTextAlignment="Center"
+                                    VerticalTextAlignment="Center" />
+                            </Border>
+
+                        </Grid>
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <!-- ANA SAYFA -->
+                <VerticalStackLayout Spacing="9">
+
+                    <Label
+                        Text="ANA SAYFA"
+                        FontSize="11"
+                        CharacterSpacing="1.7"
+                        TextColor="#8D8D8D" />
+
+                    <Border
+                        BackgroundColor="#17170F"
+                        Stroke="#3A3722"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="16,14">
+
+                        <Grid ColumnDefinitions="*,Auto">
+
+                            <VerticalStackLayout
+                                Grid.Column="0"
+                                Spacing="4">
+
+                                <Label
+                                    Text="Ana sayfa favori listem"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    TextColor="#F3F3F3" />
+
+                                <Label
+                                    Text="Açılışta favorileri göster"
+                                    FontSize="12"
+                                    TextColor="#898989" />
+
+                            </VerticalStackLayout>
+
+                            <CheckBox
+                                x:Name="HomeFavoritesCheckBox"
+                                Grid.Column="1"
+                                VerticalOptions="Center"
+                                Color="#D5B719"
+                                CheckedChanged="OnHomeFavoritesChanged" />
+
+                        </Grid>
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <!-- EKRAN -->
+                <VerticalStackLayout Spacing="9">
+
+                    <Label
+                        Text="EKRAN"
+                        FontSize="11"
+                        CharacterSpacing="1.7"
+                        TextColor="#8D8D8D" />
+
+                    <Border
+                        BackgroundColor="#17170F"
+                        Stroke="#3A3722"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="16,14">
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnTvModeTapped" />
+                        </Border.GestureRecognizers>
+
+                        <Grid ColumnDefinitions="*,Auto">
+
+                            <VerticalStackLayout Spacing="4">
+                                <Label
+                                    Text="TV modu"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    TextColor="#F3F3F3" />
+
+                                <Label
+                                    Text="Android TV / vitrin"
+                                    FontSize="12"
+                                    TextColor="#898989" />
+                            </VerticalStackLayout>
+
+                            <Label
+                                Grid.Column="1"
+                                Text="→"
+                                FontSize="18"
+                                TextColor="#888888"
+                                VerticalTextAlignment="Center" />
+
+                        </Grid>
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <!-- BİLDİRİMLER -->
+                <VerticalStackLayout Spacing="10">
+
+                    <Label
+                        Text="BİLDİRİMLER"
+                        FontSize="11"
+                        CharacterSpacing="1.7"
+                        TextColor="#8D8D8D" />
+
+                    <Grid
+                        Padding="0,5"
+                        ColumnDefinitions="*,Auto">
+
+                        <Label
+                            Text="İzin durumu"
+                            FontSize="14"
+                            TextColor="#8F8F8F" />
+
+                        <Label
+                            x:Name="NotificationPermissionLabel"
+                            Grid.Column="1"
+                            Text="Henüz sorulmadı"
+                            FontSize="14"
+                            TextColor="#F1F1F1" />
+                    </Grid>
+
+                    <BoxView
+                        HeightRequest="1"
+                        Color="#292929" />
+
+                    <Grid
+                        Padding="0,5"
+                        ColumnDefinitions="*,Auto">
+
+                        <Label
+                            Text="Uygulama bildirimleri"
+                            FontSize="14"
+                            TextColor="#8F8F8F" />
+
+                        <Label
+                            x:Name="NotificationEnabledLabel"
+                            Grid.Column="1"
+                            Text="Kapalı"
+                            FontSize="14"
+                            TextColor="#F1F1F1" />
+                    </Grid>
+
+                    <BoxView
+                        HeightRequest="1"
+                        Color="#292929" />
+
+                    <Button
+                        x:Name="NotificationsButton"
+                        Text="Bildirimleri aç"
+                        HeightRequest="50"
+                        Margin="0,6,0,0"
+                        BackgroundColor="#D4B719"
+                        TextColor="#090909"
+                        FontSize="14"
+                        CornerRadius="12"
+                        Clicked="OnNotificationsClicked" />
+
+                </VerticalStackLayout>
+
+                <!-- CONTACT -->
+                <VerticalStackLayout
+                    Margin="0,18,0,12"
+                    Spacing="10">
+
+                    <Label
+                        Text="İLETİŞİM (MERKEZ)"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        TextColor="#D4B719" />
+
+                    <Label
+                        Text="Sidebar’daki telefon, Instagram ve WhatsApp bu alanlardan güncellenir."
+                        FontSize="12"
+                        LineHeight="1.25"
+                        TextColor="#8F8F8F" />
+
+                    <Label
+                        Text="TELEFON"
+                        Margin="0,6,0,0"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        TextColor="#8F8F8F" />
+
+                    <Border
+                        Stroke="#333333"
+                        StrokeThickness="1"
+                        BackgroundColor="#171717"
+                        Padding="12,2">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+
+                        <Entry
+                            x:Name="PhoneDisplayEntry"
+                            Placeholder="0555 123 45 67"
+                            Keyboard="Telephone"
+                            FontSize="14"
+                            TextColor="#F1F1F1"
+                            PlaceholderColor="#666666"
+                            BackgroundColor="Transparent" />
+                    </Border>
+
+                    <Label
+                        Text="INSTAGRAM"
+                        Margin="0,5,0,0"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        TextColor="#8F8F8F" />
+
+                    <Border
+                        Stroke="#333333"
+                        StrokeThickness="1"
+                        BackgroundColor="#171717"
+                        Padding="12,2">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+
+                        <Entry
+                            x:Name="InstagramEntry"
+                            FontSize="14"
+                            TextColor="#F1F1F1"
+                            PlaceholderColor="#666666"
+                            BackgroundColor="Transparent" />
+                    </Border>
+
+                    <Label
+                        Text="WHATSAPP"
+                        Margin="0,5,0,0"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        TextColor="#8F8F8F" />
+
+                    <Border
+                        Stroke="#333333"
+                        StrokeThickness="1"
+                        BackgroundColor="#171717"
+                        Padding="12,2">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+
+                        <Entry
+                            x:Name="WhatsappEntry"
+                            FontSize="14"
+                            TextColor="#F1F1F1"
+                            PlaceholderColor="#666666"
+                            BackgroundColor="Transparent" />
+                    </Border>
+
+                    <Button
+                        x:Name="SaveContactButton"
+                        Text="İletişimi kaydet"
+                        HeightRequest="50"
+                        Margin="0,6,0,4"
+                        BackgroundColor="#D4B719"
+                        TextColor="#090909"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        CornerRadius="12"
+                        Clicked="OnSaveContactClicked" />
+
+                    <BoxView
+                        Margin="0,5,0,0"
+                        HeightRequest="1"
+                        Color="#292929" />
+
+                </VerticalStackLayout>
+
+                <!-- INFO -->
+                <VerticalStackLayout
+                    Margin="0,5,0,0"
+                    Spacing="0">
+
+                    <Grid
+                        Padding="0,12"
+                        ColumnDefinitions="*,Auto">
+
+                        <Label
+                            Text="Aktif tema"
+                            FontSize="14"
+                            TextColor="#8F8F8F" />
+
+                        <Label
+                            x:Name="ActiveThemeLabel"
+                            Grid.Column="1"
+                            Text="Koyu"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="#F1F1F1" />
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="#292929" />
+
+                    <Grid
+                        Padding="0,12"
+                        ColumnDefinitions="*,Auto">
+
+                        <Label
+                            Text="Veri kaynağı"
+                            FontSize="14"
+                            TextColor="#8F8F8F" />
+
+                        <Label
+                            Grid.Column="1"
+                            Text="Firebase"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="#F1F1F1" />
+                    </Grid>
+
+                </VerticalStackLayout>
+
+                <Label
+                    Text="Sürüm 1.0.01"
+                    Margin="0,2,0,0"
+                    FontSize="11"
+                    TextColor="#686868" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    
+
+        <Grid
+            x:Name="SidebarOverlay"
+            IsVisible="False"
+            BackgroundColor="#99000000"
+            ZIndex="100"
+            VerticalOptions="FillAndExpand"
+            HorizontalOptions="FillAndExpand">
+
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer
+                    Tapped="OnSidebarBackdropTapped" />
+            </Grid.GestureRecognizers>
+
+
+            <!-- LEFT PANEL -->
+            <Border
+                x:Name="SidebarPanel"
+                WidthRequest="330"
+                HorizontalOptions="Start"
+                VerticalOptions="FillAndExpand"
+                BackgroundColor="#171819"
+                Stroke="#292A2B"
+                StrokeThickness="1"
+                TranslationX="-340">
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="OnSidebarPanelTapped" />
+                </Border.GestureRecognizers>
+
+                <Grid
+                    Padding="22,32,18,18"
+                    RowDefinitions="Auto,Auto,Auto,Auto"
+                    RowSpacing="12"
+                    VerticalOptions="Start">
+
+
+                    <!-- ================= HEADER ================= -->
+
+                    <Grid
+                        Grid.Row="0"
+                        ColumnDefinitions="Auto,*,40"
+                        ColumnSpacing="12">
+
+                        <!-- MK LOGO -->
+                        <Border
+                            Grid.Column="0"
+                            WidthRequest="58"
+                            HeightRequest="58"
+                            Stroke="#D4B56A"
+                            StrokeThickness="2"
+                            BackgroundColor="Transparent"
+                            VerticalOptions="Center">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="29" />
+                            </Border.StrokeShape>
+
+                            <Grid RowDefinitions="*,Auto">
+
+                                <Label
+                                    Text="mk"
+                                    FontSize="20"
+                                    FontAttributes="Bold"
+                                    TextColor="#D4B56A"
+                                    HorizontalTextAlignment="Center"
+                                    VerticalTextAlignment="Center"
+                                    Margin="0,4,0,0" />
+
+                                <Label
+                                    Grid.Row="1"
+                                    Text="ESTD 1998"
+                                    FontSize="4"
+                                    FontAttributes="Bold"
+                                    CharacterSpacing="1"
+                                    TextColor="#D4B56A"
+                                    HorizontalTextAlignment="Center"
+                                    Margin="0,0,0,7" />
+
+                            </Grid>
+
+                        </Border>
+
+
+                        <!-- WORDMARK -->
+                        <VerticalStackLayout
+                            Grid.Column="1"
+                            Spacing="0"
+                            VerticalOptions="Center">
+
+                            <Label
+                                Text="mazlum"
+                                FontSize="22"
+                                FontAttributes="Bold"
+                                TextColor="#D4B56A" />
+
+                            <Label
+                                Text="KUYUMCULUK"
+                                FontSize="10"
+                                FontAttributes="Bold"
+                                CharacterSpacing="1.6"
+                                TextColor="#D4B56A" />
+
+                        </VerticalStackLayout>
+
+
+                        <!-- CLOSE -->
+                        <Button
+                            Grid.Column="2"
+                            Text="×"
+                            FontSize="28"
+                            FontAttributes="None"
+                            WidthRequest="40"
+                            HeightRequest="40"
+                            Padding="0"
+                            BackgroundColor="Transparent"
+                            TextColor="#92979F"
+                            VerticalOptions="Start"
+                            Clicked="OnSidebarCloseClicked" />
+
+                    </Grid>
+
+
+                    
+
+                    
+
+
+                    <!-- ================= MENU ================= -->
+
+                    <ScrollView
+                        Grid.Row="2"
+                        VerticalOptions="Start">
+
+                        <VerticalStackLayout Spacing="0">
+
+                            <!-- GIRIS -->
+<Grid
+                        x:Name="AuthMenuRow"
+                                                Padding="7,15"
+                        ColumnDefinitions="28,*"
+                        ColumnSpacing="8">
+
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnAuthMenuTapped" />
+                        </Grid.GestureRecognizers>
+
+                        <Label
+                            Grid.Column="0"
+                            Text="&#xf2f6;"
+                            FontFamily="FontAwesomeSolid"
+                            FontSize="18"
+                            TextColor="#D4B56A"
+                            VerticalTextAlignment="Center" />
+
+                        <Label
+                            x:Name="AuthUserLabel"
+                            Grid.Column="1"
+                            Text="Giriş Yap"
+                            FontSize="15"
+                            TextColor="#D4B56A"
+                            VerticalTextAlignment="Center" />
+
+                    </Grid>
+
+                            <BoxView
+                                HeightRequest="1"
+                                Color="#303133" />
+
+
+
+                            <!-- HESAPLAMA ARACI -->
+                            <Grid
+                                Padding="7,15"
+                                ColumnDefinitions="28,*"
+                                ColumnSpacing="8">
+
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Tapped="OnCalculationMenuTapped" />
+                                </Grid.GestureRecognizers>
+
+                                <Label
+                                    Text="&#xf1ec;"
+                                    FontFamily="FontAwesomeSolid"
+                                    FontSize="18"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Hesaplama Aracı"
+                                    FontSize="15"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                            </Grid>
+
+                            <BoxView
+                                HeightRequest="1"
+                                Color="#303133" />
+
+
+                            <!-- SUBELER -->
+                            <Grid
+                                Padding="7,15"
+                                ColumnDefinitions="28,*"
+                                ColumnSpacing="8">
+
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnBranchesMenuTapped" />
+                                </Grid.GestureRecognizers>
+
+                                <Label
+                                    Text="&#xf07b;"
+                                    FontFamily="FontAwesomeSolid"
+                                    FontSize="18"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Şubelerimiz"
+                                    FontSize="15"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                            </Grid>
+
+                            <BoxView
+                                HeightRequest="1"
+                                Color="#303133" />
+
+
+                            <!-- HAKKIMIZDA -->
+                            <Grid
+                                Padding="7,15"
+                                ColumnDefinitions="28,*"
+                                ColumnSpacing="8">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnAboutMenuTapped" />
+                                </Grid.GestureRecognizers>
+
+
+                                <Label
+                                    Text="&#xf05a;"
+                                    FontFamily="FontAwesomeSolid"
+                                    FontSize="18"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Hakkımızda"
+                                    FontSize="15"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                            </Grid>
+
+                            <BoxView
+                                HeightRequest="1"
+                                Color="#303133" />
+
+
+                            <!-- YASAL -->
+                            <Grid
+                                Padding="7,15"
+                                ColumnDefinitions="28,*"
+                                ColumnSpacing="8">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnLegalMenuTapped" />
+                                </Grid.GestureRecognizers>
+
+
+                                <Label
+                                    Text="&#xf3ed;"
+                                    FontFamily="FontAwesomeSolid"
+                                    FontSize="18"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Yasal Uyarı"
+                                    FontSize="15"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                            </Grid>
+
+                            <BoxView
+                                HeightRequest="1"
+                                Color="#303133" />
+
+
+                            <!-- BILDIRIM -->
+                            <Grid
+                                x:Name="NotificationMenuRow"
+                                IsVisible="False"
+                                Padding="7,15"
+                                ColumnDefinitions="28,*"
+                                ColumnSpacing="8">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Tapped="OnNotificationMenuTapped" />
+                                </Grid.GestureRecognizers>
+
+
+                                <Label
+                                    Text="&#xf0f3;"
+                                    FontFamily="FontAwesomeSolid"
+                                    FontSize="18"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Bildirim gönder"
+                                    FontSize="15"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                            </Grid>
+
+                            <BoxView
+                                HeightRequest="1"
+                                Color="#303133" />
+
+
+                            <!-- AYARLAR -->
+                            <Grid
+                                Padding="7,15"
+                                ColumnDefinitions="28,*"
+                                ColumnSpacing="8">
+
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnSettingsMenuTapped" />
+                                </Grid.GestureRecognizers>
+
+                                <Label
+                                    Text="&#xf013;"
+                                    FontFamily="FontAwesomeSolid"
+                                    FontSize="18"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Ayarlar"
+                                    FontSize="15"
+                                    TextColor="#D4B56A"
+                                    VerticalTextAlignment="Center" />
+
+                            </Grid>
+
+                            <BoxView
+                                HeightRequest="1"
+                                Color="#303133" />
+
+                        </VerticalStackLayout>
+
+                    </ScrollView>
+
+
+                    <!-- ================= FOOTER ================= -->
+
+                    <VerticalStackLayout
+                        Grid.Row="3"
+                        Spacing="11">
+
+
+                        <HorizontalStackLayout
+                            Spacing="10">
+
+                            <Label
+                                Text="&#xf0e0;"
+                                FontFamily="FontAwesomeSolid"
+                                FontSize="15"
+                                TextColor="#92979F" />
+
+                            <Label
+                                Text="destek@mazlumkuyumculuk.com"
+                                FontSize="11"
+                                TextColor="#92979F"
+                                VerticalTextAlignment="Center" />
+
+                        </HorizontalStackLayout>
+
+
+                        <HorizontalStackLayout
+                            Spacing="10">
+
+                            <Label
+                                Text="&#xf0ac;"
+                                FontFamily="FontAwesomeSolid"
+                                FontSize="15"
+                                TextColor="#92979F" />
+
+                            <Label
+                                Text="mazlumkuyumculuk.com"
+                                FontSize="11"
+                                TextColor="#92979F"
+                                VerticalTextAlignment="Center" />
+
+                        </HorizontalStackLayout>
+
+
+                        <!-- SOCIAL BUTTONS -->
+                        <Grid
+                            Margin="0,5,0,0"
+                            ColumnDefinitions="46,46,46,*"
+                            ColumnSpacing="10">
+
+
+                            <Border
+                                Grid.Column="0"
+                                HeightRequest="44"
+                                BackgroundColor="#202117"
+                                Stroke="#3A3925"
+                                StrokeThickness="1">
+
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="11" />
+                                </Border.StrokeShape>
+
+                                <Label
+                                    Text="&#xf095;"
+                                    FontFamily="FontAwesomeSolid"
+                                    FontSize="17"
+                                    TextColor="#D4B56A"
+                                    HorizontalTextAlignment="Center"
+                                    VerticalTextAlignment="Center" />
+
+                            </Border>
+
+
+                            <Border
+                                Grid.Column="1"
+                                HeightRequest="44"
+                                BackgroundColor="#202117"
+                                Stroke="#3A3925"
+                                StrokeThickness="1">
+
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="11" />
+                                </Border.StrokeShape>
+
+                                <Label
+                                    Text="&#xf16d;"
+                                    FontFamily="FontAwesomeSolid"
+                                    FontSize="18"
+                                    TextColor="#D4B56A"
+                                    HorizontalTextAlignment="Center"
+                                    VerticalTextAlignment="Center" />
+
+                            </Border>
+
+
+                            <Border
+                                Grid.Column="2"
+                                HeightRequest="44"
+                                BackgroundColor="#202117"
+                                Stroke="#3A3925"
+                                StrokeThickness="1">
+
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="11" />
+                                </Border.StrokeShape>
+
+                                <Label
+                                    Text="&#xf232;"
+                                    FontFamily="FontAwesomeSolid"
+                                    FontSize="18"
+                                    TextColor="#D4B56A"
+                                    HorizontalTextAlignment="Center"
+                                    VerticalTextAlignment="Center" />
+
+                            </Border>
+
+
+                            <!-- LOGOUT -->
+                            <Border
+                                x:Name="LogoutMenuRow"
+                                IsVisible="False"
+                                Grid.Column="3"
+                                HeightRequest="44"
+                                BackgroundColor="#202117"
+                                Stroke="#3A3925"
+                                StrokeThickness="1"
+                                HorizontalOptions="End"
+                                Padding="12,0">
+
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="11" />
+                                </Border.StrokeShape>
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnLogoutTapped" />
+                                </Border.GestureRecognizers>
+
+                                <HorizontalStackLayout
+                                    Spacing="7"
+                                    VerticalOptions="Center">
+
+                                    <Label
+                                        Text="&#xf2f5;"
+                                        FontFamily="FontAwesomeSolid"
+                                        FontSize="17"
+                                        TextColor="#D4B56A" />
+
+                                    <Label
+                                        Text="Çıkış"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        TextColor="#D4B56A"
+                                        VerticalTextAlignment="Center" />
+
+                                </HorizontalStackLayout>
+
+                            </Border>
+
+                        </Grid>
+
+                    </VerticalStackLayout>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+        <!-- /MAZLUM SIDEBAR -->
+
+</Grid>
+
+</ContentPage>

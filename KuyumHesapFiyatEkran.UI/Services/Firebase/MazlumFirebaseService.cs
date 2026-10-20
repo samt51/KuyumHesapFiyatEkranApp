@@ -1,0 +1,864 @@
+using System.Globalization;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+
+namespace KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+public sealed class MazlumFirebaseService : IMazlumFirebaseService
+{
+    private readonly HttpClient httpClient;
+    private readonly MazlumFirebaseOptions options;
+
+    public MazlumFirebaseService(
+        HttpClient httpClient,
+        MazlumFirebaseOptions options)
+    {
+        this.httpClient = httpClient;
+        this.options = options;
+    }
+
+    public async Task<MazlumFirebaseRatesResult> GetRatesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var result = new MazlumFirebaseRatesResult();
+
+        await LoadPricesAsync(result, cancellationToken);
+        await LoadMetaAsync(result, cancellationToken);
+
+        return result;
+    }
+
+    public async Task<List<MazlumFirebaseKurItem>> GetKurCatalogAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"{options.FirestoreBaseUrl}/meta/kur";
+
+        using var response =
+            await httpClient.GetAsync(url, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        await using var stream =
+            await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        using var json = await JsonDocument.ParseAsync(
+            stream,
+            cancellationToken: cancellationToken);
+
+        var result = new List<MazlumFirebaseKurItem>();
+
+        if (!json.RootElement.TryGetProperty("fields", out var fields))
+            return result;
+
+        // Web tarafı önce meta/kur.list kullanıyor.
+        if (fields.TryGetProperty("list", out var listField) &&
+            listField.TryGetProperty("arrayValue", out var arrayValue) &&
+            arrayValue.TryGetProperty("values", out var values) &&
+            values.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var value in values.EnumerateArray())
+            {
+                if (!value.TryGetProperty("mapValue", out var mapValue) ||
+                    !mapValue.TryGetProperty("fields", out var row))
+                {
+                    continue;
+                }
+
+                var code = GetString(row, "code");
+
+                if (string.IsNullOrWhiteSpace(code))
+                    continue;
+
+                var alis = GetDecimal(row, "alis");
+                var satis = GetDecimal(row, "satis");
+
+                if (alis <= 0m && satis <= 0m)
+                    continue;
+
+                result.Add(new MazlumFirebaseKurItem
+                {
+                    Code = code.ToUpperInvariant(),
+                    Alis = alis,
+                    Satis = satis,
+                    Source = GetString(row, "source", "formul")
+                });
+            }
+        }
+
+        // list yoksa webdeki gibi rates map fallback.
+        if (result.Count == 0 &&
+            fields.TryGetProperty("rates", out var ratesField) &&
+            ratesField.TryGetProperty("mapValue", out var ratesMap) &&
+            ratesMap.TryGetProperty("fields", out var rateFields))
+        {
+            foreach (var property in rateFields.EnumerateObject())
+            {
+                if (!property.Value.TryGetProperty("mapValue", out var mapValue) ||
+                    !mapValue.TryGetProperty("fields", out var row))
+                {
+                    continue;
+                }
+
+                var code = GetString(row, "code", property.Name);
+
+                if (string.IsNullOrWhiteSpace(code))
+                    continue;
+
+                var alis = GetDecimal(row, "alis");
+                var satis = GetDecimal(row, "satis");
+
+                if (alis <= 0m && satis <= 0m)
+                    continue;
+
+                result.Add(new MazlumFirebaseKurItem
+                {
+                    Code = code.ToUpperInvariant(),
+                    Alis = alis,
+                    Satis = satis,
+                    Source = GetString(row, "source", "formul")
+                });
+            }
+        }
+
+        return result
+            .GroupBy(x => x.Code, StringComparer.OrdinalIgnoreCase)
+            .Select(x => x.First())
+            .OrderBy(x => x.Code, StringComparer.Create(
+                CultureInfo.GetCultureInfo("tr-TR"),
+                ignoreCase: true))
+            .ToList();
+    }
+
+    public async Task<List<MazlumFirebaseBranch>> GetBranchesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"{options.FirestoreBaseUrl}/branches?pageSize=100";
+
+        using var response =
+            await httpClient.GetAsync(url, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        await using var stream =
+            await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        using var json = await JsonDocument.ParseAsync(
+            stream,
+            cancellationToken: cancellationToken);
+
+        var result = new List<MazlumFirebaseBranch>();
+
+        if (!json.RootElement.TryGetProperty(
+                "documents",
+                out var documents))
+        {
+            return result;
+        }
+
+        foreach (var document in documents.EnumerateArray())
+        {
+            if (!document.TryGetProperty("fields", out var fields))
+                continue;
+
+            var name = GetString(fields, "name");
+
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+
+            result.Add(new MazlumFirebaseBranch
+            {
+                Id = GetDocumentId(document),
+                Name = name.Trim(),
+                Phone = GetString(fields, "phone").Trim(),
+                Address = GetString(fields, "address").Trim(),
+                ImageUrl = GetString(fields, "imageUrl"),
+                Order = GetInt(fields, "order")
+            });
+        }
+
+        return result
+            .OrderBy(x => x.Order)
+            .ThenBy(x => x.Name)
+            .ToList();
+    }
+
+    public async Task<MazlumFirebasePageContent> GetPageAsync(
+        string id,
+        MazlumFirebasePageContent fallback,
+        CancellationToken cancellationToken = default)
+    {
+        var url =
+            $"{options.FirestoreBaseUrl}/meta/{Uri.EscapeDataString(id)}";
+
+        try
+        {
+            using var response =
+                await httpClient.GetAsync(url, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return fallback;
+
+            await using var stream =
+                await response.Content.ReadAsStreamAsync(cancellationToken);
+
+            using var json =
+                await JsonDocument.ParseAsync(
+                    stream,
+                    cancellationToken: cancellationToken);
+
+            if (!json.RootElement.TryGetProperty(
+                    "fields",
+                    out var fields))
+            {
+                return fallback;
+            }
+
+            var title = GetString(fields, "title");
+            var body = GetString(fields, "body");
+            var linkLabel = GetString(fields, "linkLabel");
+            var linkUrl = GetString(fields, "linkUrl");
+
+            return new MazlumFirebasePageContent
+            {
+                Title =
+                    string.IsNullOrWhiteSpace(title)
+                        ? fallback.Title
+                        : title,
+
+                Body =
+                    fields.TryGetProperty("body", out _)
+                        ? body
+                        : fallback.Body,
+
+                LinkLabel =
+                    fields.TryGetProperty("linkLabel", out _)
+                        ? linkLabel
+                        : fallback.LinkLabel,
+
+                LinkUrl =
+                    fields.TryGetProperty("linkUrl", out _)
+                        ? linkUrl
+                        : fallback.LinkUrl
+            };
+        }
+        catch
+        {
+            return fallback;
+        }
+    }
+
+    public async Task<MazlumFirebaseContact> GetContactAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var fallback = new MazlumFirebaseContact();
+        var url = $"{options.FirestoreBaseUrl}/meta/contact";
+
+        try
+        {
+            using var response =
+                await httpClient.GetAsync(url, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return fallback;
+
+            await using var stream =
+                await response.Content.ReadAsStreamAsync(
+                    cancellationToken);
+
+            using var json =
+                await JsonDocument.ParseAsync(
+                    stream,
+                    cancellationToken: cancellationToken);
+
+            if (!json.RootElement.TryGetProperty(
+                    "fields",
+                    out var fields))
+            {
+                return fallback;
+            }
+
+            var phone =
+                GetString(fields, "phone");
+
+            var phoneDisplay =
+                GetString(fields, "phoneDisplay");
+
+            var instagram =
+                GetString(fields, "instagram");
+
+            var whatsapp =
+                GetString(fields, "whatsapp");
+
+            return new MazlumFirebaseContact
+            {
+                Phone =
+                    string.IsNullOrWhiteSpace(phone)
+                        ? fallback.Phone
+                        : phone,
+
+                PhoneDisplay =
+                    string.IsNullOrWhiteSpace(phoneDisplay)
+                        ? fallback.PhoneDisplay
+                        : phoneDisplay,
+
+                Instagram =
+                    string.IsNullOrWhiteSpace(instagram)
+                        ? fallback.Instagram
+                        : instagram,
+
+                Whatsapp =
+                    string.IsNullOrWhiteSpace(whatsapp)
+                        ? fallback.Whatsapp
+                        : whatsapp
+            };
+        }
+        catch
+        {
+            return fallback;
+        }
+    }
+
+    public async Task SaveContactAsync(
+        MazlumFirebaseContact contact,
+        string idToken,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(idToken))
+        {
+            throw new InvalidOperationException(
+                "Firebase yönetici oturumu bulunamadı.");
+        }
+
+        var url =
+            $"{options.FirestoreBaseUrl}/meta/contact" +
+            "?updateMask.fieldPaths=phone" +
+            "&updateMask.fieldPaths=phoneDisplay" +
+            "&updateMask.fieldPaths=instagram" +
+            "&updateMask.fieldPaths=whatsapp";
+
+        var payload = new
+        {
+            fields = new
+            {
+                phone = new
+                {
+                    stringValue =
+                        contact.Phone?.Trim() ?? string.Empty
+                },
+                phoneDisplay = new
+                {
+                    stringValue =
+                        contact.PhoneDisplay?.Trim() ?? string.Empty
+                },
+                instagram = new
+                {
+                    stringValue =
+                        contact.Instagram?.Trim() ?? string.Empty
+                },
+                whatsapp = new
+                {
+                    stringValue =
+                        contact.Whatsapp?.Trim() ?? string.Empty
+                }
+            }
+        };
+
+        var json =
+            JsonSerializer.Serialize(payload);
+
+        using var request =
+            new HttpRequestMessage(
+                HttpMethod.Patch,
+                url);
+
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue(
+                "Bearer",
+                idToken);
+
+        request.Content =
+            new StringContent(
+                json,
+                Encoding.UTF8,
+                "application/json");
+
+        using var response =
+            await httpClient.SendAsync(
+                request,
+                cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task SavePageAsync(
+        string id,
+        MazlumFirebasePageContent content,
+        string idToken,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(idToken))
+            throw new InvalidOperationException(
+                "Firebase yönetici oturumu bulunamadı.");
+
+        var url =
+            $"{options.FirestoreBaseUrl}/meta/{Uri.EscapeDataString(id)}" +
+            "?updateMask.fieldPaths=title" +
+            "&updateMask.fieldPaths=body" +
+            "&updateMask.fieldPaths=linkLabel" +
+            "&updateMask.fieldPaths=linkUrl";
+
+        var payload = new
+        {
+            fields = new
+            {
+                title = new
+                {
+                    stringValue =
+                        string.IsNullOrWhiteSpace(content.Title)
+                            ? "Başlık"
+                            : content.Title.Trim()
+                },
+
+                body = new
+                {
+                    stringValue = content.Body ?? string.Empty
+                },
+
+                linkLabel = new
+                {
+                    stringValue =
+                        content.LinkLabel?.Trim() ?? string.Empty
+                },
+
+                linkUrl = new
+                {
+                    stringValue =
+                        content.LinkUrl?.Trim() ?? string.Empty
+                }
+            }
+        };
+
+        var json = JsonSerializer.Serialize(payload);
+
+        using var request =
+            new HttpRequestMessage(
+                HttpMethod.Patch,
+                url);
+
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue(
+                "Bearer",
+                idToken);
+
+        request.Content =
+            new StringContent(
+                json,
+                Encoding.UTF8,
+                "application/json");
+
+        using var response =
+            await httpClient.SendAsync(
+                request,
+                cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    private async Task LoadPricesAsync(
+        MazlumFirebaseRatesResult result,
+        CancellationToken cancellationToken)
+    {
+        var url = $"{options.FirestoreBaseUrl}/prices?pageSize=200";
+
+        using var response = await httpClient.GetAsync(url, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        await using var stream =
+            await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        using var json = await JsonDocument.ParseAsync(
+            stream,
+            cancellationToken: cancellationToken);
+
+        if (!json.RootElement.TryGetProperty("documents", out var documents))
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"[MAZLUM] Firebase prices response has no documents. JSON: {json.RootElement}");
+            return;
+        }
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[MAZLUM] Firebase prices documents count: {documents.GetArrayLength()}");
+
+        foreach (var document in documents.EnumerateArray())
+        {
+            if (!document.TryGetProperty("fields", out var fields))
+                continue;
+
+            var item = new MazlumFirebasePrice
+            {
+                Id = GetDocumentId(document),
+                Name = GetString(fields, "name"),
+                Buy = GetDecimal(fields, "buy"),
+                Sell = GetDecimal(fields, "sell"),
+                BuyChangePercent = GetNullableDecimal(fields, "buyChangePct"),
+                SellChangePercent =
+                    GetNullableDecimal(fields, "sellChangePct")
+                    ?? GetNullableDecimal(fields, "changePct"),
+                Unit = GetString(fields, "unit", "₺"),
+                List = GetString(fields, "list", "home"),
+                Order = GetInt(fields, "order"),
+                PrevBuy = GetNullableDecimal(fields, "prevBuy"),
+                PrevSell = GetNullableDecimal(fields, "prevSell"),
+                BuyFormula = GetFormula(fields, "buyFormula"),
+                SellFormula = GetFormula(fields, "sellFormula")
+            };
+
+            if (string.IsNullOrWhiteSpace(item.Name))
+                continue;
+
+            result.Prices.Add(item);
+        }
+
+        result.Prices = result.Prices
+            .OrderBy(x => x.Order)
+            .ThenBy(x => x.Name)
+            .ToList();
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[MAZLUM] LoadPricesAsync OK. Count={result.Prices.Count}");
+    }
+
+    private async Task LoadMetaAsync(
+        MazlumFirebaseRatesResult result,
+        CancellationToken cancellationToken)
+    {
+        var url = $"{options.FirestoreBaseUrl}/meta/app";
+
+        using var response = await httpClient.GetAsync(url, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            return;
+
+        await using var stream =
+            await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        using var json = await JsonDocument.ParseAsync(
+            stream,
+            cancellationToken: cancellationToken);
+
+        if (!json.RootElement.TryGetProperty("fields", out var fields))
+            return;
+
+        var value = GetString(fields, "lastKurSyncAt");
+
+        if (string.IsNullOrWhiteSpace(value))
+            value = GetString(fields, "updatedAt");
+
+        result.LastUpdate = FormatUpdateTime(value);
+
+        if (DateTimeOffset.TryParse(
+                GetString(fields, "lastKurSyncAt"),
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal |
+                DateTimeStyles.AdjustToUniversal,
+                out var lastKurSyncAt))
+        {
+            result.LastKurSyncAt = lastKurSyncAt;
+        }
+
+        result.LastKurSyncOk =
+            GetBool(fields, "lastKurSyncOk", true);
+
+        var error =
+            GetString(fields, "lastKurSyncError");
+
+        result.LastKurSyncError =
+            string.IsNullOrWhiteSpace(error)
+                ? null
+                : error;
+    }
+
+    private static string GetDocumentId(JsonElement document)
+    {
+        if (!document.TryGetProperty("name", out var nameElement))
+            return string.Empty;
+
+        var fullName = nameElement.GetString();
+
+        if (string.IsNullOrWhiteSpace(fullName))
+            return string.Empty;
+
+        var index = fullName.LastIndexOf('/');
+
+        return index >= 0
+            ? fullName[(index + 1)..]
+            : fullName;
+    }
+
+    private static string GetString(
+        JsonElement fields,
+        string name,
+        string defaultValue = "")
+    {
+        if (!fields.TryGetProperty(name, out var field))
+            return defaultValue;
+
+        if (field.TryGetProperty("stringValue", out var stringValue))
+            return stringValue.GetString() ?? defaultValue;
+
+        return defaultValue;
+    }
+
+    private static bool GetBool(
+        JsonElement fields,
+        string name,
+        bool defaultValue = false)
+    {
+        if (!fields.TryGetProperty(name, out var field))
+            return defaultValue;
+
+        if (field.TryGetProperty(
+                "booleanValue",
+                out var booleanValue))
+        {
+            if (booleanValue.ValueKind ==
+                JsonValueKind.True)
+                return true;
+
+            if (booleanValue.ValueKind ==
+                JsonValueKind.False)
+                return false;
+        }
+
+        return defaultValue;
+    }
+
+    private static decimal GetDecimal(
+        JsonElement fields,
+        string name)
+    {
+        return GetNullableDecimal(fields, name) ?? 0m;
+    }
+
+    private static decimal? GetNullableDecimal(
+        JsonElement fields,
+        string name)
+    {
+        if (!fields.TryGetProperty(name, out var field))
+            return null;
+
+        if (field.TryGetProperty("doubleValue", out var doubleValue))
+        {
+            if (doubleValue.ValueKind == JsonValueKind.Number &&
+                doubleValue.TryGetDecimal(out var decimalValue))
+                return decimalValue;
+
+            if (decimal.TryParse(
+                    doubleValue.GetString(),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out var parsed))
+                return parsed;
+        }
+
+        if (field.TryGetProperty("integerValue", out var integerValue))
+        {
+            if (decimal.TryParse(
+                    integerValue.GetString(),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out var parsed))
+                return parsed;
+        }
+
+        return null;
+    }
+
+    private static MazlumFirebaseFormula? GetFormula(
+        JsonElement fields,
+        string name)
+    {
+        if (!fields.TryGetProperty(name, out var field))
+            return null;
+
+        if (field.TryGetProperty("nullValue", out _))
+            return null;
+
+        if (!field.TryGetProperty("mapValue", out var mapValue) ||
+            !mapValue.TryGetProperty("fields", out var formulaFields))
+        {
+            return null;
+        }
+
+        var reference = GetString(formulaFields, "ref");
+        var op = GetString(formulaFields, "op");
+        var deger = GetNullableDecimal(formulaFields, "deger");
+
+        if (string.IsNullOrWhiteSpace(reference) ||
+            string.IsNullOrWhiteSpace(op) ||
+            !deger.HasValue)
+        {
+            return null;
+        }
+
+        if (op is not "*" and not "/" and not "+" and not "-")
+            return null;
+
+        return new MazlumFirebaseFormula
+        {
+            Ref = reference,
+            Op = op,
+            Deger = deger.Value
+        };
+    }
+
+    private static int GetInt(
+        JsonElement fields,
+        string name)
+    {
+        var value = GetNullableDecimal(fields, name);
+
+        return value.HasValue
+            ? Convert.ToInt32(value.Value)
+            : 0;
+    }
+
+    private static string FormatUpdateTime(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        if (DateTimeOffset.TryParse(
+                value,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal,
+                out var date))
+        {
+            return date.ToLocalTime().ToString("HH:mm");
+        }
+
+        if (value.Length >= 5 && value.Contains(':'))
+            return value[..5];
+
+        return value;
+    }
+
+    public async Task<string> SendBroadcastAsync(
+        string title,
+        string body,
+        string? createdBy,
+        string idToken,
+        CancellationToken cancellationToken = default)
+    {
+        title = title.Trim();
+        body = body.Trim();
+
+        if (string.IsNullOrWhiteSpace(title))
+            throw new ArgumentException("Başlık gerekli.", nameof(title));
+
+        if (string.IsNullOrWhiteSpace(body))
+            throw new ArgumentException("Mesaj gerekli.", nameof(body));
+
+        if (string.IsNullOrWhiteSpace(idToken))
+            throw new InvalidOperationException(
+                "Yönetici oturumu bulunamadı.");
+
+        var fields =
+            new Dictionary<string, object>
+            {
+                ["title"] = new
+                {
+                    stringValue = title
+                },
+
+                ["body"] = new
+                {
+                    stringValue = body
+                },
+
+                ["createdAt"] = new
+                {
+                    timestampValue =
+                        DateTime.UtcNow.ToString(
+                            "O",
+                            System.Globalization.CultureInfo.InvariantCulture)
+                },
+
+                ["status"] = new
+                {
+                    stringValue = "pending"
+                }
+            };
+
+        if (string.IsNullOrWhiteSpace(createdBy))
+        {
+            fields["createdBy"] = new
+            {
+                nullValue = (object?)null
+            };
+        }
+        else
+        {
+            fields["createdBy"] = new
+            {
+                stringValue = createdBy.Trim()
+            };
+        }
+
+        var payload = new
+        {
+            fields
+        };
+
+        using var request =
+            new HttpRequestMessage(
+                HttpMethod.Post,
+                $"{options.FirestoreBaseUrl}/broadcasts");
+
+        request.Headers.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue(
+                "Bearer",
+                idToken);
+
+        request.Content =
+            new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(payload),
+                System.Text.Encoding.UTF8,
+                "application/json");
+
+        using var response =
+            await httpClient.SendAsync(
+                request,
+                cancellationToken);
+
+        var json =
+            await response.Content.ReadAsStringAsync(
+                cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException(
+                $"Broadcast gönderilemedi: {(int)response.StatusCode} {json}");
+        }
+
+        using var document =
+            System.Text.Json.JsonDocument.Parse(json);
+
+        if (document.RootElement.TryGetProperty(
+                "name",
+                out var nameElement))
+        {
+            var fullName =
+                nameElement.GetString();
+
+            if (!string.IsNullOrWhiteSpace(fullName))
+                return fullName.Split('/').Last();
+        }
+
+        return string.Empty;
+    }
+
+}

@@ -1,0 +1,110 @@
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumSettingsPage : ContentPage
+{
+    private const string HomeFavoritesPreferenceKey =
+        "mazlum-home-favorites";
+
+    private bool loading;
+
+    public MazlumSettingsPage()
+    {
+        InitializeComponent();
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        NavigationPage.SetHasNavigationBar(this, false);
+        Shell.SetNavBarIsVisible(this, false);
+
+        loading = true;
+
+        HomeFavoritesCheckBox.IsChecked =
+            Preferences.Default.Get(
+                HomeFavoritesPreferenceKey,
+                false);
+
+        ActiveThemeLabel.Text = "Koyu";
+
+        loading = false;
+    }
+
+    private async void OnBackTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        if (Navigation.NavigationStack.Count > 1)
+            await Navigation.PopAsync();
+    }
+
+    private async void OnMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        // Sidebar'ı sonraki adımda Home ile birebir
+        // aynı component/overlay olarak ekleyeceğiz.
+        await DisplayAlert(
+            "Ayarlar",
+            "Menü bağlantısı hazırlanıyor.",
+            "Tamam");
+    }
+
+    private void OnDarkThemeTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        ActiveThemeLabel.Text = "Koyu";
+
+        Application.Current!.UserAppTheme =
+            AppTheme.Dark;
+    }
+
+    private void OnLightThemeTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        ActiveThemeLabel.Text = "Açık";
+
+        Application.Current!.UserAppTheme =
+            AppTheme.Light;
+    }
+
+    private void OnHomeFavoritesChanged(
+        object? sender,
+        CheckedChangedEventArgs e)
+    {
+        if (loading)
+            return;
+
+        Preferences.Default.Set(
+            HomeFavoritesPreferenceKey,
+            e.Value);
+    }
+
+    private async void OnTvModeTapped(
+        object? sender,
+        TappedEventArgs e)
+    {
+        var services = Handler?.MauiContext?.Services;
+
+        if (services is null)
+            return;
+
+        var page =
+            services.GetRequiredService<MazlumTvPage>();
+
+        await Navigation.PushAsync(page);
+    }
+
+    private async void OnNotificationsClicked(
+        object? sender,
+        EventArgs e)
+    {
+        await DisplayAlert(
+            "Bildirimler",
+            "Firebase native bildirim yapılandırması tamamlandığında bu özellik aktif olacak.",
+            "Tamam");
+    }
+}

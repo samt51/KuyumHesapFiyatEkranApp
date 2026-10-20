@@ -4,6 +4,8 @@
 		<TargetFrameworks>net9.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">$(TargetFrameworks);net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+		<!-- Opt in to the current Google Play Android target without changing Apple builds. -->
+		<TargetFrameworks Condition="'$(GooglePlayRelease)' == 'true' And '$(Brand)' == 'SalihCetinkaya'">net10.0-android36.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
 
@@ -43,6 +45,7 @@
 	<PropertyGroup Condition="'$(Brand)' == 'SalihCetinkaya'">
 		<ApplicationTitle>Salih Çetinkaya Kuyumcu</ApplicationTitle>
 		<ApplicationId>com.salihcetinkaya.kuyumculuk</ApplicationId>
+		<ApplicationId Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">com.salihcetinkaya.kuyumhesap</ApplicationId>
 		<ApplicationDisplayVersion>1.0.9</ApplicationDisplayVersion>
 		<ApplicationVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17</ApplicationVersion>
 		<ApplicationVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'">15</ApplicationVersion>
@@ -52,7 +55,13 @@
 		<ApplicationTitle>Mazlum Kuyumculuk</ApplicationTitle>
 		<ApplicationId>com.mazlumkuyumculuk.kuyumhesap</ApplicationId>
 		<ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationVersion>2</ApplicationVersion>
+
+		<AndroidManifestPlaceholders>tvBanner=@drawable/tv_banner</AndroidManifestPlaceholders>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Brand)' != 'MazlumKuyumculuk'">
+		<AndroidManifestPlaceholders>tvBanner=@mipmap/appicon</AndroidManifestPlaceholders>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
@@ -72,15 +81,17 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Brand)' == 'MazlumKuyumculuk'">
+		<MauiImage Include="Resources\Images\MazlumKuyumculuk\tv_banner.png" />
+
 		<MauiIcon
 				Include="Resources\AppIcon\MazlumKuyumculuk\appicon.png"
 				BaseSize="1024,1024"
 				Color="#050505" />
 
 		<MauiSplashScreen
-				Include="Resources\Splash\splash.png"
-				Color="#050505"
-				BaseSize="180,180" />
+				Include="Resources\Splash\MazlumKuyumculuk\transparent.svg"
+				Color="#FFFFFF"
+				BaseSize="1,1" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Brand)' == 'Aslan'">
@@ -100,6 +111,7 @@
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Include="Resources\Images\SalihCetinkaya\*.png" />
+		<MauiImage Include="Resources\Images\MazlumKuyumculuk\mazlum_splash_logo.png" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 
 		<!-- Custom Fonts -->

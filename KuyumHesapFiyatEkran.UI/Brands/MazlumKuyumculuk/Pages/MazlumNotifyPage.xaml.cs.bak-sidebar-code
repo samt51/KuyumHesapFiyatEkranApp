@@ -1,0 +1,183 @@
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumNotifyPage : ContentPage
+{
+    private const string AdminEmail =
+        "admin@mazlumkuyumculuk.com";
+
+    private readonly IMazlumFirebaseService firebaseService;
+    private readonly IMazlumFirebaseAuthService authService;
+
+    private bool busy;
+
+    public MazlumNotifyPage(
+        IMazlumFirebaseService firebaseService,
+        IMazlumFirebaseAuthService authService)
+    {
+        InitializeComponent();
+
+        this.firebaseService = firebaseService;
+        this.authService = authService;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        await authService.RestoreSessionAsync();
+
+        if (IsAdmin())
+            return;
+
+        await DisplayAlert(
+            "Yetkisiz erişim",
+            "Bu ekran yalnızca yönetici hesabı tarafından kullanılabilir.",
+            "Tamam");
+
+        if (Navigation.NavigationStack.Count > 1)
+            await Navigation.PopAsync();
+    }
+
+    private bool IsAdmin()
+    {
+        return
+            authService.IsAuthenticated &&
+            string.Equals(
+                authService.UserEmail?.Trim(),
+                AdminEmail,
+                StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async void OnSendClicked(
+        object sender,
+        EventArgs e)
+    {
+        if (busy)
+            return;
+
+        ErrorLabel.IsVisible = false;
+        SuccessLabel.IsVisible = false;
+
+        var title =
+            TitleEntry.Text?.Trim() ??
+            string.Empty;
+
+        var body =
+            BodyEditor.Text?.Trim() ??
+            string.Empty;
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            ShowError("Başlık gerekli.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            ShowError("Mesaj gerekli.");
+            return;
+        }
+
+        if (!IsAdmin())
+        {
+            ShowError(
+                "Gönderilemedi. Yönetici oturumu gerekir.");
+
+            return;
+        }
+
+        try
+        {
+            SetBusy(true);
+
+            var token =
+                await authService.GetIdTokenAsync();
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                ShowError(
+                    "Gönderilemedi. Yönetici oturumu gerekir.");
+
+                return;
+            }
+
+            await firebaseService.SendBroadcastAsync(
+                title,
+                body,
+                authService.UserEmail,
+                token);
+
+            TitleEntry.Text = string.Empty;
+            BodyEditor.Text = string.Empty;
+
+            ErrorLabel.IsVisible = false;
+
+            SuccessLabel.Text =
+                "Bildirim gönderildi.";
+
+            SuccessLabel.IsVisible = true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Broadcast error: {ex}");
+
+            ShowError(
+                "Gönderilemedi. Yönetici oturumu gerekir.");
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    private void SetBusy(bool value)
+    {
+        busy = value;
+
+        SendButton.IsEnabled = !value;
+        TitleEntry.IsEnabled = !value;
+        BodyEditor.IsEnabled = !value;
+
+        SendButton.Text =
+            value
+                ? "Gönderiliyor…"
+                : "Gönder";
+    }
+
+    private void ShowError(string message)
+    {
+        SuccessLabel.IsVisible = false;
+
+        ErrorLabel.Text = message;
+        ErrorLabel.IsVisible = true;
+    }
+
+    private void OnInputChanged(
+        object sender,
+        TextChangedEventArgs e)
+    {
+        ErrorLabel.IsVisible = false;
+        SuccessLabel.IsVisible = false;
+    }
+
+    private async void OnBackTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await Navigation.PopAsync();
+    }
+
+    private async void OnMenuClicked(
+        object sender,
+        EventArgs e)
+    {
+        // Sidebar'ı bir sonraki adımda Home ile birebir bağlıyoruz.
+        await DisplayAlert(
+            "Menü",
+            "Sidebar bağlantısı hazırlanıyor.",
+            "Tamam");
+    }
+}

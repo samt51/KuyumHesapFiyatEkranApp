@@ -1,7 +1,10 @@
+using KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Services;
+using KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
 using System.Reflection;
 using KuyumHesapFiyatEkran.Core;
 using KuyumHesapFiyatEkran.UI.Pages;
 using KuyumHesapFiyatEkran.UI.Services;
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
 using KuyumHesapFiyatEkran.UI.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -19,6 +22,8 @@ namespace KuyumHesapFiyatEkran.UI
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFont("fa-solid-900.ttf", "FontAwesomeSolid");
+                    fonts.AddFont("fa-brands-400.ttf", "FontAwesomeBrands");
                 });
 
             AddAppSettings(builder.Configuration);
@@ -29,7 +34,31 @@ namespace KuyumHesapFiyatEkran.UI
 
             builder.Services.AddCoreServices(builder.Configuration);
             builder.Services.AddSingleton(brandSettings);
-            builder.Services.AddSingleton<LiveRatesStore>();
+
+            // Mazlum Kuyumculuk Firebase/Firestore reader.
+            // Servis DI'da kayıtlı olsa da sadece BrandSettings.Key == "Mazlum"
+            // olduğunda LiveRatesStore tarafından kullanılacak.
+            builder.Services.AddSingleton(new MazlumFirebaseOptions
+            {
+                ProjectId = "mazlum-kuyumculuk"
+            });
+            builder.Services.AddHttpClient<IMazlumFirebaseService, MazlumFirebaseService>();
+            builder.Services.AddSingleton<IMazlumFirebaseAuthService, MazlumFirebaseAuthService>();
+
+            builder.Services.AddSingleton<MazlumFavoritesService>();
+builder.Services.AddSingleton<LiveRatesStore>();
+            builder.Services.AddSingleton<MazlumHomePage>();
+            builder.Services.AddTransient<MazlumSplashPage>();
+            builder.Services.AddTransient<MazlumCalculationPage>();
+builder.Services.AddTransient<MazlumBranchesPage>();
+            builder.Services.AddTransient<MazlumAboutPage>();
+            builder.Services.AddTransient<MazlumLegalPage>();
+            builder.Services.AddTransient<MazlumNotifyPage>();
+            builder.Services.AddTransient<MazlumSettingsPage>();
+            builder.Services.AddTransient<MazlumTvPage>();
+            builder.Services.AddTransient<MazlumProductEditPage>();
+            builder.Services.AddTransient<MazlumLoginChooserPage>();
+            builder.Services.AddTransient<MazlumLoginPage>();
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<SalihHomePage>();

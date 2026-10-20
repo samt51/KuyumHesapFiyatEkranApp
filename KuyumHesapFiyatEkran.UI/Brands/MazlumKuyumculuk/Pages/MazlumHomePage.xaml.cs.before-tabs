@@ -1,0 +1,196 @@
+using System.Globalization;
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumHomePage : ContentPage
+{
+    private readonly IMazlumFirebaseService firebaseService;
+
+    private bool loaded;
+
+    public MazlumHomePage(
+        IMazlumFirebaseService firebaseService)
+    {
+        InitializeComponent();
+
+        this.firebaseService = firebaseService;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (loaded)
+            return;
+
+        loaded = true;
+
+        await LoadPricesAsync();
+    }
+
+    private async Task LoadPricesAsync()
+    {
+        try
+        {
+            var result = await firebaseService.GetRatesAsync();
+
+            var items = result.Prices
+                .Where(x =>
+                    string.Equals(
+                        x.List,
+                        "home",
+                        StringComparison.OrdinalIgnoreCase))
+                .OrderBy(x => x.Order)
+                .ThenBy(x => x.Name)
+                .Select(CreateRow)
+                .ToList();
+
+            PricesCollection.ItemsSource = items;
+
+            LastUpdateLabel.Text =
+                string.IsNullOrWhiteSpace(result.LastUpdate)
+                    ? "--:--"
+                    : result.LastUpdate;
+
+            LiveIndicator.Fill =
+                result.IsKurLive
+                    ? Color.FromArgb("#3DCF8E")
+                    : Color.FromArgb("#EF6B6B");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Mazlum Firebase load error: {ex}");
+
+            LiveIndicator.Fill =
+                Color.FromArgb("#EF6B6B");
+
+            LastUpdateLabel.Text = "--:--";
+        }
+    }
+
+    private static MazlumPriceRow CreateRow(
+        MazlumFirebasePrice item)
+    {
+        return new MazlumPriceRow
+        {
+            Id = item.Id,
+            Name = item.Name,
+
+            Buy = FormatPrice(
+                item.Buy,
+                item.Unit),
+
+            Sell = FormatPrice(
+                item.Sell,
+                item.Unit),
+
+            BuyChangeDisplay =
+                FormatChange(item.BuyChangePercent),
+
+            SellChangeDisplay =
+                FormatChange(item.SellChangePercent),
+
+            BuyChangeColor =
+                GetChangeColor(item.BuyChangePercent),
+
+            SellChangeColor =
+                GetChangeColor(item.SellChangePercent)
+        };
+    }
+
+    private static string FormatPrice(
+        decimal value,
+        string unit)
+    {
+        var culture =
+            CultureInfo.GetCultureInfo("tr-TR");
+
+        var formatted =
+            value.ToString("#,##0.##", culture);
+
+        return string.IsNullOrWhiteSpace(unit)
+            ? formatted
+            : $"{formatted} {unit}";
+    }
+
+    private static string FormatChange(
+        decimal? value)
+    {
+        if (!value.HasValue)
+            return string.Empty;
+
+        var prefix =
+            value.Value > 0
+                ? "▲ "
+                : value.Value < 0
+                    ? "▼ "
+                    : string.Empty;
+
+        return
+            prefix +
+            value.Value.ToString(
+                "0.##",
+                CultureInfo.InvariantCulture) +
+            "%";
+    }
+
+    private static Color GetChangeColor(
+        decimal? value)
+    {
+        if (!value.HasValue ||
+            value.Value == 0)
+        {
+            return Color.FromArgb("#777C84");
+        }
+
+        return value.Value > 0
+            ? Color.FromArgb("#3DCF8E")
+            : Color.FromArgb("#EF6B6B");
+    }
+
+    private void OnMenuClicked(
+        object sender,
+        EventArgs e)
+    {
+        Shell.Current.FlyoutIsPresented = true;
+    }
+
+    private void OnPriceSelected(
+        object sender,
+        SelectionChangedEventArgs e)
+    {
+        if (sender is CollectionView collectionView)
+        {
+            collectionView.SelectedItem = null;
+        }
+    }
+
+    private sealed class MazlumPriceRow
+    {
+        public string Id { get; init; } =
+            string.Empty;
+
+        public string Name { get; init; } =
+            string.Empty;
+
+        public string Buy { get; init; } =
+            string.Empty;
+
+        public string Sell { get; init; } =
+            string.Empty;
+
+        public string BuyChangeDisplay { get; init; } =
+            string.Empty;
+
+        public string SellChangeDisplay { get; init; } =
+            string.Empty;
+
+        public Color BuyChangeColor { get; init; } =
+            Colors.Transparent;
+
+        public Color SellChangeColor { get; init; } =
+            Colors.Transparent;
+    }
+}

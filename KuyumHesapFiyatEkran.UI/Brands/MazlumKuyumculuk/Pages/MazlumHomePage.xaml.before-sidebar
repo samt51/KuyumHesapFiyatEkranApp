@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumHomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="#101113">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- HEADER -->
+        <Grid
+            Grid.Row="0"
+            Padding="10,50,10,22"
+            ColumnDefinitions="32,62,Auto,*,Auto,Auto"
+            ColumnSpacing="6"
+            BackgroundColor="#101113">
+
+            <!-- HAMBURGER -->
+            <Button
+                Grid.Column="0"
+                Text="☰"
+                FontSize="28"
+                FontAttributes="Bold"
+                WidthRequest="32"
+                HeightRequest="62"
+                Padding="0"
+                Margin="-5,0,0,0"
+                BackgroundColor="Transparent"
+                TextColor="#D4B56A"
+                VerticalOptions="Center"
+                Clicked="OnMenuClicked" />
+
+            <!-- MK LOGO -->
+            <Border
+                Grid.Column="1"
+                WidthRequest="62"
+                HeightRequest="62"
+                Stroke="#D4B56A"
+                StrokeThickness="2"
+                BackgroundColor="Transparent"
+                VerticalOptions="Center">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="31" />
+                </Border.StrokeShape>
+
+                <Grid RowDefinitions="*,Auto">
+
+                    <Label
+                        Text="mk"
+                        FontSize="23"
+                        FontAttributes="Bold"
+                        TextColor="#D4B56A"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center"
+                        Margin="0,4,0,0" />
+
+                    <Label
+                        Grid.Row="1"
+                        Text="ESTD 1998"
+                        FontSize="5"
+                        FontAttributes="Bold"
+                        CharacterSpacing="1"
+                        TextColor="#D4B56A"
+                        HorizontalTextAlignment="Center"
+                        Margin="0,0,0,8" />
+
+                </Grid>
+
+            </Border>
+
+            <!-- WORDMARK -->
+            <VerticalStackLayout
+                Grid.Column="2"
+                Spacing="0"
+                VerticalOptions="Center"
+                Margin="1,0,0,0">
+
+                <Label
+                    Text="mazlum"
+                    FontSize="23"
+                    FontAttributes="Bold"
+                    TextColor="#D4B56A"
+                    CharacterSpacing="-0.4"
+                    LineBreakMode="NoWrap" />
+
+                <Label
+                    Text="KUYUMCULUK"
+                    FontSize="10"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.25"
+                    TextColor="#D4B56A"
+                    Margin="0,1,0,0"
+                    LineBreakMode="NoWrap" />
+
+            </VerticalStackLayout>
+
+            <!-- LIVE + CLOCK -->
+            <HorizontalStackLayout
+                Grid.Column="4"
+                Spacing="4"
+                VerticalOptions="Center"
+                HorizontalOptions="End">
+
+                <Ellipse
+                    x:Name="LiveIndicator"
+                    WidthRequest="8"
+                    HeightRequest="8"
+                    Fill="#3DCF8E"
+                    VerticalOptions="Center" />
+
+                <Label
+                    x:Name="LastUpdateLabel"
+                    Text="--:--"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="#92979F"
+                    VerticalTextAlignment="Center"
+                    LineBreakMode="NoWrap" />
+
+            </HorizontalStackLayout>
+
+            <!-- ACTION BUTTONS -->
+            <HorizontalStackLayout
+                Grid.Column="5"
+                Spacing="5"
+                VerticalOptions="Center"
+                HorizontalOptions="End">
+
+                <!-- THEME -->
+                <Border
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    Stroke="#343426"
+                    StrokeThickness="1"
+                    BackgroundColor="#191A16">
+
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="10" />
+                    </Border.StrokeShape>
+
+                    <Label
+                        Text="☼"
+                        FontSize="22"
+                        TextColor="#D4B56A"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center" />
+
+                </Border>
+
+                <!-- PLUS -->
+                <Border
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    Stroke="#343426"
+                    StrokeThickness="1"
+                    BackgroundColor="#191A16">
+
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="10" />
+                    </Border.StrokeShape>
+
+                    <Label
+                        Text="+"
+                        FontSize="26"
+                        TextColor="#D4B56A"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center"
+                        Margin="0,-2,0,0" />
+
+                </Border>
+
+            </HorizontalStackLayout>
+
+        </Grid>
+
+        <!-- PRICE LIST -->
+        <Grid
+            Grid.Row="1"
+            Padding="18,0"
+            RowDefinitions="Auto,*">
+
+            <!-- COLUMN HEADERS -->
+            <Grid
+                Grid.Row="0"
+                ColumnDefinitions="1.4*,*,*"
+                Padding="2,10,2,10">
+
+                <Label
+                    Text="ÜRÜN"
+                    FontSize="10"
+                    CharacterSpacing="1.5"
+                    TextColor="#777C84" />
+
+                <Label
+                    Grid.Column="1"
+                    Text="ALIŞ"
+                    FontSize="10"
+                    CharacterSpacing="1.5"
+                    TextColor="#777C84"
+                    HorizontalTextAlignment="End" />
+
+                <Label
+                    Grid.Column="2"
+                    Text="SATIŞ"
+                    FontSize="10"
+                    CharacterSpacing="1.5"
+                    TextColor="#777C84"
+                    HorizontalTextAlignment="End" />
+
+            </Grid>
+
+            <CollectionView
+                x:Name="PricesCollection"
+                Grid.Row="1"
+                SelectionMode="Single"
+                SelectionChanged="OnPriceSelected">
+
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout
+                        Padding="20,50"
+                        Spacing="10">
+
+                        <ActivityIndicator
+                            x:Name="EmptyStateSpinner"
+                            IsRunning="True"
+                            IsVisible="True"
+                            Color="#D4B56A"
+                            HorizontalOptions="Center" />
+
+                        <Label
+                            x:Name="EmptyStateLabel"
+                            Text="Fiyatlar yükleniyor..."
+                            FontSize="13"
+                            TextColor="#777C84"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Grid RowDefinitions="Auto,1">
+
+                            <Grid
+                                Padding="2,17"
+                                ColumnDefinitions="24,1.4*,*,*"
+                                ColumnSpacing="6">
+
+                                <!-- DRAG HANDLE -->
+                                <VerticalStackLayout
+                                    Grid.Column="0"
+                                    WidthRequest="24"
+                                    Spacing="2"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center">
+
+                                    <BoxView
+                                        WidthRequest="11"
+                                        HeightRequest="2"
+                                        CornerRadius="1"
+                                        Color="#777C84"
+                                        HorizontalOptions="Center" />
+
+                                    <BoxView
+                                        WidthRequest="11"
+                                        HeightRequest="2"
+                                        CornerRadius="1"
+                                        Color="#777C84"
+                                        HorizontalOptions="Center" />
+
+                                    <BoxView
+                                        WidthRequest="11"
+                                        HeightRequest="2"
+                                        CornerRadius="1"
+                                        Color="#777C84"
+                                        HorizontalOptions="Center" />
+
+                                </VerticalStackLayout>
+
+                                <!-- PRODUCT -->
+                                <Label
+                                    Grid.Column="1"
+                                    Text="{Binding Name}"
+                                    FontSize="16"
+                                    FontAttributes="None"
+                                    TextColor="#F0F0F0"
+                                    VerticalTextAlignment="Center"
+                                    LineBreakMode="TailTruncation" />
+
+                                <!-- BUY -->
+                                <VerticalStackLayout
+                                    Grid.Column="2"
+                                    Spacing="2"
+                                    HorizontalOptions="End">
+
+                                    <Label
+                                        Text="{Binding Buy}"
+                                        FontSize="19"
+                                        TextColor="#E6E6E6"
+                                        HorizontalTextAlignment="End" />
+
+                                    <Label
+                                        Text="{Binding BuyChangeDisplay}"
+                                        FontSize="11"
+                                        TextColor="{Binding BuyChangeColor}"
+                                        HorizontalTextAlignment="End" />
+
+                                </VerticalStackLayout>
+
+                                <!-- SELL -->
+                                <VerticalStackLayout
+                                    Grid.Column="3"
+                                    Spacing="2"
+                                    HorizontalOptions="End">
+
+                                    <Label
+                                        Text="{Binding Sell}"
+                                        FontSize="19"
+                                        TextColor="#D4B56A"
+                                        HorizontalTextAlignment="End" />
+
+                                    <Label
+                                        Text="{Binding SellChangeDisplay}"
+                                        FontSize="11"
+                                        TextColor="{Binding SellChangeColor}"
+                                        HorizontalTextAlignment="End" />
+
+                                </VerticalStackLayout>
+
+                            </Grid>
+
+                            <BoxView
+                                Grid.Row="1"
+                                HeightRequest="1"
+                                Color="#272A2F" />
+
+                        </Grid>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </Grid>
+
+        <!-- BOTTOM NAV -->
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="*,*,*"
+            Padding="12,9,12,24"
+            BackgroundColor="#121417">
+
+            <!-- FAVORITES -->
+            <Grid
+                x:Name="FavoritesTab"
+                Grid.Column="0"
+                RowDefinitions="Auto,Auto"
+                RowSpacing="2">
+
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="OnFavoritesTapped" />
+                </Grid.GestureRecognizers>
+
+                <Label
+                    x:Name="FavoritesIcon"
+                    Text="☆"
+                    FontSize="24"
+                    TextColor="#777C84"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    x:Name="FavoritesLabel"
+                    Grid.Row="1"
+                    Text="Favoriler"
+                    FontSize="10"
+                    TextColor="#777C84"
+                    HorizontalTextAlignment="Center" />
+
+            </Grid>
+
+            <!-- HOME -->
+            <Grid
+                x:Name="HomeTab"
+                Grid.Column="1"
+                RowDefinitions="Auto,Auto"
+                RowSpacing="2">
+
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="OnHomeTapped" />
+                </Grid.GestureRecognizers>
+
+                <Label
+                    x:Name="HomeIcon"
+                    Text="⌂"
+                    FontSize="24"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    x:Name="HomeLabel"
+                    Grid.Row="1"
+                    Text="Ana sayfa"
+                    FontSize="10"
+                    TextColor="#D4B56A"
+                    HorizontalTextAlignment="Center" />
+
+            </Grid>
+
+            <!-- OTHER -->
+            <Grid
+                x:Name="OtherTab"
+                Grid.Column="2"
+                RowDefinitions="Auto,Auto"
+                RowSpacing="2">
+
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="OnOtherTapped" />
+                </Grid.GestureRecognizers>
+
+                <Label
+                    x:Name="OtherIcon"
+                    Text="◎"
+                    FontSize="24"
+                    TextColor="#777C84"
+                    HorizontalTextAlignment="Center" />
+
+                <Label
+                    x:Name="OtherLabel"
+                    Grid.Row="1"
+                    Text="Diğer"
+                    FontSize="10"
+                    TextColor="#777C84"
+                    HorizontalTextAlignment="Center" />
+
+            </Grid>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

@@ -1,0 +1,67 @@
+namespace KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+public sealed class MazlumFirebasePrice
+{
+    public string Id { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
+
+    public decimal Buy { get; set; }
+
+    public decimal Sell { get; set; }
+
+    public decimal? BuyChangePercent { get; set; }
+
+    public decimal? SellChangePercent { get; set; }
+
+    public string Unit { get; set; } = "₺";
+
+    public string List { get; set; } = "home";
+
+    public int Order { get; set; }
+
+    public decimal? PrevBuy { get; set; }
+
+    public decimal? PrevSell { get; set; }
+
+    public MazlumFirebaseFormula? BuyFormula { get; set; }
+
+    public MazlumFirebaseFormula? SellFormula { get; set; }
+}
+
+public sealed class MazlumFirebaseFormula
+{
+    public string Ref { get; set; } = string.Empty;
+
+    public string Op { get; set; } = "*";
+
+    public decimal Deger { get; set; } = 1m;
+}
+
+public sealed class MazlumFirebaseRatesResult
+{
+    public List<MazlumFirebasePrice> Prices { get; set; } = new();
+
+    public string LastUpdate { get; set; } = string.Empty;
+
+    public DateTimeOffset? LastKurSyncAt { get; set; }
+
+    public bool LastKurSyncOk { get; set; } = true;
+
+    public string? LastKurSyncError { get; set; }
+
+    public bool IsKurLive
+    {
+        get
+        {
+            if (!LastKurSyncOk || !LastKurSyncAt.HasValue)
+                return false;
+
+            var age =
+                DateTimeOffset.UtcNow -
+                LastKurSyncAt.Value.ToUniversalTime();
+
+            return age <= TimeSpan.FromMinutes(2.5);
+        }
+    }
+}

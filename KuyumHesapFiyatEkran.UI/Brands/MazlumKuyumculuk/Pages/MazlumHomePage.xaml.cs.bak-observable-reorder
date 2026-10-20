@@ -1,0 +1,967 @@
+using System.Globalization;
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
+using KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Services;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumHomePage : ContentPage
+{
+    private readonly IMazlumFirebaseService firebaseService;
+    private readonly MazlumFavoritesService favoritesService;
+
+    private readonly IMazlumFirebaseAuthService authService;
+
+    private const string PriceOrderPreferenceKey =
+        "mazlum-price-custom-order";
+
+    private string? draggedPriceId;
+
+    private List<MazlumFirebasePrice> allPrices = new();
+
+    private bool loaded;
+
+    private MazlumTab currentTab =
+        MazlumTab.Home;
+
+    public MazlumHomePage(
+        IMazlumFirebaseService firebaseService,
+        MazlumFavoritesService favoritesService,
+        IMazlumFirebaseAuthService authService)
+    {
+        InitializeComponent();
+
+        this.firebaseService = firebaseService;
+        this.favoritesService = favoritesService;
+        this.authService = authService;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        await RestoreAuthSessionIfNeededAsync();
+        UpdateAuthUi();
+
+        if (loaded)
+        {
+            ShowCurrentTab();
+            return;
+        }
+
+        loaded = true;
+
+        await LoadPricesAsync();
+    }
+
+    private async Task LoadPricesAsync()
+    {
+        try
+        {
+            var result =
+                await firebaseService.GetRatesAsync();
+
+            allPrices = result.Prices
+                .OrderBy(x => x.Order)
+                .ThenBy(x => x.Name)
+                .ToList();
+
+            LastUpdateLabel.Text =
+                string.IsNullOrWhiteSpace(result.LastUpdate)
+                    ? "--:--"
+                    : result.LastUpdate;
+
+            LiveIndicator.Fill =
+                result.IsKurLive
+                    ? Color.FromArgb("#3DCF8E")
+                    : Color.FromArgb("#EF6B6B");
+
+            ShowCurrentTab();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Mazlum Firebase load error: {ex}");
+
+            LiveIndicator.Fill =
+                Color.FromArgb("#EF6B6B");
+
+            LastUpdateLabel.Text =
+                "--:--";
+        }
+    }
+
+    private void ShowCurrentTab()
+    {
+        var favoriteIds =
+            favoritesService.GetIds();
+        IEnumerable<MazlumFirebasePrice> source =
+            currentTab switch
+            {
+                MazlumTab.Home =>
+                    allPrices.Where(
+                        x => string.Equals(
+                            x.List,
+                            "home",
+                            StringComparison.OrdinalIgnoreCase)),
+
+                MazlumTab.Other =>
+                    allPrices.Where(
+                        x => string.Equals(
+                            x.List,
+                            "other",
+                            StringComparison.OrdinalIgnoreCase)),
+
+                MazlumTab.Favorites =>
+                    allPrices.Where(
+                        x => favoriteIds.Contains(x.Id)),
+
+                _ => allPrices
+            };
+
+        var rows =
+            ApplyCustomPriceOrder(source)
+                .Select(CreateRow)
+                .ToList();
+        PricesCollection.ItemsSource =
+            rows;
+
+        if (rows.Count == 0)
+        {
+            EmptyStateLabel.Text =
+                currentTab == MazlumTab.Favorites
+                    ? "Henüz favori yok. Ürüne girip yıldıza dokunun."
+                    : "Gösterilecek ürün yok.";
+
+            EmptyStateSpinner.IsRunning =
+                false;
+
+            EmptyStateSpinner.IsVisible =
+                false;
+        }
+        else
+        {
+            EmptyStateSpinner.IsRunning =
+                false;
+
+            EmptyStateSpinner.IsVisible =
+                false;
+        }
+
+        UpdateTabAppearance();
+    }
+
+    private void UpdateTabAppearance()
+    {
+        var active =
+            Color.FromArgb("#D4B56A");
+
+        var inactive =
+            Color.FromArgb("#777C84");
+
+        FavoritesIcon.TextColor =
+            currentTab == MazlumTab.Favorites
+                ? active
+                : inactive;
+
+        FavoritesLabel.TextColor =
+            currentTab == MazlumTab.Favorites
+                ? active
+                : inactive;
+
+        FavoritesIcon.Text =
+            currentTab == MazlumTab.Favorites
+                ? "★"
+                : "☆";
+
+        HomeIcon.TextColor =
+            currentTab == MazlumTab.Home
+                ? active
+                : inactive;
+
+        HomeLabel.TextColor =
+            currentTab == MazlumTab.Home
+                ? active
+                : inactive;
+
+        OtherIcon.TextColor =
+            currentTab == MazlumTab.Other
+                ? active
+                : inactive;
+
+        OtherLabel.TextColor =
+            currentTab == MazlumTab.Other
+                ? active
+                : inactive;
+    }
+
+    private void OnFavoritesTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        currentTab =
+            MazlumTab.Favorites;
+
+        ShowCurrentTab();
+    }
+
+    private void OnHomeTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        currentTab =
+            MazlumTab.Home;
+
+        ShowCurrentTab();
+    }
+
+    private void OnOtherTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        currentTab =
+            MazlumTab.Other;
+
+        ShowCurrentTab();
+    }
+
+    private static MazlumPriceRow CreateRow(
+        MazlumFirebasePrice item)
+    {
+        return new MazlumPriceRow
+        {
+            Id = item.Id,
+            Source = item,
+            Name = item.Name,
+
+            Buy =
+                FormatPrice(
+                    item.Buy,
+                    item.Unit),
+
+            Sell =
+                FormatPrice(
+                    item.Sell,
+                    item.Unit),
+
+            BuyChangeDisplay =
+                FormatChange(
+                    item.BuyChangePercent),
+
+            SellChangeDisplay =
+                FormatChange(
+                    item.SellChangePercent),
+
+            BuyChangeColor =
+                GetChangeColor(
+                    item.BuyChangePercent),
+
+            SellChangeColor =
+                GetChangeColor(
+                    item.SellChangePercent)
+        };
+    }
+
+    private static string FormatPrice(
+        decimal value,
+        string unit)
+    {
+        var culture =
+            CultureInfo.GetCultureInfo(
+                "tr-TR");
+
+        var formatted =
+            value.ToString(
+                "#,##0",
+                culture);
+
+        return formatted;
+    }
+
+    private static string FormatChange(
+        decimal? value)
+    {
+        if (!value.HasValue)
+            return string.Empty;
+
+        var prefix =
+            value.Value > 0
+                ? "▲ "
+                : value.Value < 0
+                    ? "▼ "
+                    : string.Empty;
+
+        return
+            prefix +
+            value.Value.ToString(
+                "0.##",
+                CultureInfo.InvariantCulture) +
+            "%";
+    }
+
+    private static Color GetChangeColor(
+        decimal? value)
+    {
+        if (!value.HasValue ||
+            value.Value == 0)
+        {
+            return Color.FromArgb(
+                "#777C84");
+        }
+
+        return value.Value > 0
+            ? Color.FromArgb("#3DCF8E")
+            : Color.FromArgb("#EF6B6B");
+    }
+
+    private async void OnMenuClicked(
+        object sender,
+        EventArgs e)
+    {
+        SidebarOverlay.IsVisible = true;
+
+        SidebarPanel.TranslationX = -340;
+
+        await SidebarPanel.TranslateTo(
+            0,
+            0,
+            220,
+            Easing.CubicOut);
+    }
+
+    private async Task CloseSidebarAsync()
+    {
+        await SidebarPanel.TranslateTo(
+            -340,
+            0,
+            180,
+            Easing.CubicIn);
+
+        SidebarOverlay.IsVisible = false;
+    }
+
+    private async void OnSidebarCloseClicked(
+        object sender,
+        EventArgs e)
+    {
+        await CloseSidebarAsync();
+    }
+
+    private async void OnSidebarBackdropTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+    }
+
+    private void OnSidebarPanelTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        // Panel icine dokunuldugunda overlay kapanmasin.
+    }
+
+    private enum MazlumTab
+    {
+        Favorites,
+        Home,
+        Other
+    }
+
+    private IEnumerable<MazlumFirebasePrice> ApplyCustomPriceOrder(
+        IEnumerable<MazlumFirebasePrice> source)
+    {
+        var items =
+            source
+                .OrderBy(x => x.Order)
+                .ThenBy(x => x.Name)
+                .ToList();
+
+        var savedOrder =
+            Preferences.Default.Get(
+                PriceOrderPreferenceKey,
+                string.Empty);
+
+        if (string.IsNullOrWhiteSpace(savedOrder))
+        {
+            return items;
+        }
+
+        var ids =
+            savedOrder
+                .Split(
+                    '|',
+                    StringSplitOptions.RemoveEmptyEntries |
+                    StringSplitOptions.TrimEntries)
+                .ToList();
+
+        if (ids.Count == 0)
+        {
+            return items;
+        }
+
+        var positions =
+            ids
+                .Select((id, index) => new { id, index })
+                .GroupBy(x => x.id)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.First().index,
+                    StringComparer.OrdinalIgnoreCase);
+
+        return items
+            .OrderBy(
+                x => positions.TryGetValue(
+                    x.Id,
+                    out var position)
+                        ? position
+                        : int.MaxValue)
+            .ThenBy(x => x.Order)
+            .ThenBy(x => x.Name)
+            .ToList();
+    }
+
+    private void SaveCurrentPriceOrder(
+        IReadOnlyList<MazlumFirebasePrice> prices)
+    {
+        var order =
+            string.Join(
+                "|",
+                prices
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Id))
+                    .Select(x => x.Id));
+
+        Preferences.Default.Set(
+            PriceOrderPreferenceKey,
+            order);
+    }
+
+    private void OnPriceDragStarting(
+        object sender,
+        DragStartingEventArgs e)
+    {
+        if (sender is not DragGestureRecognizer dragGesture ||
+            dragGesture.BindingContext is not MazlumPriceRow row)
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        draggedPriceId = row.Id;
+
+        e.Data.Properties["MazlumPriceId"] =
+            row.Id;
+    }
+
+    private void OnPriceDragOver(
+        object sender,
+        DragEventArgs e)
+    {
+        e.AcceptedOperation =
+            DataPackageOperation.Copy;
+
+        if (sender is not DropGestureRecognizer dropGesture)
+        {
+            return;
+        }
+
+        if (dropGesture.Parent is VisualElement target)
+        {
+            target.BackgroundColor =
+                Color.FromArgb("#383112");
+        }
+    }
+
+    private void OnPriceDragLeave(
+        object sender,
+        DragEventArgs e)
+    {
+        if (sender is not DropGestureRecognizer dropGesture)
+        {
+            return;
+        }
+
+        if (dropGesture.Parent is VisualElement target)
+        {
+            target.BackgroundColor =
+                Colors.Transparent;
+        }
+    }
+
+    private void OnPriceDropped(
+        object sender,
+        DropEventArgs e)
+    {
+        try
+        {
+            if (sender is DropGestureRecognizer highlightGesture &&
+                highlightGesture.Parent is VisualElement highlightTarget)
+            {
+                highlightTarget.BackgroundColor =
+                    Colors.Transparent;
+            }
+
+            if (sender is not DropGestureRecognizer dropGesture ||
+                dropGesture.BindingContext is not MazlumPriceRow targetRow)
+            {
+                return;
+            }
+
+            var sourceId =
+                draggedPriceId;
+
+            if (string.IsNullOrWhiteSpace(sourceId) ||
+                string.Equals(
+                    sourceId,
+                    targetRow.Id,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var ordered =
+                ApplyCustomPriceOrder(allPrices)
+                    .ToList();
+
+            var sourceIndex =
+                ordered.FindIndex(
+                    x => string.Equals(
+                        x.Id,
+                        sourceId,
+                        StringComparison.OrdinalIgnoreCase));
+
+            var targetIndex =
+                ordered.FindIndex(
+                    x => string.Equals(
+                        x.Id,
+                        targetRow.Id,
+                        StringComparison.OrdinalIgnoreCase));
+
+            if (sourceIndex < 0 ||
+                targetIndex < 0)
+            {
+                return;
+            }
+
+            var moving =
+                ordered[sourceIndex];
+
+            ordered.RemoveAt(sourceIndex);
+
+            targetIndex =
+                ordered.FindIndex(
+                    x => string.Equals(
+                        x.Id,
+                        targetRow.Id,
+                        StringComparison.OrdinalIgnoreCase));
+
+            if (targetIndex < 0)
+            {
+                return;
+            }
+
+            ordered.Insert(
+                targetIndex,
+                moving);
+
+            SaveCurrentPriceOrder(ordered);
+
+            ShowCurrentTab();
+        }
+        finally
+        {
+            draggedPriceId = null;
+        }
+    }
+
+    private void OnPriceHandlePanUpdated(
+        object sender,
+        PanUpdatedEventArgs e)
+    {
+        if (sender is not PanGestureRecognizer panGesture ||
+            panGesture.BindingContext is not MazlumPriceRow row)
+        {
+            return;
+        }
+
+        if (panGesture.Parent is not VisualElement handle)
+        {
+            return;
+        }
+
+        const double reorderThreshold = 32d;
+
+        switch (e.StatusType)
+        {
+            case GestureStatus.Started:
+            {
+                draggedPriceId = row.Id;
+
+                handle.Scale = 1.08;
+
+                SetHandleColor(
+                    handle,
+                    Color.FromArgb("#D4B56A"));
+
+                break;
+            }
+
+            case GestureStatus.Running:
+            {
+                if (string.IsNullOrWhiteSpace(draggedPriceId))
+                {
+                    return;
+                }
+
+                // Handle parmakla beraber hafif hareket etsin.
+                handle.TranslationY =
+                    Math.Clamp(
+                        e.TotalY,
+                        -reorderThreshold,
+                        reorderThreshold);
+
+                // Eşik geçilmediyse henüz sıra değiştirme.
+                if (Math.Abs(e.TotalY) < reorderThreshold)
+                {
+                    return;
+                }
+
+                var visibleRows =
+                    (PricesCollection.ItemsSource as
+                        IEnumerable<MazlumPriceRow>)
+                    ?.ToList();
+
+                if (visibleRows is null ||
+                    visibleRows.Count < 2)
+                {
+                    return;
+                }
+
+                var currentIndex =
+                    visibleRows.FindIndex(
+                        x => string.Equals(
+                            x.Id,
+                            draggedPriceId,
+                            StringComparison.OrdinalIgnoreCase));
+
+                if (currentIndex < 0)
+                {
+                    return;
+                }
+
+                var direction =
+                    e.TotalY > 0
+                        ? 1
+                        : -1;
+
+                var targetIndex =
+                    currentIndex + direction;
+
+                if (targetIndex < 0 ||
+                    targetIndex >= visibleRows.Count)
+                {
+                    handle.TranslationY = 0;
+                    return;
+                }
+
+                var targetRow =
+                    visibleRows[targetIndex];
+
+                MovePriceToTarget(
+                    draggedPriceId,
+                    targetRow.Id,
+                    direction > 0);
+
+                // ItemsSource yeniden kuruldu.
+                // Yeni render edilen handle gesture'i devralacagi icin
+                // mevcut transformu sifirla.
+                handle.TranslationY = 0;
+
+                break;
+            }
+
+            case GestureStatus.Completed:
+            case GestureStatus.Canceled:
+            {
+                handle.TranslationY = 0;
+                handle.Scale = 1;
+
+                SetHandleColor(
+                    handle,
+                    Color.FromArgb("#777C84"));
+
+                draggedPriceId = null;
+
+                break;
+            }
+        }
+    }
+
+    private static void SetHandleColor(
+        VisualElement handle,
+        Color color)
+    {
+        if (handle is not Grid grid)
+        {
+            return;
+        }
+
+        var stack =
+            grid.Children
+                .OfType<VerticalStackLayout>()
+                .FirstOrDefault();
+
+        if (stack is null)
+        {
+            return;
+        }
+
+        foreach (var box in stack.Children.OfType<BoxView>())
+        {
+            box.Color = color;
+        }
+    }
+
+    private void MovePriceToTarget(
+        string sourceId,
+        string targetId,
+        bool placeAfterTarget)
+    {
+        if (string.Equals(
+            sourceId,
+            targetId,
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var ordered =
+            ApplyCustomPriceOrder(allPrices)
+                .ToList();
+
+        var sourceIndex =
+            ordered.FindIndex(
+                x => string.Equals(
+                    x.Id,
+                    sourceId,
+                    StringComparison.OrdinalIgnoreCase));
+
+        var targetIndex =
+            ordered.FindIndex(
+                x => string.Equals(
+                    x.Id,
+                    targetId,
+                    StringComparison.OrdinalIgnoreCase));
+
+        if (sourceIndex < 0 ||
+            targetIndex < 0)
+        {
+            return;
+        }
+
+        var moving =
+            ordered[sourceIndex];
+
+        ordered.RemoveAt(sourceIndex);
+
+        targetIndex =
+            ordered.FindIndex(
+                x => string.Equals(
+                    x.Id,
+                    targetId,
+                    StringComparison.OrdinalIgnoreCase));
+
+        if (targetIndex < 0)
+        {
+            return;
+        }
+
+        if (placeAfterTarget)
+        {
+            targetIndex++;
+        }
+
+        targetIndex =
+            Math.Clamp(
+                targetIndex,
+                0,
+                ordered.Count);
+
+        ordered.Insert(
+            targetIndex,
+            moving);
+
+        SaveCurrentPriceOrder(ordered);
+
+        // allPrices'i de yeni siraya al.
+        // Boylece sonraki hareket ayni siradan devam eder.
+        allPrices = ordered;
+
+        ShowCurrentTab();
+    }
+
+    private async void OnPriceSelected(
+        object sender,
+        SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault()
+            is not MazlumPriceRow row)
+        {
+            return;
+        }
+
+        if (sender is CollectionView collectionView)
+        {
+            collectionView.SelectedItem = null;
+        }
+
+        await Navigation.PushAsync(
+            new MazlumDetailPage(
+                row.Source,
+                favoritesService));
+    }
+
+    private sealed class MazlumPriceRow
+    {
+        public string Id { get; init; } =
+            string.Empty;
+
+        public MazlumFirebasePrice Source { get; init; } =
+            null!;
+
+        public string Name { get; init; } =
+            string.Empty;
+
+        public string Buy { get; init; } =
+            string.Empty;
+
+        public string Sell { get; init; } =
+            string.Empty;
+
+        public string BuyChangeDisplay { get; init; } =
+            string.Empty;
+
+        public string SellChangeDisplay { get; init; } =
+            string.Empty;
+
+        public Color BuyChangeColor { get; init; } =
+            Colors.Transparent;
+
+        public Color SellChangeColor { get; init; } =
+            Colors.Transparent;
+    }
+
+    private async Task RestoreAuthSessionIfNeededAsync()
+    {
+        if (authService.IsAuthenticated)
+        {
+            return;
+        }
+
+        try
+        {
+            await authService.RestoreSessionAsync();
+        }
+        catch
+        {
+            // Kayitli oturum okunamazsa kullanici
+            // giris yapmamis gibi devam eder.
+        }
+    }
+
+    private void UpdateAuthUi()
+    {
+        var isAuthenticated =
+            authService.IsAuthenticated &&
+            !string.IsNullOrWhiteSpace(authService.UserEmail);
+
+        var email = authService.UserEmail?.Trim();
+
+        AuthUserLabel.Text =
+            isAuthenticated
+                ? email
+                : "Giriş Yap";
+
+        LogoutMenuRow.IsVisible = isAuthenticated;
+
+        var isAdmin =
+            isAuthenticated &&
+            string.Equals(
+                email,
+                "admin@mazlumkuyumculuk.com",
+                StringComparison.OrdinalIgnoreCase);
+
+        NotificationMenuRow.IsVisible = isAdmin;
+    }
+
+    private async void OnAuthMenuTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        if (authService.IsAuthenticated)
+        {
+            return;
+        }
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumLoginChooserPage>();
+
+        if (page is null)
+        {
+            await DisplayAlert(
+                "Hata",
+                "Giriş ekranı açılamadı.",
+                "Tamam");
+
+            return;
+        }
+
+        await Navigation.PushAsync(page);
+    }
+
+    private async void OnLogoutTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        try
+        {
+            await authService.SignOutAsync();
+            UpdateAuthUi();
+        }
+        catch
+        {
+            await DisplayAlert(
+                "Hata",
+                "Çıkış yapılamadı. Tekrar deneyin.",
+                "Tamam");
+        }
+    }
+
+    private async void OnCalculationMenuTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumCalculationPage>();
+
+        if (page is null)
+        {
+            await DisplayAlert(
+                "Hata",
+                "Hesaplama sayfası açılamadı.",
+                "Tamam");
+
+            return;
+        }
+
+        await Navigation.PushAsync(page);
+    }
+
+}

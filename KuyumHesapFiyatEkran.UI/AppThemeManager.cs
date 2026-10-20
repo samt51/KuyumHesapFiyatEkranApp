@@ -110,48 +110,60 @@ namespace KuyumHesapFiyatEkran.UI
 private static readonly IReadOnlyDictionary<string, Color> MazlumLightColors =
     new Dictionary<string, Color>
     {
-        ["AppBackground"] = Color.FromArgb("#F8F3EE"),
-        ["AppCardBackground"] = Color.FromArgb("#FFFDFC"),
-        ["AppPanelBackground"] = Color.FromArgb("#F3E8E2"),
-        ["AppAlternateRowBackground"] = Color.FromArgb("#F6ECE7"),
-        ["AppBorder"] = Color.FromArgb("#D7BFA9"),
-        ["AppAccent"] = Color.FromArgb("#6D1F2F"),
-        ["AppTextPrimary"] = Color.FromArgb("#2C2022"),
-        ["AppTextMuted"] = Color.FromArgb("#725E62"),
-        ["AppTextInactive"] = Color.FromArgb("#9A7B81"),
-        ["AppBrandText"] = Color.FromArgb("#48121E"),
-        ["AppHeaderText"] = Color.FromArgb("#FFFFFF"),
-        ["AppPositive"] = Color.FromArgb("#1FA463"),
-        ["AppNegative"] = Color.FromArgb("#D84555"),
-        ["AppTickerBackground"] = Color.FromArgb("#F8F3EE"),
-        ["AppTickerCardBackground"] = Color.FromArgb("#FFFDFC"),
-        ["AppTickerText"] = Color.FromArgb("#48121E"),
-        ["AppLoadingBackground"] = Color.FromArgb("#F8F3EE")
+        ["AppBackground"] = Color.FromArgb("#FAF9F5"),
+        ["AppCardBackground"] = Color.FromArgb("#F7F4E9"),
+        ["AppPanelBackground"] = Color.FromArgb("#FFFFFF"),
+        ["AppAlternateRowBackground"] = Color.FromArgb("#F4F1E6"),
+        ["AppBorder"] = Color.FromArgb("#DDD8C8"),
+
+        ["AppAccent"] = Color.FromArgb("#B99A20"),
+
+        ["AppTextPrimary"] = Color.FromArgb("#171717"),
+        ["AppTextMuted"] = Color.FromArgb("#686868"),
+        ["AppTextInactive"] = Color.FromArgb("#8A8A8A"),
+
+        ["AppBrandText"] = Color.FromArgb("#A88916"),
+        ["AppHeaderText"] = Color.FromArgb("#171717"),
+
+        ["AppPositive"] = Color.FromArgb("#20A66A"),
+        ["AppNegative"] = Color.FromArgb("#D64A4A"),
+
+        ["AppTickerBackground"] = Color.FromArgb("#FAF9F5"),
+        ["AppTickerCardBackground"] = Color.FromArgb("#F7F4E9"),
+        ["AppTickerText"] = Color.FromArgb("#171717"),
+
+        ["AppLoadingBackground"] = Color.FromArgb("#FAF9F5")
     };
 
 private static readonly IReadOnlyDictionary<string, Color> MazlumDarkColors =
     new Dictionary<string, Color>
     {
-        ["AppBackground"] = Color.FromArgb("#160B0E"),
-        ["AppCardBackground"] = Color.FromArgb("#241116"),
-        ["AppPanelBackground"] = Color.FromArgb("#1C0D11"),
-        ["AppAlternateRowBackground"] = Color.FromArgb("#2B171C"),
-        ["AppBorder"] = Color.FromArgb("#7B4E58"),
-        ["AppAccent"] = Color.FromArgb("#C79A73"),
-        ["AppTextPrimary"] = Color.FromArgb("#FFF4ED"),
-        ["AppTextMuted"] = Color.FromArgb("#C8AEB4"),
-        ["AppTextInactive"] = Color.FromArgb("#A88189"),
-        ["AppBrandText"] = Color.FromArgb("#E3B892"),
-        ["AppHeaderText"] = Color.FromArgb("#160B0E"),
-        ["AppPositive"] = Color.FromArgb("#31C278"),
-        ["AppNegative"] = Color.FromArgb("#FF6673"),
-        ["AppTickerBackground"] = Color.FromArgb("#160B0E"),
-        ["AppTickerCardBackground"] = Color.FromArgb("#241116"),
-        ["AppTickerText"] = Color.FromArgb("#E3B892"),
-        ["AppLoadingBackground"] = Color.FromArgb("#160B0E")
+        ["AppBackground"] = Color.FromArgb("#101113"),
+        ["AppCardBackground"] = Color.FromArgb("#191A16"),
+        ["AppPanelBackground"] = Color.FromArgb("#121417"),
+        ["AppAlternateRowBackground"] = Color.FromArgb("#171819"),
+        ["AppBorder"] = Color.FromArgb("#343426"),
+
+        ["AppAccent"] = Color.FromArgb("#D4B56A"),
+
+        ["AppTextPrimary"] = Color.FromArgb("#F0F0F0"),
+        ["AppTextMuted"] = Color.FromArgb("#92979F"),
+        ["AppTextInactive"] = Color.FromArgb("#777C84"),
+
+        ["AppBrandText"] = Color.FromArgb("#D4B56A"),
+        ["AppHeaderText"] = Color.FromArgb("#F0F0F0"),
+
+        ["AppPositive"] = Color.FromArgb("#3DCF8E"),
+        ["AppNegative"] = Color.FromArgb("#E65C61"),
+
+        ["AppTickerBackground"] = Color.FromArgb("#101113"),
+        ["AppTickerCardBackground"] = Color.FromArgb("#191A16"),
+        ["AppTickerText"] = Color.FromArgb("#D4B56A"),
+
+        ["AppLoadingBackground"] = Color.FromArgb("#101113")
     };
 
-        public static AslanThemeMode GetSavedTheme()
+    public static AslanThemeMode GetSavedTheme()
         {
             var value = Preferences.Get(PreferenceKey, AslanThemeMode.Light.ToString());
             return Enum.TryParse<AslanThemeMode>(value, out var mode) ? mode : AslanThemeMode.Light;

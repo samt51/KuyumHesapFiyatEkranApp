@@ -16,6 +16,16 @@
   <component name="ChangeListManager">
     <list default="true" id="f0a44f68-f010-4cc0-9b80-c3fb4c4aad02" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.KuyumHesapFiyatEkranApp/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.KuyumHesapFiyatEkranApp/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/App.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/App.xaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/AppShell.xaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/AppShell.xaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/AppThemeManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/AppThemeManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/KuyumHesapFiyatEkran.UI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/KuyumHesapFiyatEkran.UI.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/MauiProgram.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/MauiProgram.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Platforms/Android/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Platforms/Android/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Platforms/Android/MainActivity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Platforms/Android/MainActivity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Resources/Styles/Theme.GoldBlack.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Resources/Styles/Theme.GoldBlack.xaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Resources/Styles/Theme.White.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Resources/Styles/Theme.White.xaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Services/LiveRatesStore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/KuyumHesapFiyatEkran.UI/Services/LiveRatesStore.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -166,6 +176,8 @@
       <workItem from="1784998747145" duration="5534000" />
       <workItem from="1785769986706" duration="35000" />
       <workItem from="1785770270518" duration="1314000" />
+      <workItem from="1790116573573" duration="1986000" />
+      <workItem from="1790378550476" duration="7000" />
     </task>
     <task id="LOCAL-00001" summary="hata">
       <option name="closed" value="true" />

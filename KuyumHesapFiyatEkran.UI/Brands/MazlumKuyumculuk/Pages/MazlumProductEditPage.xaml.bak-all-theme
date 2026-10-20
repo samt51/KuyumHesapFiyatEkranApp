@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumProductEditPage"
+    BackgroundColor="#101113"
+    NavigationPage.HasNavigationBar="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- HEADER -->
+        <Grid
+            Grid.Row="0"
+            Padding="18,54,18,14"
+            ColumnDefinitions="40,40,*,40"
+            ColumnSpacing="8">
+
+            <Label
+                Grid.Column="0"
+                Text="☰"
+                FontSize="24"
+                TextColor="#C5A83B"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center" />
+
+            <Border
+                Grid.Column="1"
+                WidthRequest="36"
+                HeightRequest="36"
+                Stroke="#343426"
+                StrokeThickness="1"
+                BackgroundColor="#191A16">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="9" />
+                </Border.StrokeShape>
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Border.GestureRecognizers>
+
+                <Label
+                    Text="‹"
+                    FontSize="25"
+                    TextColor="#C5A83B"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center" />
+            </Border>
+
+            <Label
+                Grid.Column="2"
+                Text="Ürün"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="#F3F3F3"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center" />
+
+            <Border
+                Grid.Column="3"
+                WidthRequest="36"
+                HeightRequest="36"
+                Stroke="#343426"
+                StrokeThickness="1"
+                BackgroundColor="#191A16">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="9" />
+                </Border.StrokeShape>
+
+                <Label
+                    Text="☆"
+                    FontSize="22"
+                    TextColor="#C5A83B"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center" />
+            </Border>
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout
+                Padding="18,8,18,35"
+                Spacing="12">
+
+                <Label
+                    Text="ÜRÜN ADI"
+                    FontSize="11"
+                    CharacterSpacing="1.5"
+                    TextColor="#8B8B83" />
+
+                <Grid ColumnDefinitions="*,42,42" ColumnSpacing="8">
+
+                    <Border
+                        Grid.Column="0"
+                        HeightRequest="54"
+                        Stroke="#48452A"
+                        StrokeThickness="1"
+                        BackgroundColor="#191A16">
+
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="11" />
+                        </Border.StrokeShape>
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnProductPickerTapped" />
+                        </Border.GestureRecognizers>
+
+                        <Grid
+                            Padding="14,0"
+                            ColumnDefinitions="*">
+
+                            <Label
+                                x:Name="ProductNameLabel"
+                                Text="YENİ ÜRÜN"
+                                TextColor="#F0F0F0"
+                                FontSize="16"
+                                VerticalTextAlignment="Center"
+                                LineBreakMode="TailTruncation"
+                                InputTransparent="True" />
+
+                            <Entry
+                                x:Name="ProductNameEntry"
+                                IsVisible="False"
+                                Text="YENİ ÜRÜN" />
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        Grid.Column="1"
+                        HeightRequest="42"
+                        WidthRequest="42"
+                        VerticalOptions="Center"
+                        Stroke="#48452A"
+                        BackgroundColor="#191A16">
+
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnProductPickerTapped" />
+                        </Border.GestureRecognizers>
+
+                        <Label
+                            Text="⌄"
+                            TextColor="#C5A83B"
+                            FontSize="18"
+                            HorizontalTextAlignment="Center"
+                            VerticalTextAlignment="Center"
+                            InputTransparent="True" />
+                    </Border>
+
+                    <Border
+                        Grid.Column="2"
+                        HeightRequest="42"
+                        WidthRequest="42"
+                        VerticalOptions="Center"
+                        Stroke="#48452A"
+                        BackgroundColor="#191A16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+
+                        <Label
+                            Text="+"
+                            TextColor="#C5A83B"
+                            FontSize="23"
+                            HorizontalTextAlignment="Center"
+                            VerticalTextAlignment="Center" />
+                    </Border>
+                </Grid>
+
+                <!-- PRODUCT DROPDOWN -->
+                <Border
+                    x:Name="ProductDropdown"
+                    IsVisible="False"
+                    Margin="0,-6,92,2"
+                    MaximumHeightRequest="260"
+                    Stroke="#48452A"
+                    StrokeThickness="1"
+                    BackgroundColor="#171815"
+                    ZIndex="100">
+
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="11" />
+                    </Border.StrokeShape>
+
+                    <CollectionView
+                        x:Name="ProductDropdownList"
+                        SelectionMode="Single"
+                        SelectionChanged="OnProductDropdownSelectionChanged">
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid
+                                    Padding="14,11"
+                                    BackgroundColor="Transparent">
+
+                                    <Label
+                                        Text="{Binding Name}"
+                                        FontSize="14"
+                                        TextColor="#F0F0F0"
+                                        LineBreakMode="TailTruncation" />
+
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Tapped="OnProductDropdownItemTapped"
+                                            CommandParameter="{Binding .}" />
+                                    </Grid.GestureRecognizers>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                    </CollectionView>
+                </Border>
+
+                <Label
+                    Margin="0,6,0,0"
+                    Text="LİSTE (MERKEZ)"
+                    FontSize="11"
+                    CharacterSpacing="1.5"
+                    TextColor="#8B8B83" />
+
+                <Border
+                    HeightRequest="54"
+                    Stroke="#48452A"
+                    BackgroundColor="#191A16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <Border
+                            x:Name="HomeListButton"
+                            Grid.Column="0"
+                            Margin="5"
+                            StrokeThickness="0"
+                            BackgroundColor="Transparent">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnHomeListTapped" />
+                            </Border.GestureRecognizers>
+                            <Label
+                                Text="Ana sayfa"
+                                TextColor="#A7A79F"
+                                HorizontalTextAlignment="Center"
+                                VerticalTextAlignment="Center" />
+                        </Border>
+
+                        <Border
+                            x:Name="OtherListButton"
+                            Grid.Column="1"
+                            Margin="5"
+                            StrokeThickness="0"
+                            BackgroundColor="#40391E">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnOtherListTapped" />
+                            </Border.GestureRecognizers>
+                            <Label
+                                x:Name="OtherListLabel"
+                                Text="Diğer"
+                                TextColor="#D4B56A"
+                                HorizontalTextAlignment="Center"
+                                VerticalTextAlignment="Center" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <BoxView
+                    Margin="0,10,0,2"
+                    HeightRequest="1"
+                    Color="#282A2D" />
+
+                <Grid ColumnDefinitions="*,*,*" Padding="5,4,5,6">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="ALIŞ" FontSize="11"
+                               TextColor="#8B8B83"
+                               HorizontalTextAlignment="Center"/>
+                        <Label x:Name="BuyValueLabel"
+                               Text="–"
+                               FontSize="17"
+                               FontAttributes="Bold"
+                               TextColor="#F0F0F0"
+                               HorizontalTextAlignment="Center"/>
+
+                        <Label x:Name="BuyChangeLabel"
+                               Text="–"
+                               FontSize="10"
+                               TextColor="#8B8B83"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="SATIŞ" FontSize="11"
+                               TextColor="#8B8B83"
+                               HorizontalTextAlignment="Center"/>
+                        <Label x:Name="SellValueLabel"
+                               Text="0,00"
+                               FontSize="17"
+                               FontAttributes="Bold"
+                               TextColor="#F0F0F0"
+                               HorizontalTextAlignment="Center"/>
+                        <Label x:Name="SellChangeLabel"
+                               Text="–"
+                               FontSize="10"
+                               TextColor="#8B8B83"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="2" Spacing="4">
+                        <Label Text="FARK" FontSize="11"
+                               TextColor="#8B8B83"
+                               HorizontalTextAlignment="Center"/>
+                        <Label x:Name="DifferenceLabel"
+                               Text="–"
+                               FontSize="17"
+                               TextColor="#F0F0F0"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <BoxView HeightRequest="1" Color="#282A2D" />
+
+                <!-- FORMULA TYPE -->
+                <Border
+                    Margin="0,6,0,0"
+                    HeightRequest="54"
+                    Stroke="#48452A"
+                    BackgroundColor="#191A16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <Border
+                            x:Name="BuyFormulaButton"
+                            Grid.Column="0"
+                            Margin="5"
+                            StrokeThickness="0"
+                            BackgroundColor="#40391E">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnBuyFormulaTapped" />
+                            </Border.GestureRecognizers>
+                            <Label x:Name="BuyFormulaLabel"
+                                   Text="Alış formülü"
+                                   TextColor="#D4B56A"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center"/>
+                        </Border>
+
+                        <Border
+                            x:Name="SellFormulaButton"
+                            Grid.Column="1"
+                            Margin="5"
+                            StrokeThickness="0"
+                            BackgroundColor="Transparent">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnSellFormulaTapped" />
+                            </Border.GestureRecognizers>
+                            <Label x:Name="SellFormulaLabel"
+                                   Text="Satış formülü"
+                                   TextColor="#A7A79F"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- FORMULA -->
+                <Grid ColumnDefinitions="*,58,105" ColumnSpacing="7">
+
+                    <Border
+                        HeightRequest="50"
+                        Stroke="#48452A"
+                        BackgroundColor="#191A16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+
+                        <Picker
+                            x:Name="RatePicker"
+                            Title="Kur seç"
+                            TitleColor="#F0F0F0"
+                            TextColor="#F0F0F0"
+                            BackgroundColor="Transparent"
+                            SelectedIndexChanged="OnFormulaChanged" />
+                    </Border>
+
+                    <Border
+                        Grid.Column="1"
+                        HeightRequest="50"
+                        Stroke="#48452A"
+                        BackgroundColor="#191A16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+
+                        <Picker
+                            x:Name="OperatorPicker"
+                            TextColor="#F0F0F0"
+                            BackgroundColor="Transparent"
+                            SelectedIndexChanged="OnFormulaChanged">
+                            <Picker.Items>
+                                <x:String>×</x:String>
+                                <x:String>÷</x:String>
+                                <x:String>+</x:String>
+                                <x:String>−</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </Border>
+
+                    <Border
+                        Grid.Column="2"
+                        HeightRequest="50"
+                        Stroke="#48452A"
+                        BackgroundColor="#191A16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+
+                        <Entry
+                            x:Name="FormulaValueEntry"
+                            Text="1"
+                            Keyboard="Numeric"
+                            TextColor="#F0F0F0"
+                            HorizontalTextAlignment="End"
+                            Margin="8,0"
+                            BackgroundColor="Transparent"
+                            TextChanged="OnFormulaValueChanged" />
+                    </Border>
+                </Grid>
+
+                <Border
+                    HeightRequest="54"
+                    Stroke="#48452A"
+                    BackgroundColor="#383112">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="11" />
+                    </Border.StrokeShape>
+
+                    <Grid Padding="15,0" ColumnDefinitions="*,Auto">
+                        <Label
+                            Text="ÖNİZLEME"
+                            FontSize="11"
+                            CharacterSpacing="1"
+                            TextColor="#8B8B83"
+                            VerticalTextAlignment="Center" />
+
+                        <Label
+                            x:Name="PreviewLabel"
+                            Grid.Column="1"
+                            Text="–"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            TextColor="#D4B56A"
+                            VerticalTextAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <Button
+                    x:Name="SaveButton"
+                    Margin="0,20,0,0"
+                    HeightRequest="54"
+                    Text="Kaydet"
+                    FontAttributes="Bold"
+                    FontSize="15"
+                    TextColor="#101113"
+                    BackgroundColor="#C9AE20"
+                    CornerRadius="11"
+                    Clicked="OnSaveClicked" />
+
+                <Button
+                    x:Name="DeleteButton"
+                    IsVisible="False"
+                    HeightRequest="48"
+                    Text="Sil"
+                    FontAttributes="Bold"
+                    TextColor="#EF6262"
+                    BackgroundColor="Transparent"
+                    BorderColor="#8A3333"
+                    BorderWidth="1"
+                    CornerRadius="11" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

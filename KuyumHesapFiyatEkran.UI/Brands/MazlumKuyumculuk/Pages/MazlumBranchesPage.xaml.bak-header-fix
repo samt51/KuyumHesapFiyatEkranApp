@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumBranchesPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#101113"
+    NavigationPage.HasNavigationBar="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- HEADER -->
+        <Grid
+            Grid.Row="0"
+            Padding="18,54,18,14"
+            ColumnDefinitions="42,42,*,42"
+            ColumnSpacing="8">
+
+            <Border
+                Grid.Column="0"
+                WidthRequest="36"
+                HeightRequest="36"
+                BackgroundColor="Transparent"
+                StrokeThickness="0">
+                <Label
+                    Text="☰"
+                    TextColor="#C9AE20"
+                    FontSize="24"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"/>
+            </Border>
+
+            <Border
+                Grid.Column="1"
+                WidthRequest="36"
+                HeightRequest="36"
+                BackgroundColor="#181812"
+                Stroke="#37331A"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 10">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped"/>
+                </Border.GestureRecognizers>
+                <Label
+                    Text="‹"
+                    TextColor="#C9AE20"
+                    FontSize="28"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"/>
+            </Border>
+
+            <Label
+                Grid.Column="2"
+                Text="Şubelerimiz"
+                TextColor="White"
+                FontSize="16"
+                FontAttributes="Bold"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"/>
+
+            <Border
+                x:Name="AddButton"
+                Grid.Column="3"
+                WidthRequest="36"
+                HeightRequest="36"
+                BackgroundColor="#181812"
+                Stroke="#37331A"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 10"
+                IsVisible="False">
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnAddTapped"/>
+                </Border.GestureRecognizers>
+
+                <Label
+                    Text="+"
+                    TextColor="#C9AE20"
+                    FontSize="25"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"/>
+            </Border>
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout
+                Padding="18,8,18,30"
+                Spacing="16">
+
+                <Label
+                    x:Name="ErrorLabel"
+                    IsVisible="False"
+                    TextColor="#E57373"
+                    FontSize="13"/>
+
+                <!-- ADMIN FORM -->
+                <VerticalStackLayout
+                    x:Name="BranchForm"
+                    IsVisible="False"
+                    Spacing="10">
+
+                    <Label
+                        Text="ŞUBE ADI"
+                        TextColor="#929292"
+                        FontSize="11"
+                        CharacterSpacing="1.3"/>
+
+                    <Border
+                        BackgroundColor="#181812"
+                        Stroke="#39351E"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="14,4">
+
+                        <Entry
+                            x:Name="NameEntry"
+                            Placeholder="Örn. Merkez Şube"
+                            PlaceholderColor="#777777"
+                            TextColor="White"
+                            BackgroundColor="Transparent"
+                            HeightRequest="48"/>
+                    </Border>
+
+                    <Label
+                        Margin="0,6,0,0"
+                        Text="TELEFON"
+                        TextColor="#929292"
+                        FontSize="11"
+                        CharacterSpacing="1.3"/>
+
+                    <Border
+                        BackgroundColor="#181812"
+                        Stroke="#39351E"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="14,4">
+
+                        <Entry
+                            x:Name="PhoneEntry"
+                            Placeholder="0555 123 45 67"
+                            PlaceholderColor="#777777"
+                            TextColor="White"
+                            Keyboard="Telephone"
+                            BackgroundColor="Transparent"
+                            HeightRequest="48"/>
+                    </Border>
+
+                    <Label
+                        Margin="0,6,0,0"
+                        Text="ADRES"
+                        TextColor="#929292"
+                        FontSize="11"
+                        CharacterSpacing="1.3"/>
+
+                    <Border
+                        BackgroundColor="#181812"
+                        Stroke="#39351E"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="14,8">
+
+                        <Editor
+                            x:Name="AddressEditor"
+                            Placeholder="Mahalle, cadde, ilçe..."
+                            PlaceholderColor="#777777"
+                            TextColor="White"
+                            BackgroundColor="Transparent"
+                            AutoSize="TextChanges"
+                            MinimumHeightRequest="90"/>
+                    </Border>
+
+                    <!-- 16:10 IMAGE -->
+                    <Border
+                        Margin="0,8,0,0"
+                        HeightRequest="200"
+                        BackgroundColor="#181812"
+                        Stroke="#39351E"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12">
+
+                        <Grid>
+                            <Image
+                                x:Name="BranchImage"
+                                IsVisible="False"
+                                Aspect="AspectFill"/>
+
+                            <Label
+                                x:Name="ImagePlaceholder"
+                                Text="Şube görseli (16:10)"
+                                TextColor="#929292"
+                                FontSize="13"
+                                HorizontalTextAlignment="Center"
+                                VerticalTextAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <HorizontalStackLayout
+                        Spacing="18">
+
+                        <Label
+                            Text="Çek"
+                            TextColor="#C9AE20"
+                            FontSize="14">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnTakePhotoTapped"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+
+                        <Label
+                            Text="Galeri"
+                            TextColor="#C9AE20"
+                            FontSize="14">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnGalleryTapped"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+
+                        <Label
+                            x:Name="RemoveImageButton"
+                            Text="Kaldır"
+                            TextColor="#C9AE20"
+                            FontSize="14"
+                            IsVisible="False">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnRemoveImageTapped"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+
+                    <Button
+                        x:Name="SaveButton"
+                        Margin="0,10,0,0"
+                        HeightRequest="52"
+                        Text="Kaydet"
+                        FontAttributes="Bold"
+                        FontSize="15"
+                        TextColor="#101113"
+                        BackgroundColor="#C9AE20"
+                        CornerRadius="11"
+                        Clicked="OnSaveClicked"/>
+
+                    <Button
+                        Text="Vazgeç"
+                        HeightRequest="42"
+                        TextColor="#C9AE20"
+                        BackgroundColor="Transparent"
+                        Clicked="OnCancelClicked"/>
+                </VerticalStackLayout>
+
+                <!-- EMPTY -->
+                <Label
+                    x:Name="EmptyLabel"
+                    Text="Henüz şube yok. + ile ekleyebilirsiniz."
+                    TextColor="#8D8D8D"
+                    FontSize="13"
+                    HorizontalTextAlignment="Center"
+                    Margin="0,12,0,0"
+                    IsVisible="False"/>
+
+                <!-- LIST -->
+                <VerticalStackLayout
+                    x:Name="BranchesContainer"
+                    Spacing="14"/>
+
+                <ActivityIndicator
+                    x:Name="LoadingIndicator"
+                    Color="#C9AE20"
+                    IsRunning="False"
+                    IsVisible="False"
+                    HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

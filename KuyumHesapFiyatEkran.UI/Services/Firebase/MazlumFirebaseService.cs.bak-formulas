@@ -1,0 +1,369 @@
+using System.Globalization;
+using System.Text.Json;
+
+namespace KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+public sealed class MazlumFirebaseService : IMazlumFirebaseService
+{
+    private readonly HttpClient httpClient;
+    private readonly MazlumFirebaseOptions options;
+
+    public MazlumFirebaseService(
+        HttpClient httpClient,
+        MazlumFirebaseOptions options)
+    {
+        this.httpClient = httpClient;
+        this.options = options;
+    }
+
+    public async Task<MazlumFirebaseRatesResult> GetRatesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var result = new MazlumFirebaseRatesResult();
+
+        await LoadPricesAsync(result, cancellationToken);
+        await LoadMetaAsync(result, cancellationToken);
+
+        return result;
+    }
+
+    public async Task<List<MazlumFirebaseKurItem>> GetKurCatalogAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"{options.FirestoreBaseUrl}/meta/kur";
+
+        using var response =
+            await httpClient.GetAsync(url, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        await using var stream =
+            await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        using var json = await JsonDocument.ParseAsync(
+            stream,
+            cancellationToken: cancellationToken);
+
+        var result = new List<MazlumFirebaseKurItem>();
+
+        if (!json.RootElement.TryGetProperty("fields", out var fields))
+            return result;
+
+        // Web tarafı önce meta/kur.list kullanıyor.
+        if (fields.TryGetProperty("list", out var listField) &&
+            listField.TryGetProperty("arrayValue", out var arrayValue) &&
+            arrayValue.TryGetProperty("values", out var values) &&
+            values.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var value in values.EnumerateArray())
+            {
+                if (!value.TryGetProperty("mapValue", out var mapValue) ||
+                    !mapValue.TryGetProperty("fields", out var row))
+                {
+                    continue;
+                }
+
+                var code = GetString(row, "code");
+
+                if (string.IsNullOrWhiteSpace(code))
+                    continue;
+
+                var alis = GetDecimal(row, "alis");
+                var satis = GetDecimal(row, "satis");
+
+                if (alis <= 0m && satis <= 0m)
+                    continue;
+
+                result.Add(new MazlumFirebaseKurItem
+                {
+                    Code = code.ToUpperInvariant(),
+                    Alis = alis,
+                    Satis = satis,
+                    Source = GetString(row, "source", "formul")
+                });
+            }
+        }
+
+        // list yoksa webdeki gibi rates map fallback.
+        if (result.Count == 0 &&
+            fields.TryGetProperty("rates", out var ratesField) &&
+            ratesField.TryGetProperty("mapValue", out var ratesMap) &&
+            ratesMap.TryGetProperty("fields", out var rateFields))
+        {
+            foreach (var property in rateFields.EnumerateObject())
+            {
+                if (!property.Value.TryGetProperty("mapValue", out var mapValue) ||
+                    !mapValue.TryGetProperty("fields", out var row))
+                {
+                    continue;
+                }
+
+                var code = GetString(row, "code", property.Name);
+
+                if (string.IsNullOrWhiteSpace(code))
+                    continue;
+
+                var alis = GetDecimal(row, "alis");
+                var satis = GetDecimal(row, "satis");
+
+                if (alis <= 0m && satis <= 0m)
+                    continue;
+
+                result.Add(new MazlumFirebaseKurItem
+                {
+                    Code = code.ToUpperInvariant(),
+                    Alis = alis,
+                    Satis = satis,
+                    Source = GetString(row, "source", "formul")
+                });
+            }
+        }
+
+        return result
+            .GroupBy(x => x.Code, StringComparer.OrdinalIgnoreCase)
+            .Select(x => x.First())
+            .OrderBy(x => x.Code, StringComparer.Create(
+                CultureInfo.GetCultureInfo("tr-TR"),
+                ignoreCase: true))
+            .ToList();
+    }
+
+    private async Task LoadPricesAsync(
+        MazlumFirebaseRatesResult result,
+        CancellationToken cancellationToken)
+    {
+        var url = $"{options.FirestoreBaseUrl}/prices?pageSize=200";
+
+        using var response = await httpClient.GetAsync(url, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        await using var stream =
+            await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        using var json = await JsonDocument.ParseAsync(
+            stream,
+            cancellationToken: cancellationToken);
+
+        if (!json.RootElement.TryGetProperty("documents", out var documents))
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"[MAZLUM] Firebase prices response has no documents. JSON: {json.RootElement}");
+            return;
+        }
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[MAZLUM] Firebase prices documents count: {documents.GetArrayLength()}");
+
+        foreach (var document in documents.EnumerateArray())
+        {
+            if (!document.TryGetProperty("fields", out var fields))
+                continue;
+
+            var item = new MazlumFirebasePrice
+            {
+                Id = GetDocumentId(document),
+                Name = GetString(fields, "name"),
+                Buy = GetDecimal(fields, "buy"),
+                Sell = GetDecimal(fields, "sell"),
+                BuyChangePercent = GetNullableDecimal(fields, "buyChangePct"),
+                SellChangePercent =
+                    GetNullableDecimal(fields, "sellChangePct")
+                    ?? GetNullableDecimal(fields, "changePct"),
+                Unit = GetString(fields, "unit", "₺"),
+                List = GetString(fields, "list", "home"),
+                Order = GetInt(fields, "order")
+            };
+
+            if (string.IsNullOrWhiteSpace(item.Name))
+                continue;
+
+            result.Prices.Add(item);
+        }
+
+        result.Prices = result.Prices
+            .OrderBy(x => x.Order)
+            .ThenBy(x => x.Name)
+            .ToList();
+
+        System.Diagnostics.Debug.WriteLine(
+            $"[MAZLUM] LoadPricesAsync OK. Count={result.Prices.Count}");
+    }
+
+    private async Task LoadMetaAsync(
+        MazlumFirebaseRatesResult result,
+        CancellationToken cancellationToken)
+    {
+        var url = $"{options.FirestoreBaseUrl}/meta/app";
+
+        using var response = await httpClient.GetAsync(url, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            return;
+
+        await using var stream =
+            await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        using var json = await JsonDocument.ParseAsync(
+            stream,
+            cancellationToken: cancellationToken);
+
+        if (!json.RootElement.TryGetProperty("fields", out var fields))
+            return;
+
+        var value = GetString(fields, "lastKurSyncAt");
+
+        if (string.IsNullOrWhiteSpace(value))
+            value = GetString(fields, "updatedAt");
+
+        result.LastUpdate = FormatUpdateTime(value);
+
+        if (DateTimeOffset.TryParse(
+                GetString(fields, "lastKurSyncAt"),
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal |
+                DateTimeStyles.AdjustToUniversal,
+                out var lastKurSyncAt))
+        {
+            result.LastKurSyncAt = lastKurSyncAt;
+        }
+
+        result.LastKurSyncOk =
+            GetBool(fields, "lastKurSyncOk", true);
+
+        var error =
+            GetString(fields, "lastKurSyncError");
+
+        result.LastKurSyncError =
+            string.IsNullOrWhiteSpace(error)
+                ? null
+                : error;
+    }
+
+    private static string GetDocumentId(JsonElement document)
+    {
+        if (!document.TryGetProperty("name", out var nameElement))
+            return string.Empty;
+
+        var fullName = nameElement.GetString();
+
+        if (string.IsNullOrWhiteSpace(fullName))
+            return string.Empty;
+
+        var index = fullName.LastIndexOf('/');
+
+        return index >= 0
+            ? fullName[(index + 1)..]
+            : fullName;
+    }
+
+    private static string GetString(
+        JsonElement fields,
+        string name,
+        string defaultValue = "")
+    {
+        if (!fields.TryGetProperty(name, out var field))
+            return defaultValue;
+
+        if (field.TryGetProperty("stringValue", out var stringValue))
+            return stringValue.GetString() ?? defaultValue;
+
+        return defaultValue;
+    }
+
+    private static bool GetBool(
+        JsonElement fields,
+        string name,
+        bool defaultValue = false)
+    {
+        if (!fields.TryGetProperty(name, out var field))
+            return defaultValue;
+
+        if (field.TryGetProperty(
+                "booleanValue",
+                out var booleanValue))
+        {
+            if (booleanValue.ValueKind ==
+                JsonValueKind.True)
+                return true;
+
+            if (booleanValue.ValueKind ==
+                JsonValueKind.False)
+                return false;
+        }
+
+        return defaultValue;
+    }
+
+    private static decimal GetDecimal(
+        JsonElement fields,
+        string name)
+    {
+        return GetNullableDecimal(fields, name) ?? 0m;
+    }
+
+    private static decimal? GetNullableDecimal(
+        JsonElement fields,
+        string name)
+    {
+        if (!fields.TryGetProperty(name, out var field))
+            return null;
+
+        if (field.TryGetProperty("doubleValue", out var doubleValue))
+        {
+            if (doubleValue.ValueKind == JsonValueKind.Number &&
+                doubleValue.TryGetDecimal(out var decimalValue))
+                return decimalValue;
+
+            if (decimal.TryParse(
+                    doubleValue.GetString(),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out var parsed))
+                return parsed;
+        }
+
+        if (field.TryGetProperty("integerValue", out var integerValue))
+        {
+            if (decimal.TryParse(
+                    integerValue.GetString(),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out var parsed))
+                return parsed;
+        }
+
+        return null;
+    }
+
+    private static int GetInt(
+        JsonElement fields,
+        string name)
+    {
+        var value = GetNullableDecimal(fields, name);
+
+        return value.HasValue
+            ? Convert.ToInt32(value.Value)
+            : 0;
+    }
+
+    private static string FormatUpdateTime(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        if (DateTimeOffset.TryParse(
+                value,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal,
+                out var date))
+        {
+            return date.ToLocalTime().ToString("HH:mm");
+        }
+
+        if (value.Length >= 5 && value.Contains(':'))
+            return value[..5];
+
+        return value;
+    }
+}

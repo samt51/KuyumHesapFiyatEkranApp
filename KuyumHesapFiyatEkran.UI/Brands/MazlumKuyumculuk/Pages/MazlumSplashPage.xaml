@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumSplashPage"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="White">
+
+    <Grid
+        BackgroundColor="White"
+        IsClippedToBounds="True">
+
+        <!-- SOL ÜST ALTIN DALGALAR -->
+        <GraphicsView
+            x:Name="TopGoldDecoration"
+            HorizontalOptions="Fill"
+            VerticalOptions="Start"
+            HeightRequest="285"
+            InputTransparent="True" />
+
+        <!-- ORTA MAZLUM LOGOSU -->
+        <Image
+            Source="mazlum_splash_logo.png"
+            WidthRequest="315"
+            HeightRequest="315"
+            Aspect="AspectFit"
+            HorizontalOptions="Center"
+            VerticalOptions="Center" />
+
+        <!-- SAĞ ALT ALTIN DALGALAR -->
+        <GraphicsView
+            x:Name="BottomGoldDecoration"
+            HorizontalOptions="Fill"
+            VerticalOptions="End"
+            HeightRequest="285"
+            InputTransparent="True" />
+
+    </Grid>
+
+</ContentPage>

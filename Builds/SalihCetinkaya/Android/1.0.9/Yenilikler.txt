@@ -1,0 +1,5 @@
+<tr-TR>
+Ana sayfa ve fiyat ekranlarının tasarımı yenilendi.
+Fiyatların son başarılı güncellenme saati ürün satırlarına eklendi.
+Favoriler ve altın hesaplama ekranları geliştirildi.
+</tr-TR>

@@ -1,0 +1,295 @@
+using System.Collections.ObjectModel;
+using System.Globalization;
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumTvPage : ContentPage
+{
+    private readonly IMazlumFirebaseService firebaseService;
+
+    private readonly ObservableCollection<MazlumTvPriceRow> rows = new();
+
+    private IDispatcherTimer? clockTimer;
+    private IDispatcherTimer? refreshTimer;
+
+    private bool loading;
+    private bool lightTheme;
+
+    public MazlumTvPage(
+        IMazlumFirebaseService firebaseService)
+    {
+        InitializeComponent();
+
+        this.firebaseService = firebaseService;
+
+        PricesCollection.ItemsSource = rows;
+
+        ThemeButton.Focused += OnTvButtonFocused;
+        ThemeButton.Unfocused += OnTvButtonUnfocused;
+
+        ExitButton.Focused += OnTvButtonFocused;
+        ExitButton.Unfocused += OnTvButtonUnfocused;
+    }
+
+    private void OnTvButtonFocused(
+        object? sender,
+        FocusEventArgs e)
+    {
+        if (sender is not Button button)
+            return;
+
+        button.BorderColor =
+            Color.FromArgb("#C6AA19");
+
+        button.BorderWidth = 2;
+
+        button.BackgroundColor =
+            lightTheme
+                ? Color.FromArgb("#E8DFC0")
+                : Color.FromArgb("#302B12");
+
+        button.TextColor =
+            lightTheme
+                ? Color.FromArgb("#5A4B00")
+                : Color.FromArgb("#F2D329");
+    }
+
+    private void OnTvButtonUnfocused(
+        object? sender,
+        FocusEventArgs e)
+    {
+        if (sender is not Button button)
+            return;
+
+        button.BorderColor =
+            Color.FromArgb("#3A3722");
+
+        button.BorderWidth = 1;
+
+        button.BackgroundColor =
+            lightTheme
+                ? Color.FromArgb("#EEE9D8")
+                : Color.FromArgb("#17170F");
+
+        button.TextColor =
+            Color.FromArgb("#C6AA19");
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        NavigationPage.SetHasNavigationBar(this, false);
+        Shell.SetNavBarIsVisible(this, false);
+
+        StartTimers();
+
+        UpdateClock();
+
+        await LoadPricesAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        clockTimer?.Stop();
+        refreshTimer?.Stop();
+    }
+
+    private void StartTimers()
+    {
+        clockTimer?.Stop();
+        refreshTimer?.Stop();
+
+        clockTimer = Dispatcher.CreateTimer();
+        clockTimer.Interval = TimeSpan.FromSeconds(1);
+        clockTimer.Tick += (_, _) => UpdateClock();
+        clockTimer.Start();
+
+        refreshTimer = Dispatcher.CreateTimer();
+        refreshTimer.Interval = TimeSpan.FromSeconds(15);
+        refreshTimer.Tick += async (_, _) =>
+        {
+            await LoadPricesAsync();
+        };
+        refreshTimer.Start();
+    }
+
+    private void UpdateClock()
+    {
+        ClockLabel.Text =
+            DateTime.Now.ToString(
+                "HH:mm",
+                CultureInfo.InvariantCulture);
+    }
+
+    private async Task LoadPricesAsync()
+    {
+        if (loading)
+            return;
+
+        loading = true;
+
+        try
+        {
+            var result =
+                await firebaseService.GetRatesAsync();
+
+            var homePrices =
+                result.Prices
+                    .Where(x =>
+                        string.Equals(
+                            x.List,
+                            "home",
+                            StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(x => x.Order)
+                    .ThenBy(x => x.Name)
+                    .ToList();
+
+            rows.Clear();
+
+            foreach (var price in homePrices)
+            {
+                rows.Add(
+                    new MazlumTvPriceRow
+                    {
+                        Name = price.Name,
+                        BuyText = FormatPrice(
+                            price.Buy,
+                            price.Name),
+                        SellText = FormatPrice(
+                            price.Sell,
+                            price.Name),
+                        BuyChangeText =
+                            FormatChange(
+                                price.BuyChangePercent),
+                        SellChangeText =
+                            FormatChange(
+                                price.SellChangePercent)
+                    });
+            }
+
+            LiveIndicator.Fill =
+                result.IsKurLive
+                    ? Color.FromArgb("#3DCF8E")
+                    : Color.FromArgb("#EF6B6B");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Mazlum TV Firebase load error: {ex}");
+
+            LiveIndicator.Fill =
+                Color.FromArgb("#EF6B6B");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private static string FormatPrice(
+        decimal value,
+        string productName)
+    {
+        var culture =
+            CultureInfo.GetCultureInfo("tr-TR");
+
+        if (productName.Contains(
+                "GÜMÜŞ",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return value.ToString(
+                "#,##0.00",
+                culture);
+        }
+
+        return value.ToString(
+            "#,##0",
+            culture);
+    }
+
+    private static string FormatChange(
+        decimal? value)
+    {
+        var percent =
+            value ?? 0m;
+
+        var sign =
+            percent > 0
+                ? "+"
+                : string.Empty;
+
+        return
+            $"{sign}{percent.ToString("0.00", CultureInfo.InvariantCulture)}%";
+    }
+
+    private void OnThemeTapped(
+        object? sender,
+        EventArgs e)
+    {
+        lightTheme = !lightTheme;
+
+        if (lightTheme)
+        {
+            RootGrid.BackgroundColor =
+                Color.FromArgb("#F2F0E8");
+
+            TvPanel.BackgroundColor =
+                Color.FromArgb("#F7F5ED");
+
+            ThemeButton.Text = "☾";
+        }
+        else
+        {
+            RootGrid.BackgroundColor =
+                Color.FromArgb("#050505");
+
+            TvPanel.BackgroundColor =
+                Color.FromArgb("#0A0B0B");
+
+            ThemeButton.Text = "☼";
+        }
+    }
+
+    private async void OnExitTapped(
+        object? sender,
+        EventArgs e)
+    {
+        clockTimer?.Stop();
+        refreshTimer?.Stop();
+
+        if (Navigation.NavigationStack.Count > 1)
+        {
+            await Navigation.PopAsync();
+            return;
+        }
+
+#if ANDROID
+        var activity =
+            Platform.CurrentActivity;
+
+        activity?.Finish();
+#endif
+    }
+}
+
+public sealed class MazlumTvPriceRow
+{
+    public string Name { get; set; } =
+        string.Empty;
+
+    public string BuyText { get; set; } =
+        string.Empty;
+
+    public string SellText { get; set; } =
+        string.Empty;
+
+    public string BuyChangeText { get; set; } =
+        string.Empty;
+
+    public string SellChangeText { get; set; } =
+        string.Empty;
+}

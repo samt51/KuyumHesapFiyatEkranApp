@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages.MazlumLoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#101113"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- HEADER -->
+        <Grid
+            Grid.Row="0"
+            Padding="18,52,18,16"
+            ColumnDefinitions="40,*,40">
+
+            <Label
+                Grid.Column="0"
+                Text="‹"
+                FontSize="30"
+                TextColor="#B79A32"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center">
+
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <Label
+                x:Name="HeaderTitle"
+                Grid.Column="1"
+                Text="Yönetici"
+                FontSize="17"
+                FontAttributes="Bold"
+                TextColor="#F4F4F2"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center" />
+
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+
+            <VerticalStackLayout
+                Padding="22,28,22,35"
+                Spacing="14">
+
+                <!-- BRAND / LOGIN CARD -->
+                <Border
+                    Padding="18"
+                    BackgroundColor="#18191A"
+                    Stroke="#343537"
+                    StrokeThickness="1">
+
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+
+                    <Grid
+                        ColumnDefinitions="58,*"
+                        ColumnSpacing="14">
+
+                        <Border
+                            Grid.Column="0"
+                            WidthRequest="52"
+                            HeightRequest="52"
+                            BackgroundColor="#1F1D12"
+                            Stroke="#40391E"
+                            StrokeThickness="1"
+                            VerticalOptions="Center">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14" />
+                            </Border.StrokeShape>
+
+                            <Label
+                                Text="M"
+                                FontSize="26"
+                                FontAttributes="Bold"
+                                TextColor="#B79A32"
+                                HorizontalTextAlignment="Center"
+                                VerticalTextAlignment="Center" />
+
+                        </Border>
+
+                        <VerticalStackLayout
+                            Grid.Column="1"
+                            VerticalOptions="Center"
+                            Spacing="3">
+
+                            <Label
+                                Text="MAZLUM"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                CharacterSpacing="2"
+                                TextColor="#F4F4F2" />
+
+                            <Label
+                                Text="KUYUMCULUK"
+                                FontSize="10"
+                                CharacterSpacing="3"
+                                TextColor="#B79A32" />
+
+                            <Label
+                                x:Name="LoginTypeLabel"
+                                Text="Yönetici girişi"
+                                FontSize="11"
+                                TextColor="#858681"
+                                Margin="0,3,0,0" />
+
+                        </VerticalStackLayout>
+
+                    </Grid>
+
+                </Border>
+
+                <!-- EMAIL -->
+                <Label
+                    Margin="0,12,0,-6"
+                    Text="E-POSTA"
+                    FontSize="10"
+                    CharacterSpacing="1"
+                    TextColor="#898A86" />
+
+                <Border
+                    HeightRequest="54"
+                    BackgroundColor="#18191A"
+                    Stroke="#343537"
+                    StrokeThickness="1">
+
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+
+                    <Grid
+                        Padding="14,0"
+                        ColumnDefinitions="26,*"
+                        ColumnSpacing="8">
+
+                        <Label
+                            Grid.Column="0"
+                            Text="&#xf0e0;"
+                            FontFamily="FontAwesomeSolid"
+                            FontSize="15"
+                            TextColor="#B79A32"
+                            VerticalTextAlignment="Center"
+                            HorizontalTextAlignment="Center" />
+
+                        <Entry
+                            x:Name="EmailEntry"
+                            Grid.Column="1"
+                            Placeholder="E-posta adresiniz"
+                            PlaceholderColor="#62635F"
+                            TextColor="#F4F4F2"
+                            FontSize="14"
+                            Keyboard="Email"
+                            ReturnType="Next"
+                            BackgroundColor="Transparent" />
+
+                    </Grid>
+
+                </Border>
+
+                <!-- PASSWORD -->
+                <Label
+                    Margin="0,8,0,-6"
+                    Text="ŞİFRE"
+                    FontSize="10"
+                    CharacterSpacing="1"
+                    TextColor="#898A86" />
+
+                <Border
+                    HeightRequest="54"
+                    BackgroundColor="#18191A"
+                    Stroke="#343537"
+                    StrokeThickness="1">
+
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+
+                    <Grid
+                        Padding="14,0"
+                        ColumnDefinitions="26,*,42"
+                        ColumnSpacing="8">
+
+                        <Label
+                            Grid.Column="0"
+                            Text="&#xf023;"
+                            FontFamily="FontAwesomeSolid"
+                            FontSize="16"
+                            TextColor="#B79A32"
+                            VerticalTextAlignment="Center"
+                            HorizontalTextAlignment="Center" />
+
+                        <Entry
+                            x:Name="PasswordEntry"
+                            Grid.Column="1"
+                            Placeholder="Şifreniz"
+                            PlaceholderColor="#62635F"
+                            TextColor="#F4F4F2"
+                            FontSize="14"
+                            IsPassword="True"
+                            ReturnType="Go"
+                            Completed="OnPasswordCompleted"
+                            BackgroundColor="Transparent" />
+
+                        <Button
+                            x:Name="PasswordVisibilityButton"
+                            Grid.Column="2"
+                            Text="&#xf06e;"
+                            FontFamily="FontAwesomeSolid"
+                            FontSize="14"
+                            TextColor="#898A86"
+                            BackgroundColor="Transparent"
+                            Padding="0"
+                            Clicked="OnPasswordVisibilityClicked" />
+
+                    </Grid>
+
+                </Border>
+
+                <!-- REMEMBER -->
+                <Grid
+                    Margin="0,2,0,4"
+                    ColumnDefinitions="Auto,*"
+                    ColumnSpacing="7">
+
+                    <CheckBox
+                        x:Name="RememberCheckBox"
+                        Grid.Column="0"
+                        IsChecked="True"
+                        Color="#B79A32"
+                        VerticalOptions="Center" />
+
+                    <Label
+                        Grid.Column="1"
+                        Text="Beni hatırla"
+                        FontSize="12"
+                        TextColor="#A5A6A2"
+                        VerticalTextAlignment="Center" />
+
+                </Grid>
+
+                <!-- ERROR -->
+                <Label
+                    x:Name="ErrorLabel"
+                    IsVisible="False"
+                    FontSize="12"
+                    TextColor="#EF6B6B"
+                    LineBreakMode="WordWrap"
+                    HorizontalTextAlignment="Center" />
+
+                <!-- LOGIN BUTTON -->
+                <Button
+                    x:Name="LoginButton"
+                    HeightRequest="52"
+                    Text="Giriş Yap"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#101113"
+                    BackgroundColor="#B79A32"
+                    CornerRadius="12"
+                    Clicked="OnLoginClicked" />
+
+            </VerticalStackLayout>
+
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>

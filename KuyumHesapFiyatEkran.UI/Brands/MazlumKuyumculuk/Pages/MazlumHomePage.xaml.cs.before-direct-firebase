@@ -1,0 +1,171 @@
+using System.Globalization;
+using KuyumHesapFiyatEkran.Core.Features.LiveRates.Queries.GetLiveRates;
+using KuyumHesapFiyatEkran.UI.Services;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumHomePage : ContentPage
+{
+    private readonly LiveRatesStore liveRatesStore;
+    private bool loaded;
+
+    public MazlumHomePage(LiveRatesStore liveRatesStore)
+    {
+        InitializeComponent();
+
+        this.liveRatesStore = liveRatesStore;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (loaded)
+        {
+            return;
+        }
+
+        loaded = true;
+
+        await LoadPricesAsync();
+    }
+
+    private async Task LoadPricesAsync()
+    {
+        try
+        {
+            var rates = await liveRatesStore.LoadAsync(
+                CancellationToken.None);
+
+            if (rates is null)
+            {
+                LiveIndicator.Fill = Colors.Red;
+                LastUpdateLabel.Text = "--:--";
+                return;
+            }
+
+            var items = rates.Sarrafiye
+                .Concat(rates.Maden)
+                .Concat(rates.Doviz)
+                .Select(CreateRow)
+                .ToList();
+
+            PricesCollection.ItemsSource = items;
+
+            LastUpdateLabel.Text =
+                string.IsNullOrWhiteSpace(rates.LastUpdate)
+                    ? "--:--"
+                    : rates.LastUpdate;
+
+            LiveIndicator.Fill =
+                string.IsNullOrWhiteSpace(liveRatesStore.LastError)
+                    ? Color.FromArgb("#3DCF8E")
+                    : Color.FromArgb("#EF6B6B");
+        }
+        catch
+        {
+            LiveIndicator.Fill =
+                Color.FromArgb("#EF6B6B");
+
+            LastUpdateLabel.Text = "--:--";
+        }
+    }
+
+    private static MazlumPriceRow CreateRow(
+        LiveRateItem item)
+    {
+        var change = item.SellChangePercent;
+
+        return new MazlumPriceRow
+        {
+            Id = item.Code ?? item.Name,
+            Name = item.Name,
+            Buy = item.Buy,
+            Sell = item.Sell,
+
+            BuyChangeDisplay = string.Empty,
+
+            SellChangeDisplay =
+                FormatChange(change),
+
+            BuyChangeColor =
+                Colors.Transparent,
+
+            SellChangeColor =
+                GetChangeColor(change)
+        };
+    }
+
+    private static string FormatChange(decimal? value)
+    {
+        if (!value.HasValue)
+        {
+            return string.Empty;
+        }
+
+        var prefix =
+            value.Value > 0
+                ? "▲ "
+                : value.Value < 0
+                    ? "▼ "
+                    : string.Empty;
+
+        return prefix +
+               value.Value.ToString(
+                   "0.##",
+                   CultureInfo.InvariantCulture) +
+               "%";
+    }
+
+    private static Color GetChangeColor(decimal? value)
+    {
+        if (!value.HasValue || value.Value == 0)
+        {
+            return Color.FromArgb("#777C84");
+        }
+
+        return value.Value > 0
+            ? Color.FromArgb("#3DCF8E")
+            : Color.FromArgb("#EF6B6B");
+    }
+
+    private void OnMenuClicked(
+        object sender,
+        EventArgs e)
+    {
+        Shell.Current.FlyoutIsPresented = true;
+    }
+
+    private void OnPriceSelected(
+        object sender,
+        SelectionChangedEventArgs e)
+    {
+        if (sender is CollectionView collectionView)
+        {
+            collectionView.SelectedItem = null;
+        }
+    }
+
+    private sealed class MazlumPriceRow
+    {
+        public string Id { get; init; } = string.Empty;
+
+        public string Name { get; init; } = string.Empty;
+
+        public string Buy { get; init; } = string.Empty;
+
+        public string Sell { get; init; } = string.Empty;
+
+        public string BuyChangeDisplay { get; init; } =
+            string.Empty;
+
+        public string SellChangeDisplay { get; init; } =
+            string.Empty;
+
+        public Color BuyChangeColor { get; init; } =
+            Colors.Transparent;
+
+        public Color SellChangeColor { get; init; } =
+            Colors.Transparent;
+    }
+}

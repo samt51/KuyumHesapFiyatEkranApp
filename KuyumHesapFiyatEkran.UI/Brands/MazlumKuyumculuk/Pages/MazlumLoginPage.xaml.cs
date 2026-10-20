@@ -1,0 +1,178 @@
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumLoginPage : ContentPage
+{
+    private readonly IMazlumFirebaseAuthService _authService;
+
+    private bool _isAdmin;
+    private bool _isBusy;
+
+    public MazlumLoginPage(
+        IMazlumFirebaseAuthService authService)
+    {
+        InitializeComponent();
+
+        _authService = authService;
+    }
+
+    public async void Configure(bool isAdmin)
+    {
+        _isAdmin = isAdmin;
+
+        HeaderTitle.Text =
+            isAdmin
+                ? "Yönetici"
+                : "Kullanıcı";
+
+        LoginTypeLabel.Text =
+            isAdmin
+                ? "Yönetici girişi"
+                : "Kullanıcı girişi";
+
+        ErrorLabel.Text = string.Empty;
+        ErrorLabel.IsVisible = false;
+
+        PasswordEntry.IsPassword = true;
+        PasswordVisibilityButton.Text = "\uf06e";
+
+        var remember =
+            Preferences.Default.Get(
+                "mazlum_auth_remember",
+                false);
+
+        RememberCheckBox.IsChecked = remember;
+
+        if (remember)
+        {
+            EmailEntry.Text =
+                await SecureStorage.Default.GetAsync(
+                    "mazlum_auth_email")
+                ?? string.Empty;
+
+            PasswordEntry.Text =
+                await SecureStorage.Default.GetAsync(
+                    "mazlum_auth_password")
+                ?? string.Empty;
+        }
+        else
+        {
+            EmailEntry.Text = string.Empty;
+            PasswordEntry.Text = string.Empty;
+        }
+    }
+
+    private async void OnLoginClicked(
+        object sender,
+        EventArgs e)
+    {
+        await LoginAsync();
+    }
+
+    private async void OnPasswordCompleted(
+        object sender,
+        EventArgs e)
+    {
+        await LoginAsync();
+    }
+
+    private async Task LoginAsync()
+    {
+        if (_isBusy)
+            return;
+
+        var email =
+            EmailEntry.Text?.Trim()
+            ?? string.Empty;
+
+        var password =
+            PasswordEntry.Text
+            ?? string.Empty;
+
+        ErrorLabel.IsVisible = false;
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            ShowError("E-posta adresinizi girin.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            ShowError("Şifrenizi girin.");
+            return;
+        }
+
+        try
+        {
+            _isBusy = true;
+
+            LoginButton.IsEnabled = false;
+            LoginButton.Text = "Giriş yapılıyor…";
+
+            EmailEntry.IsEnabled = false;
+            PasswordEntry.IsEnabled = false;
+
+            var result =
+                await _authService.SignInAsync(
+                    email,
+                    password,
+                    RememberCheckBox.IsChecked);
+
+            if (!result.Success)
+            {
+                ShowError(
+                    result.ErrorMessage
+                    ?? "Giriş yapılamadı. Tekrar deneyin.");
+
+                return;
+            }
+
+            ErrorLabel.IsVisible = false;
+
+            await Navigation.PopToRootAsync();
+        }
+        catch
+        {
+            ShowError(
+                "Giriş yapılamadı. Tekrar deneyin.");
+        }
+        finally
+        {
+            _isBusy = false;
+
+            LoginButton.IsEnabled = true;
+            LoginButton.Text = "Giriş Yap";
+
+            EmailEntry.IsEnabled = true;
+            PasswordEntry.IsEnabled = true;
+        }
+    }
+
+    private void ShowError(string message)
+    {
+        ErrorLabel.Text = message;
+        ErrorLabel.IsVisible = true;
+    }
+
+    private void OnPasswordVisibilityClicked(
+        object sender,
+        EventArgs e)
+    {
+        PasswordEntry.IsPassword =
+            !PasswordEntry.IsPassword;
+
+        PasswordVisibilityButton.Text =
+            PasswordEntry.IsPassword
+                ? "\uf06e"
+                : "\uf070";
+    }
+
+    private async void OnBackTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await Navigation.PopAsync();
+    }
+}

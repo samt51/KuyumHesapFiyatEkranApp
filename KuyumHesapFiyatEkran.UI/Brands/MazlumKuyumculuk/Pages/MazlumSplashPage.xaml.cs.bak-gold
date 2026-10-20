@@ -1,0 +1,31 @@
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumSplashPage : ContentPage
+{
+    private readonly AppShell _appShell;
+    private bool _navigated;
+
+    public MazlumSplashPage(AppShell appShell)
+    {
+        InitializeComponent();
+
+        _appShell = appShell;
+
+        NavigationPage.SetHasNavigationBar(this, false);
+        Shell.SetNavBarIsVisible(this, false);
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (_navigated)
+            return;
+
+        _navigated = true;
+
+        await Task.Delay(1200);
+
+        Application.Current!.MainPage = _appShell;
+    }
+}

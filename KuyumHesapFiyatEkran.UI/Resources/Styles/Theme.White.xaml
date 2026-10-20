@@ -7,6 +7,8 @@
     <Color x:Key="AppAlternateRowBackground">#FAF6EA</Color>
     <Color x:Key="AppBorder">#D4AF37</Color>
     <Color x:Key="AppAccent">#D4AF37</Color>
+    <Color x:Key="AppAccentSoft">#29B8A122</Color>
+    <Color x:Key="AppActionBackground">#1AB8A122</Color>
     <Color x:Key="AppTextPrimary">#2F2A1D</Color>
     <Color x:Key="AppTextMuted">#9A7417</Color>
     <Color x:Key="AppTextInactive">#A8872B</Color>

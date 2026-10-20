@@ -1,0 +1,286 @@
+using System.Globalization;
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumCalculationPage : ContentPage
+{
+    private readonly IMazlumFirebaseService firebaseService;
+
+    private List<MazlumFirebasePrice> prices = new();
+    private readonly List<CalculationRow> rows = new();
+
+    private bool loaded;
+
+    public MazlumCalculationPage(
+        IMazlumFirebaseService firebaseService)
+    {
+        InitializeComponent();
+
+        this.firebaseService = firebaseService;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (loaded)
+            return;
+
+        loaded = true;
+
+        await LoadProductsAsync();
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        try
+        {
+            var result =
+                await firebaseService.GetRatesAsync();
+
+            prices = result.Prices
+                .OrderBy(x => x.Order)
+                .ThenBy(x => x.Name)
+                .ToList();
+
+            ProductPicker.ItemsSource =
+                prices.Select(x => x.Name).ToList();
+
+            if (prices.Count > 0)
+                ProductPicker.SelectedIndex = 0;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Mazlum calculation Firebase error: {ex}");
+
+            await DisplayAlert(
+                "Hata",
+                "Ürün fiyatları yüklenemedi.",
+                "Tamam");
+        }
+    }
+
+    private void OnProductChanged(
+        object sender,
+        EventArgs e)
+    {
+    }
+
+    private void OnAddClicked(
+        object sender,
+        EventArgs e)
+    {
+        var index = ProductPicker.SelectedIndex;
+
+        if (index < 0 || index >= prices.Count)
+            return;
+
+        if (!TryReadAmount(out var amount))
+        {
+            AmountEntry.Focus();
+            return;
+        }
+
+        var product = prices[index];
+
+        rows.Add(
+            new CalculationRow
+            {
+                Product = product,
+                Amount = amount
+            });
+
+        AmountEntry.Text = string.Empty;
+
+        RenderRows();
+    }
+
+    private bool TryReadAmount(out decimal amount)
+    {
+        amount = 0;
+
+        var text =
+            AmountEntry.Text?.Trim();
+
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+
+        return
+            decimal.TryParse(
+                text,
+                NumberStyles.Number,
+                CultureInfo.GetCultureInfo("tr-TR"),
+                out amount)
+            ||
+            decimal.TryParse(
+                text.Replace(',', '.'),
+                NumberStyles.Number,
+                CultureInfo.InvariantCulture,
+                out amount)
+            && amount > 0;
+    }
+
+    private void RenderRows()
+    {
+        RowsContainer.Children.Clear();
+
+        EmptyRowsLabel.IsVisible =
+            rows.Count == 0;
+
+        if (rows.Count == 0)
+        {
+            RowsContainer.Children.Add(
+                EmptyRowsLabel);
+        }
+
+        foreach (var row in rows)
+        {
+            RowsContainer.Children.Add(
+                CreateRowView(row));
+        }
+
+        var totalBuy =
+            rows.Sum(
+                x => x.Product.Buy * x.Amount);
+
+        var totalSell =
+            rows.Sum(
+                x => x.Product.Sell * x.Amount);
+
+        TotalBuyLabel.Text =
+            FormatMoney(totalBuy);
+
+        TotalSellLabel.Text =
+            FormatMoney(totalSell);
+    }
+
+    private static View CreateRowView(
+        CalculationRow row)
+    {
+        var grid = new Grid
+        {
+            Padding = new Thickness(0, 9),
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(
+                    new GridLength(1.7, GridUnitType.Star)),
+
+                new ColumnDefinition(
+                    new GridLength(.8, GridUnitType.Star)),
+
+                new ColumnDefinition(
+                    new GridLength(1, GridUnitType.Star)),
+
+                new ColumnDefinition(
+                    new GridLength(1, GridUnitType.Star))
+            },
+
+            ColumnSpacing = 6
+        };
+
+        grid.Add(
+            CreateCell(
+                row.Product.Name,
+                false,
+                11),
+            0);
+
+        grid.Add(
+            CreateCell(
+                FormatAmount(row.Amount),
+                true,
+                11),
+            1);
+
+        grid.Add(
+            CreateCell(
+                FormatMoney(
+                    row.Product.Buy *
+                    row.Amount),
+                true,
+                11),
+            2);
+
+        grid.Add(
+            CreateCell(
+                FormatMoney(
+                    row.Product.Sell *
+                    row.Amount),
+                true,
+                11),
+            3);
+
+        return grid;
+    }
+
+    private static Label CreateCell(
+        string text,
+        bool right,
+        double fontSize)
+    {
+        return new Label
+        {
+            Text = text,
+            FontSize = fontSize,
+            TextColor =
+                Color.FromArgb("#C7C7C2"),
+
+            HorizontalTextAlignment =
+                right
+                    ? TextAlignment.End
+                    : TextAlignment.Start,
+
+            VerticalTextAlignment =
+                TextAlignment.Center
+        };
+    }
+
+    private static string FormatAmount(
+        decimal value)
+    {
+        return value.ToString(
+            "0.##",
+            CultureInfo.GetCultureInfo(
+                "tr-TR"));
+    }
+
+    private static string FormatMoney(
+        decimal value)
+    {
+        return value.ToString(
+            "N2",
+            CultureInfo.GetCultureInfo(
+                "tr-TR"));
+    }
+
+    private async void OnBackTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await Navigation.PopAsync();
+    }
+
+    private async void OnMenuClicked(
+        object sender,
+        EventArgs e)
+    {
+        await Navigation.PopAsync();
+    }
+
+    private sealed class CalculationRow
+    {
+        public required MazlumFirebasePrice Product
+        {
+            get;
+            init;
+        }
+
+        public decimal Amount
+        {
+            get;
+            init;
+        }
+    }
+}

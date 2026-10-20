@@ -1,0 +1,139 @@
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumProductEditPage : ContentPage
+{
+    private string selectedList = "other";
+    private bool editingBuyFormula = true;
+
+    public MazlumProductEditPage()
+    {
+        InitializeComponent();
+
+        OperatorPicker.SelectedIndex = 0;
+    }
+
+    private async void OnBackTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await Navigation.PopAsync();
+    }
+
+    private void OnHomeListTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        selectedList = "home";
+
+        HomeListButton.BackgroundColor =
+            Color.FromArgb("#40391E");
+
+        OtherListButton.BackgroundColor =
+            Colors.Transparent;
+
+        if (HomeListButton.Content is Label homeLabel)
+            homeLabel.TextColor = Color.FromArgb("#D4B56A");
+
+        OtherListLabel.TextColor =
+            Color.FromArgb("#A7A79F");
+    }
+
+    private void OnOtherListTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        selectedList = "other";
+
+        HomeListButton.BackgroundColor =
+            Colors.Transparent;
+
+        OtherListButton.BackgroundColor =
+            Color.FromArgb("#40391E");
+
+        if (HomeListButton.Content is Label homeLabel)
+            homeLabel.TextColor = Color.FromArgb("#A7A79F");
+
+        OtherListLabel.TextColor =
+            Color.FromArgb("#D4B56A");
+    }
+
+    private void OnBuyFormulaTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        editingBuyFormula = true;
+        UpdateFormulaTabs();
+    }
+
+    private void OnSellFormulaTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        editingBuyFormula = false;
+        UpdateFormulaTabs();
+    }
+
+    private void UpdateFormulaTabs()
+    {
+        BuyFormulaButton.BackgroundColor =
+            editingBuyFormula
+                ? Color.FromArgb("#40391E")
+                : Colors.Transparent;
+
+        SellFormulaButton.BackgroundColor =
+            editingBuyFormula
+                ? Colors.Transparent
+                : Color.FromArgb("#40391E");
+
+        BuyFormulaLabel.TextColor =
+            editingBuyFormula
+                ? Color.FromArgb("#D4B56A")
+                : Color.FromArgb("#A7A79F");
+
+        SellFormulaLabel.TextColor =
+            editingBuyFormula
+                ? Color.FromArgb("#A7A79F")
+                : Color.FromArgb("#D4B56A");
+
+        UpdatePreview();
+    }
+
+    private void OnFormulaChanged(
+        object sender,
+        EventArgs e)
+    {
+        UpdatePreview();
+    }
+
+    private void OnFormulaValueChanged(
+        object sender,
+        TextChangedEventArgs e)
+    {
+        UpdatePreview();
+    }
+
+    private void UpdatePreview()
+    {
+        PreviewLabel.Text = "–";
+    }
+
+    private async void OnSaveClicked(
+        object sender,
+        EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(ProductNameEntry.Text))
+        {
+            await DisplayAlert(
+                "Ürün adı",
+                "Ürün adı girin.",
+                "Tamam");
+
+            return;
+        }
+
+        await DisplayAlert(
+            "Hazır",
+            "Ekran hazır. Firebase kayıt bağlantısı sonraki adımda bağlanacak.",
+            "Tamam");
+    }
+}

@@ -1,0 +1,515 @@
+using KuyumHesapFiyatEkran.UI.Services.Firebase;
+
+namespace KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
+
+public partial class MazlumAboutPage : ContentPage
+{
+    private readonly IMazlumFirebaseService firebaseService;
+    private readonly IMazlumFirebaseAuthService authService;
+
+    private MazlumFirebasePageContent page =
+        CreateFallback();
+
+    private bool editing;
+    private bool busy;
+
+    public MazlumAboutPage(
+        IMazlumFirebaseService firebaseService,
+        IMazlumFirebaseAuthService authService)
+    {
+        InitializeComponent();
+
+        this.firebaseService = firebaseService;
+        this.authService = authService;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        NavigationPage.SetHasNavigationBar(this, false);
+        Shell.SetNavBarIsVisible(this, false);
+
+        await authService.RestoreSessionAsync();
+
+        EditButton.IsVisible = IsAdmin();
+        UpdateSidebarAuthState();
+
+        await LoadAsync();
+    }
+
+    private static MazlumFirebasePageContent CreateFallback()
+    {
+        return new MazlumFirebasePageContent
+        {
+            Title = "mazlum KUYUMCULUK",
+            Body =
+                "1998’den bu yana güvenilir kuyumculuk. Altın, ziynet ve mücevherde şeffaf fiyatlandırma ile yanınızdayız.\n\n" +
+                "Güncel alış-satış fiyatlarını uygulamadan takip edebilir, hesaplama aracı ile hızlıca tutar çıkarabilirsiniz.",
+            LinkLabel = "www.mazlumkuyumculuk.com",
+            LinkUrl = "https://www.mazlumkuyumculuk.com"
+        };
+    }
+
+    private bool IsAdmin()
+    {
+        return authService.IsAuthenticated &&
+               string.Equals(
+                   authService.UserEmail?.Trim(),
+                   "admin@mazlumkuyumculuk.com",
+                   StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task LoadAsync()
+    {
+        page = await firebaseService.GetPageAsync(
+            "about",
+            CreateFallback());
+
+        Render();
+    }
+
+    private void Render()
+    {
+        TitleLabel.Text = page.Title;
+
+        ParagraphsPanel.Children.Clear();
+
+        foreach (var paragraph in SplitParagraphs(page.Body))
+        {
+            var paragraphLabel = new Label
+            {                    Text = paragraph,
+                    FontSize = 16,
+                    
+                    LineHeight = 1.45
+            };
+
+            paragraphLabel.SetDynamicResource(
+                Label.TextColorProperty,
+                "AppTextSecondary");
+
+            ParagraphsPanel.Children.Add(
+                paragraphLabel);
+        }
+
+        LinkLabel.Text = page.LinkLabel;
+        LinkLabel.IsVisible =
+            !string.IsNullOrWhiteSpace(page.LinkLabel) &&
+            !string.IsNullOrWhiteSpace(page.LinkUrl);
+    }
+
+    private static IEnumerable<string> SplitParagraphs(
+        string body)
+    {
+        return (body ?? string.Empty)
+            .Replace("\r\n", "\n")
+            .Split(
+                new[] { "\n\n" },
+                StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x));
+    }
+
+    private void EnterEditMode()
+    {
+        editing = true;
+
+        TitleEntry.Text = page.Title;
+        BodyEditor.Text = page.Body;
+        LinkLabelEntry.Text = page.LinkLabel;
+        LinkUrlEntry.Text = page.LinkUrl;
+
+        DisplayPanel.IsVisible = false;
+        EditPanel.IsVisible = true;
+
+        EditButton.Text = "İptal";
+
+        ErrorLabel.IsVisible = false;
+    }
+
+    private void ExitEditMode()
+    {
+        editing = false;
+
+        DisplayPanel.IsVisible = true;
+        EditPanel.IsVisible = false;
+
+        EditButton.Text = "Düzenle";
+
+        ErrorLabel.IsVisible = false;
+    }
+
+    private void OnEditClicked(
+        object sender,
+        EventArgs e)
+    {
+        if (!IsAdmin() || busy)
+            return;
+
+        if (editing)
+        {
+            ExitEditMode();
+            return;
+        }
+
+        EnterEditMode();
+    }
+
+    private async void OnSaveClicked(
+        object sender,
+        EventArgs e)
+    {
+        if (!IsAdmin() || busy)
+            return;
+
+        busy = true;
+        SaveButton.IsEnabled = false;
+        EditButton.IsEnabled = false;
+        SaveButton.Text = "Kaydediliyor…";
+
+        ErrorLabel.IsVisible = false;
+
+        try
+        {
+            var token =
+                await authService.GetIdTokenAsync();
+
+            if (string.IsNullOrWhiteSpace(token))
+                throw new InvalidOperationException();
+
+            var draft =
+                new MazlumFirebasePageContent
+                {
+                    Title =
+                        string.IsNullOrWhiteSpace(TitleEntry.Text)
+                            ? "Başlık"
+                            : TitleEntry.Text.Trim(),
+
+                    Body =
+                        BodyEditor.Text ?? string.Empty,
+
+                    LinkLabel =
+                        LinkLabelEntry.Text?.Trim() ??
+                        string.Empty,
+
+                    LinkUrl =
+                        LinkUrlEntry.Text?.Trim() ??
+                        string.Empty
+                };
+
+            await firebaseService.SavePageAsync(
+                "about",
+                draft,
+                token);
+
+            page = draft;
+
+            Render();
+            ExitEditMode();
+        }
+        catch
+        {
+            ErrorLabel.Text =
+                "Kaydedilemedi. Yönetici oturumu gerekir.";
+
+            ErrorLabel.IsVisible = true;
+        }
+        finally
+        {
+            busy = false;
+            SaveButton.IsEnabled = true;
+            EditButton.IsEnabled = true;
+            SaveButton.Text = "Kaydet";
+        }
+    }
+
+    private async void OnBackTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await Navigation.PopAsync();
+    }
+
+    private async void OnMenuTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        UpdateSidebarAuthState();
+        await OpenSidebarAsync();
+    }
+
+    private async void OnLinkTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(page.LinkUrl))
+            return;
+
+        var url = page.LinkUrl.Trim();
+
+        if (!url.StartsWith(
+                "http://",
+                StringComparison.OrdinalIgnoreCase) &&
+            !url.StartsWith(
+                "https://",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            url = "https://" + url;
+        }
+
+        if (Uri.TryCreate(
+                url,
+                UriKind.Absolute,
+                out var uri))
+        {
+            await Launcher.Default.OpenAsync(uri);
+        }
+    }
+
+    public async Task OpenSidebarAsync()
+    {
+        UpdateSidebarAuthState();
+
+        SidebarOverlay.IsVisible = true;
+        SidebarPanel.TranslationX = -340;
+
+        await SidebarPanel.TranslateTo(
+            0,
+            0,
+            220,
+            Easing.CubicOut);
+    }
+
+    private async Task CloseSidebarAsync()
+    {
+        await SidebarPanel.TranslateTo(
+            -340,
+            0,
+            180,
+            Easing.CubicIn);
+
+        SidebarOverlay.IsVisible = false;
+    }
+
+    private async void OnSidebarCloseClicked(
+        object sender,
+        EventArgs e)
+    {
+        await CloseSidebarAsync();
+    }
+
+    private async void OnSidebarBackdropTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+    }
+
+    private void OnSidebarPanelTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        // Panel içine dokununca sidebar kapanmasın.
+    }
+
+    private void UpdateSidebarAuthState()
+    {
+        var isAuthenticated =
+            authService.IsAuthenticated &&
+            !string.IsNullOrWhiteSpace(
+                authService.UserEmail);
+
+        var email =
+            authService.UserEmail?.Trim();
+
+        AuthUserLabel.Text =
+            isAuthenticated
+                ? email
+                : "Giriş Yap";
+
+        LogoutMenuRow.IsVisible =
+            isAuthenticated;
+
+        var isAdmin =
+            isAuthenticated &&
+            string.Equals(
+                email,
+                "admin@mazlumkuyumculuk.com",
+                StringComparison.OrdinalIgnoreCase);
+
+        NotificationMenuRow.IsVisible =
+            isAdmin;
+    }
+
+    private async void OnAuthMenuTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        if (authService.IsAuthenticated)
+            return;
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumLoginChooserPage>();
+
+        if (page is null)
+        {
+            await DisplayAlert(
+                "Hata",
+                "Giriş ekranı açılamadı.",
+                "Tamam");
+
+            return;
+        }
+
+        await Navigation.PushAsync(page);
+    }
+
+    private async void OnLogoutTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        try
+        {
+            await authService.SignOutAsync();
+
+            UpdateSidebarAuthState();
+
+            EditButton.IsVisible = false;
+
+            if (editing)
+                ExitEditMode();
+        }
+        catch
+        {
+            await DisplayAlert(
+                "Hata",
+                "Çıkış yapılamadı. Tekrar deneyin.",
+                "Tamam");
+        }
+    }
+
+    private async void OnCalculationMenuTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumCalculationPage>();
+
+        if (page is null)
+        {
+            await DisplayAlert(
+                "Hata",
+                "Hesaplama sayfası açılamadı.",
+                "Tamam");
+
+            return;
+        }
+
+        await Navigation.PushAsync(page);
+    }
+
+    private async void OnBranchesMenuTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        await CloseSidebarAsync();
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumBranchesPage>();
+
+        if (page is null)
+        {
+            await DisplayAlert(
+                "Hata",
+                "Şubelerimiz sayfası açılamadı.",
+                "Tamam");
+
+            return;
+        }
+
+        await Navigation.PushAsync(page);
+    }
+
+    private async void OnAboutMenuTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        // Zaten Hakkımızda sayfasındayız.
+        await CloseSidebarAsync();
+    }
+
+
+    private async void OnLegalMenuTapped(
+        object sender,
+        TappedEventArgs e)
+    {
+        if (SidebarOverlay.IsVisible)
+            await CloseSidebarAsync();
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumLegalPage>();
+
+        if (page is null)
+        {
+            await DisplayAlert(
+                "Hata",
+                "Yasal Uyarı sayfası açılamadı.",
+                "Tamam");
+
+            return;
+        }
+
+        await Navigation.PushAsync(page);
+    }
+
+
+
+    private async void OnNotificationMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {{
+        await CloseSidebarAsync();
+
+        var isAdmin =
+            authService.IsAuthenticated &&
+            string.Equals(
+                authService.UserEmail?.Trim(),
+                "admin@mazlumkuyumculuk.com",
+                StringComparison.OrdinalIgnoreCase);
+
+        if (!isAdmin)
+            return;
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumNotifyPage>();
+
+        if (page is not null)
+            await Navigation.PushAsync(page);
+    }}
+
+
+    private async void OnSettingsMenuTapped(
+        object? sender,
+        TappedEventArgs e)
+    {{
+        await CloseSidebarAsync();
+
+        var page =
+            Handler?.MauiContext?.Services
+                .GetService<MazlumSettingsPage>();
+
+        if (page is not null)
+            await Navigation.PushAsync(page);
+    }}
+
+}

@@ -1,3 +1,4 @@
+using KuyumHesapFiyatEkran.UI.Brands.MazlumKuyumculuk.Pages;
 ﻿using KuyumHesapFiyatEkran.UI.Pages;
 using KuyumHesapFiyatEkran.UI.Services;
 
@@ -8,6 +9,7 @@ namespace KuyumHesapFiyatEkran.UI
         public AppShell(
             MainPage mainPage,
             SalihHomePage salihHomePage,
+            MazlumHomePage mazlumHomePage,
             GoldCalculatorPage goldCalculatorPage,
             FavoritesPage favoritesPage,
             ContactPage contactPage,
@@ -17,7 +19,15 @@ namespace KuyumHesapFiyatEkran.UI
             InitializeComponent();
             ApplyBranding(brandSettings);
             DashboardContent.Content = salihHomePage;
-            HomeContent.Content = mainPage;
+
+            HomeContent.Content =
+                string.Equals(
+                    brandSettings.Key,
+                    "Mazlum",
+                    StringComparison.OrdinalIgnoreCase)
+                    ? mazlumHomePage
+                    : mainPage;
+
             GoldCalculatorContent.Content = goldCalculatorPage;
             FavoritesContent.Content = favoritesPage;
             ContactContent.Content = contactPage;
