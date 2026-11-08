@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFrameworks>net9.0-android</TargetFrameworks>
@@ -36,19 +36,21 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Brand)' == 'SalihCetinkaya'">
-		<ApplicationTitle>Salih Çetinkaya Kuyumcu</ApplicationTitle>
+		<ApplicationTitle>Salih Ã‡etinkaya Kuyumcu</ApplicationTitle>
 		<ApplicationId>com.salihcetinkaya.kuyumculuk</ApplicationId>
 		<ApplicationId Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">com.salihcetinkaya.kuyumhesap</ApplicationId>
 		<ApplicationDisplayVersion>1.0.9</ApplicationDisplayVersion>
+		<ApplicationDisplayVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">1.0.10</ApplicationDisplayVersion>
 		<ApplicationVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17</ApplicationVersion>
 		<ApplicationVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'">15</ApplicationVersion>
+		<ApplicationVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">16</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Brand)' == 'MazlumKuyumculuk'">
@@ -111,7 +113,7 @@
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Include="Resources\Images\SalihCetinkaya\*.png" />
-		<MauiImage Include="Resources\Images\MazlumKuyumculuk\mazlum_splash_logo.png" />
+		<MauiImage Include="Resources\Images\MazlumKuyumculuk\mazlum_splash_logo.png" Condition="'$(Brand)' == 'MazlumKuyumculuk'" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 
 		<!-- Custom Fonts -->
@@ -144,3 +146,4 @@
 	</ItemGroup>
 
 </Project>
+

@@ -1,0 +1,4 @@
+<tr-TR>
+Sayfalar arası geçişlerde uygulamanın kapanmasına neden olan hatalar giderildi.
+Ana Sayfa ve Hesaplama ekranlarına tekrar girişte kararlılık iyileştirildi.
+</tr-TR>

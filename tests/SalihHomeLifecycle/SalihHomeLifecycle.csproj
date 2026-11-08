@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
+    <Compile Include="../../KuyumHesapFiyatEkran.UI/Pages/SalihHomePage.cs" Link="SalihHomePage.cs" />
+    <Compile Include="../../KuyumHesapFiyatEkran.UI/Pages/GoldCalculatorPage.cs" Link="GoldCalculatorPage.cs" />
+    <Compile Include="../../KuyumHesapFiyatEkran.UI/Pages/ProductSelectionPage.cs" Link="ProductSelectionPage.cs" />
+    <Compile Include="../../KuyumHesapFiyatEkran.UI/Services/SalihUi.cs" Link="SalihUi.cs" />
+    <Compile Include="../../KuyumHesapFiyatEkran.UI/Services/ThemePageStyler.cs" Link="ThemePageStyler.cs" />
+    <Compile Include="../../KuyumHesapFiyatEkran.UI/Views/LucideIcon.cs" Link="LucideIcon.cs" />
+    <Compile Include="../../KuyumHesapFiyatEkran.UI/Views/BottomNavigationBar.cs" Link="BottomNavigationBar.cs" />
+    <Compile Include="../../KuyumHesapFiyatEkran.Core/Features/LiveRates/RateChangeFormatter.cs" Link="RateChangeFormatter.cs" />
+    <Compile Include="../../KuyumHesapFiyatEkran.Core/Features/LiveRates/Queries/GetLiveRates/GetLiveRatesQueryResponse.cs" Link="Rates.cs" />
+    <Compile Include="../../KuyumHesapFiyatEkran.Core/Serialization/LiveRateJsonConverters.cs" Link="Converters.cs" />
+  </ItemGroup>
+</Project>
