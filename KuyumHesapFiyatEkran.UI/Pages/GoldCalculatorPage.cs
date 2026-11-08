@@ -63,6 +63,21 @@ public sealed class GoldCalculatorPage : ContentPage
 
     private View CreateSalihCalculator()
     {
+        // Clearing Page.Content does not remove children from their nested
+        // layouts. Detach the stateful controls before rebuilding their cards,
+        // otherwise Android rejects them on the next visit or theme change.
+        foreach (var control in new View[]
+        {
+            categoryHost, selectorTitleLabel, selectedGoldLabel, amountEntry,
+            buyPriceLabel, sellPriceLabel, messageLabel
+        })
+        {
+            if (control.Parent is Layout previousLayout)
+            {
+                previousLayout.Children.Remove(control);
+            }
+        }
+
         BackgroundColor = SalihUi.Cream;
         selectedGoldLabel.TextColor = SalihUi.Ink; lastUpdateLabel.TextColor = SalihUi.Ink; selectorTitleLabel.TextColor = SalihUi.SecondaryGold;
         var stack = new VerticalStackLayout { Padding = new Thickness(20, 0, 20, 24), Spacing = 16 };

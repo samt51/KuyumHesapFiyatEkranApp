@@ -10,7 +10,7 @@ public sealed class SalihHomePage : ContentPage
 {
     private readonly LiveRatesStore store;
     private readonly Grid pageRoot = new();
-    private readonly VerticalStackLayout rates = new() { Spacing = 0 };
+    private VerticalStackLayout rates = new() { Spacing = 0 };
     private Label dateLabel = Text(string.Empty, 12, true);
     private Grid? themeOverlay;
     private AslanThemeMode theme;
@@ -24,7 +24,6 @@ public sealed class SalihHomePage : ContentPage
     public SalihHomePage(LiveRatesStore store)
     {
         this.store = store; Title = "Ana Sayfa"; Shell.SetNavBarIsVisible(this, false);
-        rates.SizeChanged += OnRatesSizeChanged;
         AppThemeManager.ThemeChanged += OnThemeChanged; Render();
     }
 
@@ -39,6 +38,12 @@ public sealed class SalihHomePage : ContentPage
     private void Render()
     {
         theme = AppThemeManager.GetEffectiveTheme(); BackgroundColor = PageColor;
+        // The old table still belongs to the nested card after pageRoot is
+        // cleared. Reusing it would attach the same Android view to two parents.
+        rates.SizeChanged -= OnRatesSizeChanged;
+        rates = new VerticalStackLayout { Spacing = 0 };
+        rates.SizeChanged += OnRatesSizeChanged;
+        CloseThemeMenu();
         pageRoot.Children.Clear(); pageRoot.RowDefinitions.Clear();
         pageRoot.RowDefinitions.Add(new RowDefinition(GridLength.Star)); pageRoot.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         pageRoot.Add(new ScrollView { BackgroundColor = PageColor, Content = BuildContent() });
